@@ -42,9 +42,20 @@ function parseStack(value: string | null) {
     .filter(Boolean);
 }
 
+function parseTextList(value: string | null) {
+  return (value ?? "")
+    .split(/\r?\n|,/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 function toInteger(value: string | null) {
   const parsed = Number.parseInt(value ?? "0", 10);
   return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function parseCoverDisplay(value: string | null): "thumbnail" | "fullscreen" {
+  return value === "fullscreen" ? "fullscreen" : "thumbnail";
 }
 
 async function uploadCover(formData: FormData, fallbackUrl: string | null) {
@@ -115,6 +126,13 @@ export async function saveProjectAction(formData: FormData) {
     slug: getOptionalString(formData, "slug") ?? slugify(title),
     description: getRequiredString(formData, "description"),
     cover_image_url: coverImageUrl,
+    cover_display: parseCoverDisplay(getOptionalString(formData, "cover_display")),
+    product_overview: getOptionalString(formData, "product_overview"),
+    gallery_image_urls: parseTextList(getOptionalString(formData, "gallery_image_urls")),
+    video_url: getOptionalString(formData, "video_url"),
+    product_role: getOptionalString(formData, "product_role"),
+    product_features: parseTextList(getOptionalString(formData, "product_features")),
+    product_results: parseTextList(getOptionalString(formData, "product_results")),
     tech_stack: parseStack(getOptionalString(formData, "tech_stack")),
     project_url: getOptionalString(formData, "project_url"),
     repo_url: getOptionalString(formData, "repo_url"),
