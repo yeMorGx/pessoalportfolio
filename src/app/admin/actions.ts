@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { isAllowedAdminEmail } from "@/lib/auth/admin";
 import { createSupabaseServerClient, hasSupabaseConfig } from "@/lib/supabase/server";
 
 function getOptionalString(formData: FormData, key: string) {
@@ -74,16 +75,35 @@ async function uploadCover(formData: FormData, fallbackUrl: string | null) {
   return data.publicUrl;
 }
 
-export async function saveProjectAction(formData: FormData) {
-  if (!hasSupabaseConfig()) {
-    throw new Error("Configure NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY antes de salvar.");
-  }
-
+async function requireAdminSession() {
   const supabase = await createSupabaseServerClient();
 
   if (!supabase) {
     throw new Error("Supabase não está configurado.");
   }
+
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/admin/login");
+  }
+
+  if (!isAllowedAdminEmail(user.email)) {
+    await supabase.auth.signOut();
+    redirect("/admin/login?error=unauthorized");
+  }
+
+  return supabase;
+}
+
+export async function saveProjectAction(formData: FormData) {
+  if (!hasSupabaseConfig()) {
+    throw new Error("Configure NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY antes de salvar.");
+  }
+
+  const supabase = await requireAdminSession();
 
   const title = getRequiredString(formData, "title");
   const id = getOptionalString(formData, "id");
@@ -118,45 +138,54 @@ export async function saveProjectAction(formData: FormData) {
 }
 
 export async function deleteProjectAction(formData: FormData) {
-  const id = getRequiredString(formData, "id");
-  const supabase = await createSupabaseServerClient();
+  const id = getOptionalString(formData, "id");
 
-  if (!supabase) {
-    throw new Error("Supabase não está configurado.");
+  if (!id) {
+    redirect("/admin?error=missing-id");
   }
+
+  const supabase = await requireAdminSession();
 
   const { error } = await supabase.from("projects").delete().eq("id", id);
 
   if (error) {
-    throw new Error(error.message);
+    redirect(`/admin?error=${encodeURIComponent(error.code ?? "delete")}`);
   }
 
   revalidatePath("/");
   revalidatePath("/admin");
+  redirect("/admin?deleted=1");
 }
 
 export async function toggleFeaturedAction(formData: FormData) {
-  const id = getRequiredString(formData, "id");
+  const id = getOptionalString(formData, "id");
   const featured = formData.get("featured") === "true";
-  const supabase = await createSupabaseServerClient();
 
-  if (!supabase) {
-    throw new Error("Supabase não está configurado.");
+  if (!id) {
+    redirect("/admin?error=missing-id");
   }
+
+  const supabase = await requireAdminSession();
 
   const { error } = await supabase.from("projects").update({ featured: !featured }).eq("id", id);
 
   if (error) {
-    throw new Error(error.message);
+    redirect(`/admin?error=${encodeURIComponent(error.code ?? "featured")}`);
   }
 
   revalidatePath("/");
   revalidatePath("/admin");
+  redirect("/admin?updated=1");
 }
 
 export async function signInAction(formData: FormData) {
-  const email = getRequiredString(formData, "email");
-  const password = getRequiredString(formData, "password");
+  const email = getOptionalString(formData, "email");
+  const password = getOptionalString(formData, "password");
+
+  if (!email || !password) {
+    redirect("/admin/login?error=missing");
+  }
+
   const supabase = await createSupabaseServerClient();
 
   if (!supabase) {
@@ -167,6 +196,15 @@ export async function signInAction(formData: FormData) {
 
   if (error) {
     redirect("/admin/login?error=1");
+  }
+
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  if (!isAllowedAdminEmail(user?.email)) {
+    await supabase.auth.signOut();
+    redirect("/admin/login?error=unauthorized");
   }
 
   redirect("/admin");

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LogIn } from "lucide-react";
 import { signInAction } from "@/app/admin/actions";
 
 export default async function LoginPage({
@@ -18,15 +19,28 @@ export default async function LoginPage({
         <p className="mt-3 text-sm leading-6 text-slate-300">
           A autenticação com Supabase está preparada para ser conectada quando as variáveis de ambiente forem configuradas.
         </p>
-        {params?.error ? <p className="mt-5 border border-coral/40 bg-coral/10 px-4 py-3 text-sm text-coral">Email ou senha inválidos.</p> : null}
-        <form action={signInAction} className="mt-8 space-y-4">
+        {params?.error ? (
+          <p className="mt-5 border border-coral/40 bg-coral/10 px-4 py-3 text-sm text-coral">
+            {params.error === "unauthorized" ? "Esta conta não tem acesso ao painel." : "Não foi possível entrar. Verifique suas credenciais."}
+          </p>
+        ) : null}
+        <Link href="/auth/google" className="mt-8 inline-flex w-full items-center justify-center gap-2 border border-white/12 bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:bg-mint">
+          <LogIn size={16} />
+          Entrar com Google
+        </Link>
+        <div className="my-6 flex items-center gap-3 text-xs uppercase text-slate-500">
+          <span className="h-px flex-1 bg-white/10" />
+          ou
+          <span className="h-px flex-1 bg-white/10" />
+        </div>
+        <form action={signInAction} className="space-y-4">
           <label className="block text-sm text-slate-300">
             Email
-            <input className="mt-2 w-full border border-white/12 bg-ink px-4 py-3 text-white outline-none focus:border-mint" type="email" placeholder="voce@email.com" />
+            <input name="email" className="mt-2 w-full border border-white/12 bg-ink px-4 py-3 text-white outline-none focus:border-mint" type="email" placeholder="voce@email.com" required />
           </label>
           <label className="block text-sm text-slate-300">
             Senha
-            <input className="mt-2 w-full border border-white/12 bg-ink px-4 py-3 text-white outline-none focus:border-mint" type="password" placeholder="********" />
+            <input name="password" className="mt-2 w-full border border-white/12 bg-ink px-4 py-3 text-white outline-none focus:border-mint" type="password" placeholder="********" required />
           </label>
           <button className="w-full bg-mint px-4 py-3 text-sm font-semibold text-ink" type="submit">
             Entrar

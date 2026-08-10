@@ -7,7 +7,13 @@ import { useMemo, useState } from "react";
 import { deleteProjectAction, saveProjectAction, signOutAction, toggleFeaturedAction } from "@/app/admin/actions";
 import type { Project } from "@/lib/projects";
 
-export function AdminProjects({ initialProjects }: { initialProjects: Project[] }) {
+export function AdminProjects({
+  initialProjects,
+  status
+}: {
+  initialProjects: Project[];
+  status?: "deleted" | "updated" | "error";
+}) {
   const [projects] = useState(initialProjects);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const featuredCount = useMemo(() => projects.filter((project) => project.featured).length, [projects]);
@@ -27,6 +33,13 @@ export function AdminProjects({ initialProjects }: { initialProjects: Project[] 
             </Link>
             <h1 className="mt-4 text-3xl font-semibold text-white">Painel de projetos</h1>
             <p className="mt-2 text-sm text-slate-400">{projects.length} projetos cadastrados, {featuredCount} em destaque.</p>
+            {status ? (
+              <p className={`mt-4 inline-flex border px-3 py-2 text-sm ${status === "error" ? "border-coral/40 bg-coral/10 text-coral" : "border-mint/40 bg-mint/10 text-mint"}`}>
+                {status === "deleted" ? "Projeto excluido." : null}
+                {status === "updated" ? "Projeto atualizado." : null}
+                {status === "error" ? "Nao foi possivel concluir a acao. Confira sua sessao e tente novamente." : null}
+              </p>
+            ) : null}
           </div>
           <div className="flex flex-wrap gap-3">
             <button onClick={clearForm} className="inline-flex items-center justify-center gap-2 bg-mint px-4 py-3 text-sm font-semibold text-ink">
@@ -53,11 +66,11 @@ export function AdminProjects({ initialProjects }: { initialProjects: Project[] 
               <div key={project.id} className="grid grid-cols-[1fr_7rem_7rem] items-center gap-3 border-b border-white/8 px-4 py-4 last:border-b-0">
                 <div className="flex min-w-0 items-center gap-4">
                   <div className="relative h-14 w-20 shrink-0 overflow-hidden bg-white/6">
-                    <Image src={project.cover_image_url} alt="" fill sizes="80px" className="object-cover" />
+                    <Image src={project.cover_image_url || "/project-forge.svg"} alt="" fill sizes="80px" className="object-cover" />
                   </div>
                   <div className="min-w-0">
                     <h2 className="truncate font-medium text-white">{project.title}</h2>
-                    <p className="truncate text-sm text-slate-400">{project.tech_stack.join(", ")}</p>
+                    <p className="truncate text-sm text-slate-400">{Array.isArray(project.tech_stack) ? project.tech_stack.join(", ") : ""}</p>
                   </div>
                 </div>
                 <form action={toggleFeaturedAction}>
@@ -95,7 +108,7 @@ export function AdminProjects({ initialProjects }: { initialProjects: Project[] 
               <input name="title" className="w-full border border-white/12 bg-ink px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder="Título" defaultValue={selectedProject?.title ?? ""} required />
               <input name="slug" className="w-full border border-white/12 bg-ink px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder="slug-opcional" defaultValue={selectedProject?.slug ?? ""} />
               <textarea name="description" className="min-h-28 w-full border border-white/12 bg-ink px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder="Descrição" defaultValue={selectedProject?.description ?? ""} required />
-              <input name="tech_stack" className="w-full border border-white/12 bg-ink px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder="Stack separada por vírgulas" defaultValue={selectedProject?.tech_stack.join(", ") ?? ""} />
+              <input name="tech_stack" className="w-full border border-white/12 bg-ink px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder="Stack separada por vírgulas" defaultValue={Array.isArray(selectedProject?.tech_stack) ? selectedProject.tech_stack.join(", ") : ""} />
               <input name="project_url" className="w-full border border-white/12 bg-ink px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder="URL do projeto" defaultValue={selectedProject?.project_url ?? ""} />
               <input name="repo_url" className="w-full border border-white/12 bg-ink px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder="URL do repositório" defaultValue={selectedProject?.repo_url ?? ""} />
               <input name="order" className="w-full border border-white/12 bg-ink px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder="Ordem" type="number" defaultValue={selectedProject?.order ?? projects.length + 1} />
