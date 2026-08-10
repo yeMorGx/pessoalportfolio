@@ -117,7 +117,16 @@ export function AdminProjects({
               <input name="product_role" className="w-full border border-white/12 bg-ink px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder="Seu papel no produto" defaultValue={selectedProject?.product_role ?? ""} />
               <input name="order" className="w-full border border-white/12 bg-ink px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder="Ordem" type="number" defaultValue={selectedProject?.order ?? projects.length + 1} />
               <textarea name="product_overview" className="min-h-32 w-full border border-white/12 bg-ink px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder="Visão do produto / contexto / problema resolvido" defaultValue={selectedProject?.product_overview ?? ""} />
-              <textarea name="gallery_image_urls" className="min-h-28 w-full border border-white/12 bg-ink px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder="Imagens da galeria, uma URL por linha" defaultValue={selectedProject?.gallery_image_urls.join("\n") ?? ""} />
+              <textarea
+                name="gallery_image_urls"
+                className="min-h-32 w-full border border-white/12 bg-ink px-3 py-3 text-sm text-white outline-none focus:border-mint"
+                placeholder={"Galeria: URL | tamanho\nTamanhos: pequeno, medio, grande, total"}
+                defaultValue={
+                  selectedProject?.gallery_image_urls
+                    .map((url, index) => `${url} | ${selectedProject.gallery_image_sizes[index] ?? "medium"}`)
+                    .join("\n") ?? ""
+                }
+              />
               <textarea name="product_features" className="min-h-28 w-full border border-white/12 bg-ink px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder="Features, uma por linha" defaultValue={selectedProject?.product_features.join("\n") ?? ""} />
               <textarea name="product_results" className="min-h-28 w-full border border-white/12 bg-ink px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder="Resultados/impactos, um por linha" defaultValue={selectedProject?.product_results.join("\n") ?? ""} />
               <div className="grid grid-cols-2 gap-2">

@@ -49,6 +49,45 @@ function parseTextList(value: string | null) {
     .filter(Boolean);
 }
 
+function normalizeGallerySize(value: string | undefined) {
+  const normalized = value?.trim().toLowerCase();
+
+  if (normalized === "pequeno" || normalized === "small" || normalized === "p") {
+    return "small";
+  }
+
+  if (normalized === "grande" || normalized === "large" || normalized === "g") {
+    return "large";
+  }
+
+  if (normalized === "total" || normalized === "full" || normalized === "inteiro") {
+    return "full";
+  }
+
+  return "medium";
+}
+
+function parseGallery(value: string | null) {
+  const entries = (value ?? "")
+    .split(/\r?\n/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .map((item) => {
+      const [url, size] = item.split("|").map((part) => part.trim());
+
+      return {
+        url,
+        size: normalizeGallerySize(size)
+      };
+    })
+    .filter((item) => item.url.length > 0);
+
+  return {
+    urls: entries.map((item) => item.url),
+    sizes: entries.map((item) => item.size)
+  };
+}
+
 function toInteger(value: string | null) {
   const parsed = Number.parseInt(value ?? "0", 10);
   return Number.isFinite(parsed) ? parsed : 0;
@@ -120,6 +159,7 @@ export async function saveProjectAction(formData: FormData) {
   const id = getOptionalString(formData, "id");
   const currentCoverUrl = getOptionalString(formData, "current_cover_image_url");
   const coverImageUrl = await uploadCover(formData, currentCoverUrl);
+  const gallery = parseGallery(getOptionalString(formData, "gallery_image_urls"));
 
   const payload = {
     title,
@@ -128,7 +168,8 @@ export async function saveProjectAction(formData: FormData) {
     cover_image_url: coverImageUrl,
     cover_display: parseCoverDisplay(getOptionalString(formData, "cover_display")),
     product_overview: getOptionalString(formData, "product_overview"),
-    gallery_image_urls: parseTextList(getOptionalString(formData, "gallery_image_urls")),
+    gallery_image_urls: gallery.urls,
+    gallery_image_sizes: gallery.sizes,
     video_url: getOptionalString(formData, "video_url"),
     product_role: getOptionalString(formData, "product_role"),
     product_features: parseTextList(getOptionalString(formData, "product_features")),

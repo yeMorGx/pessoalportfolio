@@ -19,7 +19,7 @@ export function ProjectCard({ project }: { project: Project }) {
           {isFullscreenCover ? (
             <Image src={project.cover_image_url} alt="" fill sizes="(min-width: 1024px) 33vw, 100vw" className="object-cover transition duration-700 group-hover:scale-105" />
           ) : (
-            <div className="relative h-full w-full overflow-hidden rounded-md border border-white/8 bg-white/[0.04] shadow-2xl shadow-black/30">
+            <div className="relative h-full w-full overflow-hidden rounded-md bg-white/[0.04] shadow-2xl shadow-black/30">
               <Image src={project.cover_image_url} alt="" fill sizes="(min-width: 1024px) 28vw, 82vw" className="object-cover transition duration-700 group-hover:scale-105" />
             </div>
           )}

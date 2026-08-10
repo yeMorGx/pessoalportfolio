@@ -9,6 +9,7 @@ create table if not exists public.projects (
   cover_display text not null default 'thumbnail' check (cover_display in ('thumbnail', 'fullscreen')),
   product_overview text,
   gallery_image_urls text[] not null default '{}',
+  gallery_image_sizes text[] not null default '{}',
   video_url text,
   product_role text,
   product_features text[] not null default '{}',

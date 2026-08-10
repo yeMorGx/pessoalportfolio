@@ -1,4 +1,4 @@
-import { fallbackProjects, type Project } from "@/lib/projects";
+import { fallbackProjects, type Project, type ProjectGalleryImageSize } from "@/lib/projects";
 import { createSupabaseServerClient, hasSupabaseConfig } from "@/lib/supabase/server";
 
 type RawProject = Partial<Project> & {
@@ -10,6 +10,9 @@ type RawProject = Partial<Project> & {
 
 function normalizeProject(project: RawProject): Project {
   const coverDisplay = project.cover_display === "fullscreen" ? "fullscreen" : "thumbnail";
+  const galleryImageSizes = Array.isArray(project.gallery_image_sizes)
+    ? project.gallery_image_sizes.map((size) => normalizeGallerySize(String(size)))
+    : [];
 
   return {
     id: project.id,
@@ -20,6 +23,7 @@ function normalizeProject(project: RawProject): Project {
     cover_display: coverDisplay,
     product_overview: project.product_overview || null,
     gallery_image_urls: Array.isArray(project.gallery_image_urls) ? project.gallery_image_urls : [],
+    gallery_image_sizes: galleryImageSizes,
     video_url: project.video_url || null,
     product_role: project.product_role || null,
     product_features: Array.isArray(project.product_features) ? project.product_features : [],
@@ -30,6 +34,14 @@ function normalizeProject(project: RawProject): Project {
     featured: Boolean(project.featured),
     order: typeof project.order === "number" ? project.order : 0
   };
+}
+
+function normalizeGallerySize(size: string): ProjectGalleryImageSize {
+  if (size === "small" || size === "medium" || size === "large" || size === "full") {
+    return size;
+  }
+
+  return "medium";
 }
 
 export async function getPublicProjects() {

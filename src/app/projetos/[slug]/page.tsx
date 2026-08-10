@@ -35,6 +35,38 @@ function getEmbedUrl(url: string) {
   return url;
 }
 
+function getGalleryItemClass(size: string | undefined) {
+  if (size === "small") {
+    return "md:col-span-1";
+  }
+
+  if (size === "large") {
+    return "md:col-span-2 lg:col-span-2";
+  }
+
+  if (size === "full") {
+    return "md:col-span-2 lg:col-span-3";
+  }
+
+  return "md:col-span-1 lg:col-span-1";
+}
+
+function getGalleryAspectClass(size: string | undefined) {
+  if (size === "full") {
+    return "aspect-[21/9]";
+  }
+
+  if (size === "large") {
+    return "aspect-[16/8]";
+  }
+
+  if (size === "small") {
+    return "aspect-square";
+  }
+
+  return "aspect-[16/10]";
+}
+
 export default async function ProjectPage({ params }: ProjectPageProps) {
   const { slug } = await params;
   const project = await getProjectBySlug(slug);
@@ -118,10 +150,10 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       <section className="px-5 py-20">
         <div className="mx-auto max-w-6xl">
           <p className="font-mono text-sm uppercase text-mint">Galeria</p>
-          <div className="mt-6 grid gap-5 md:grid-cols-2">
+          <div className="mt-6 grid auto-rows-auto gap-5 md:grid-cols-2 lg:grid-cols-3">
             {gallery.map((imageUrl, index) => (
-              <div key={`${imageUrl}-${index}`} className="overflow-hidden border border-white/12 bg-graphite">
-                <img src={imageUrl} alt="" className="aspect-[16/10] w-full object-cover" />
+              <div key={`${imageUrl}-${index}`} className={`overflow-hidden border border-white/12 bg-graphite ${getGalleryItemClass(project.gallery_image_sizes[index])}`}>
+                <img src={imageUrl} alt="" className={`${getGalleryAspectClass(project.gallery_image_sizes[index])} w-full object-cover`} />
               </div>
             ))}
           </div>

@@ -15,7 +15,6 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body className="font-sans antialiased">
         {children}
-        <div className="noise" aria-hidden="true" />
       </body>
     </html>
   );
