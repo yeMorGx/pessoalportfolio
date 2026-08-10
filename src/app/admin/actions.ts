@@ -88,6 +88,13 @@ function parseGallery(value: string | null) {
   };
 }
 
+function parseGallerySizes(value: string | null) {
+  return (value ?? "")
+    .split(/\r?\n|,/)
+    .map((item) => normalizeGallerySize(item))
+    .filter(Boolean);
+}
+
 function toInteger(value: string | null) {
   const parsed = Number.parseInt(value ?? "0", 10);
   return Number.isFinite(parsed) ? parsed : 0;
@@ -125,6 +132,40 @@ async function uploadCover(formData: FormData, fallbackUrl: string | null) {
   return data.publicUrl;
 }
 
+async function uploadGalleryImages(formData: FormData) {
+  const files = formData.getAll("gallery_images").filter((file): file is File => file instanceof File && file.size > 0);
+
+  if (!files.length) {
+    return null;
+  }
+
+  const supabase = await createSupabaseServerClient();
+
+  if (!supabase) {
+    throw new Error("Supabase não está configurado.");
+  }
+
+  const uploadedUrls: string[] = [];
+
+  for (const file of files) {
+    const extension = file.name.split(".").pop() ?? "webp";
+    const path = `gallery/${crypto.randomUUID()}.${extension}`;
+    const { error } = await supabase.storage.from("project-covers").upload(path, file, {
+      cacheControl: "31536000",
+      upsert: false
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    const { data } = supabase.storage.from("project-covers").getPublicUrl(path);
+    uploadedUrls.push(data.publicUrl);
+  }
+
+  return uploadedUrls;
+}
+
 async function requireAdminSession() {
   const supabase = await createSupabaseServerClient();
 
@@ -160,6 +201,12 @@ export async function saveProjectAction(formData: FormData) {
   const currentCoverUrl = getOptionalString(formData, "current_cover_image_url");
   const coverImageUrl = await uploadCover(formData, currentCoverUrl);
   const gallery = parseGallery(getOptionalString(formData, "gallery_image_urls"));
+  const uploadedGalleryUrls = await uploadGalleryImages(formData);
+  const uploadedGallerySizes = parseGallerySizes(getOptionalString(formData, "gallery_image_sizes"));
+  const galleryUrls = uploadedGalleryUrls?.length ? uploadedGalleryUrls : gallery.urls;
+  const gallerySizes = uploadedGalleryUrls?.length
+    ? uploadedGalleryUrls.map((_, index) => uploadedGallerySizes[index] ?? "medium")
+    : gallery.sizes;
 
   const payload = {
     title,
@@ -168,8 +215,8 @@ export async function saveProjectAction(formData: FormData) {
     cover_image_url: coverImageUrl,
     cover_display: parseCoverDisplay(getOptionalString(formData, "cover_display")),
     product_overview: getOptionalString(formData, "product_overview"),
-    gallery_image_urls: gallery.urls,
-    gallery_image_sizes: gallery.sizes,
+    gallery_image_urls: galleryUrls,
+    gallery_image_sizes: gallerySizes,
     video_url: getOptionalString(formData, "video_url"),
     product_role: getOptionalString(formData, "product_role"),
     product_features: parseTextList(getOptionalString(formData, "product_features")),
