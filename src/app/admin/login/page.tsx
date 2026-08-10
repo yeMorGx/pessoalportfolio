@@ -10,6 +10,14 @@ export default async function LoginPage({
   }>;
 }) {
   const params = await searchParams;
+  const errorMessage =
+    params?.error === "config"
+      ? "Supabase não está configurado neste ambiente. Confira as variáveis na Vercel."
+      : params?.error === "unauthorized"
+        ? "Esta conta não tem acesso ao painel."
+        : params?.error
+          ? "Não foi possível entrar. Verifique suas credenciais."
+          : null;
 
   return (
     <main className="flex min-h-screen items-center justify-center px-5">
@@ -19,9 +27,9 @@ export default async function LoginPage({
         <p className="mt-3 text-sm leading-6 text-slate-300">
           A autenticação com Supabase está preparada para ser conectada quando as variáveis de ambiente forem configuradas.
         </p>
-        {params?.error ? (
+        {errorMessage ? (
           <p className="mt-5 border border-coral/40 bg-coral/10 px-4 py-3 text-sm text-coral">
-            {params.error === "unauthorized" ? "Esta conta não tem acesso ao painel." : "Não foi possível entrar. Verifique suas credenciais."}
+            {errorMessage}
           </p>
         ) : null}
         <Link href="/auth/google" className="mt-8 inline-flex w-full items-center justify-center gap-2 border border-white/12 bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:bg-mint">
