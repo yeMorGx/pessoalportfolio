@@ -3,7 +3,10 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Gabriel Morgado | Full-stack Developer",
-  description: "Portfólio pessoal com projetos, stack e contato."
+  description: "Portfólio pessoal com projetos, stack e contato.",
+  icons: {
+    icon: "/favicon.ico"
+  }
 };
 
 export default function RootLayout({
