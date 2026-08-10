@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { useRef } from "react";
+import { StackLogo } from "@/components/ui/StackLogo";
 import { useTilt } from "@/hooks/useTilt";
 import type { Project } from "@/lib/projects";
 
@@ -24,22 +25,23 @@ export function ProjectCard({ project }: { project: Project }) {
             </div>
           )}
         </div>
-        <div className="p-6">
-          <div className="flex items-start justify-between gap-4">
-            <h3 className="text-xl font-semibold text-white">{project.title}</h3>
-            {project.featured ? <span className="rounded-full bg-mint/12 px-3 py-1 text-xs font-medium text-mint">Destaque</span> : null}
+        <div className="p-5">
+          <div className="flex items-start justify-between gap-3">
+            <h3 className="text-base font-semibold leading-6 text-white">{project.title}</h3>
+            {project.featured ? <span className="shrink-0 rounded-full bg-mint/12 px-2.5 py-1 text-[0.68rem] font-medium text-mint">Destaque</span> : null}
           </div>
-          <p className="mt-3 min-h-24 text-sm leading-6 text-slate-300">{project.description}</p>
-          <div className="mt-5 flex flex-wrap gap-2">
+          <p className="mt-2 line-clamp-3 min-h-[4.5rem] text-xs leading-6 text-slate-300">{project.description}</p>
+          <div className="mt-4 flex flex-wrap gap-1.5">
             {project.tech_stack.map((tech) => (
-              <span key={tech} className="rounded-full border border-white/10 px-3 py-1 text-xs text-slate-300">
+              <span key={tech} className="inline-flex items-center gap-1.5 rounded-full border border-white/10 px-2.5 py-1 text-[0.68rem] text-slate-300">
+                <StackLogo label={tech} className="h-3 w-3" />
                 {tech}
               </span>
             ))}
           </div>
-          <span className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-mint">
+          <span className="mt-5 inline-flex items-center gap-2 text-xs font-medium text-mint">
             Ver produto
-            <ArrowUpRight size={16} />
+            <ArrowUpRight size={14} />
           </span>
         </div>
       </article>
