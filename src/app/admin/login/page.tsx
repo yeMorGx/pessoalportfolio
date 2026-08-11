@@ -24,7 +24,7 @@ export default async function LoginPage({
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-ink px-5 py-10">
-      <div className="hero-grid absolute inset-0 opacity-35" aria-hidden="true" />
+      <div className="technical-grid absolute right-0 top-0 h-full w-full opacity-35 lg:w-2/3" aria-hidden="true" />
       <section className="relative w-full max-w-md rounded-sm border border-white/12 bg-ink/95 p-6 shadow-2xl shadow-black/35 sm:p-8">
         <div className="flex items-center justify-between border-b border-white/10 pb-5">
           <div className="flex items-center gap-3">
@@ -34,7 +34,7 @@ export default async function LoginPage({
           <span className="font-mono text-[0.62rem] uppercase text-mint">Admin</span>
         </div>
 
-        <h1 className="mt-7 text-2xl font-semibold text-white sm:text-3xl">Entrar no painel</h1>
+        <h1 className="mt-7 font-display text-2xl font-semibold text-white sm:text-3xl">Entrar no painel</h1>
         <p className="mt-2 text-sm leading-6 text-slate-400">Acesso reservado para gerenciar os projetos publicados.</p>
         {errorMessage ? (
           <p role="alert" className="mt-5 rounded-sm border border-coral/40 bg-coral/10 px-4 py-3 text-sm text-coral">

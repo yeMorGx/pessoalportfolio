@@ -5,19 +5,22 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: "#050608",
-        graphite: "#111318",
+        ink: "#080A0C",
+        graphite: "#171B1E",
+        ceramic: "#F1F3F0",
+        smoke: "#D8DEDC",
         line: "rgba(255,255,255,0.12)",
-        mint: "#77F2C3",
+        mint: "#6EE7B7",
         coral: "#FF6B5F",
-        steel: "#8DA2B8"
+        steel: "#91A3AD"
       },
       fontFamily: {
-        sans: ["Inter", "Segoe UI", "system-ui", "sans-serif"],
-        mono: ["Cascadia Code", "ui-monospace", "SFMono-Regular", "monospace"]
+        display: ["var(--font-display)", "Arial Black", "sans-serif"],
+        sans: ["var(--font-body)", "Segoe UI", "system-ui", "sans-serif"],
+        mono: ["var(--font-mono)", "Cascadia Code", "ui-monospace", "monospace"]
       },
       boxShadow: {
-        glow: "0 24px 80px rgba(119, 242, 195, 0.16)"
+        glow: "0 24px 80px rgba(110, 231, 183, 0.14)"
       }
     }
   },

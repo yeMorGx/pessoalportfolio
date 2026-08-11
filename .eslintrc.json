@@ -1,0 +1,7 @@
+{
+  "extends": ["next/core-web-vitals", "next/typescript"],
+  "ignorePatterns": [".next/", "next-env.d.ts", "node_modules/", "supabase/.temp/"],
+  "rules": {
+    "@next/next/no-img-element": "off"
+  }
+}

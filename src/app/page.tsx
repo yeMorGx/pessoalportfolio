@@ -10,7 +10,7 @@ export default async function Home() {
   const projects = await getPublicProjects();
 
   return (
-    <main className="relative overflow-hidden">
+    <main className="relative overflow-hidden bg-ink">
       <SiteHeader />
       <Hero />
       <About />

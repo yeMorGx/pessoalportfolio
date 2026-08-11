@@ -1,29 +1,105 @@
 "use client";
 
-import { useScrollReveal } from "@/hooks/useScrollReveal";
+import Image from "next/image";
+import { useEffect, useRef } from "react";
+import { PortfolioIcon } from "@/components/ui/PortfolioIcon";
+import { getGsap, prefersReducedMotion } from "@/lib/gsap";
 
-const highlights = ["Interfaces responsivas", "APIs e bancos relacionais", "Autenticação e áreas admin", "Microinterações com GSAP"];
+const capabilities = [
+  ["Produto", "Transformo necessidades em fluxos claros e interfaces que ajudam a decidir."],
+  ["Engenharia", "Construo frontend, APIs, autenticação e dados como uma solução única."],
+  ["Segurança", "Trago visão de defesa para a arquitetura, a operação e a experiência."]
+];
 
 export function About() {
-  const ref = useScrollReveal<HTMLElement>();
+  const sectionRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+
+    if (!section || prefersReducedMotion()) {
+      return undefined;
+    }
+
+    const { gsap } = getGsap();
+    const context = gsap.context(() => {
+      gsap.fromTo(
+        "[data-about-reveal]",
+        { autoAlpha: 0, y: 34 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.85,
+          stagger: 0.1,
+          ease: "power3.out",
+          scrollTrigger: { trigger: section, start: "top 76%", once: true }
+        }
+      );
+
+      gsap.fromTo(
+        "[data-about-photo]",
+        { yPercent: -4, scale: 1.04 },
+        {
+          yPercent: 5,
+          scale: 1.07,
+          ease: "none",
+          scrollTrigger: { trigger: section, start: "top bottom", end: "bottom top", scrub: true }
+        }
+      );
+    }, section);
+
+    return () => context.revert();
+  }, []);
 
   return (
-    <section id="sobre" ref={ref} className="border-y border-white/10 bg-white/[0.03] px-5 py-24">
-      <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[0.9fr_1.1fr]">
-        <div data-reveal>
-          <p className="font-mono text-sm uppercase text-mint">Sobre</p>
-          <h2 className="mt-4 text-4xl font-semibold tracking-normal text-white sm:text-5xl">Produto, código e acabamento visual no mesmo fluxo.</h2>
+    <section id="sobre" ref={sectionRef} className="bg-ceramic px-5 py-16 text-ink sm:px-8 sm:py-24">
+      <div className="mx-auto max-w-7xl">
+        <div data-about-reveal className="flex items-center justify-between border-b border-ink/15 pb-4 font-mono text-[0.65rem] uppercase text-ink/55">
+          <span>Perfil / abordagem</span>
+          <span>01</span>
         </div>
-        <div data-reveal className="space-y-6 text-lg leading-8 text-slate-300">
-          <p>
-            Trabalho com aplicações web de ponta a ponta: da arquitetura e modelagem dos dados até a camada visual que faz o produto parecer sólido desde o primeiro clique.
-          </p>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {highlights.map((item) => (
-              <div key={item} className="border-l border-mint/50 bg-white/[0.04] px-4 py-3 text-base text-slate-200">
-                {item}
-              </div>
-            ))}
+
+        <div className="mt-8 grid gap-10 lg:grid-cols-12 lg:gap-12">
+          <div data-about-reveal className="relative aspect-[4/5] overflow-hidden bg-graphite sm:aspect-[5/6] lg:col-span-5 lg:aspect-auto lg:min-h-[40rem]">
+            <Image
+              data-about-photo
+              src="/gabriel-morgado.jpg"
+              alt="Retrato de Gabriel Morgado"
+              fill
+              sizes="(min-width: 1024px) 42vw, 100vw"
+              className="object-cover object-[center_66%] will-change-transform"
+            />
+            <div className="absolute bottom-0 left-0 flex items-center gap-2 bg-ink px-4 py-3 font-mono text-[0.62rem] uppercase text-ceramic">
+              <span className="h-1.5 w-1.5 bg-mint" />
+              Disponível para novos projetos
+            </div>
+          </div>
+
+          <div className="lg:col-span-7 lg:pl-6">
+            <p data-about-reveal className="font-mono text-[0.68rem] uppercase text-ink/55">Full-stack developer</p>
+            <h2 data-about-reveal className="mt-5 max-w-3xl font-display text-3xl font-semibold leading-[1.08] sm:text-4xl lg:text-5xl">
+              A visão do produto não termina quando o código começa.
+            </h2>
+            <p data-about-reveal className="mt-6 max-w-2xl text-base leading-7 text-ink/70 sm:text-lg sm:leading-8">
+              Uno direção visual, engenharia full-stack e fundamentos de segurança para construir produtos digitais que sejam fáceis de entender, confiáveis para operar e fortes para apresentar.
+            </p>
+
+            <div className="mt-9 border-t border-ink/15">
+              {capabilities.map(([title, description], index) => (
+                <div data-about-reveal key={title} className="grid gap-2 border-b border-ink/15 py-5 sm:grid-cols-[7rem_1fr] sm:gap-6">
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono text-[0.58rem] text-coral">{String(index + 1).padStart(2, "0")}</span>
+                    <h3 className="text-sm font-semibold">{title}</h3>
+                  </div>
+                  <p className="text-sm leading-6 text-ink/65">{description}</p>
+                </div>
+              ))}
+            </div>
+
+            <a data-about-reveal href="#projetos" className="group mt-7 inline-flex items-center gap-2 text-sm font-semibold text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-ink">
+              Conheça o trabalho
+              <PortfolioIcon name="down" className="h-3.5 w-3.5 transition-transform group-hover:translate-y-0.5" />
+            </a>
           </div>
         </div>
       </div>

@@ -134,7 +134,7 @@ export function AdminProjects({
 
   return (
     <main className="min-h-screen bg-ink px-4 py-6 sm:px-5 sm:py-8">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-7xl">
         <div className="flex flex-col justify-between gap-5 border-b border-white/10 pb-6 md:flex-row md:items-center">
           <div>
             <Link href="/" className="inline-flex items-center gap-2 text-sm text-slate-400 transition hover:text-white">

@@ -40,26 +40,20 @@ function StackCarousel({ group, index }: { group: StackGroup; index: number }) {
   ];
 
   return (
-    <div data-reveal className="border-t border-white/10 py-6 last:border-b">
-      <div className="mb-5 grid gap-2 md:grid-cols-[9rem_1fr_auto] md:items-center md:gap-6">
+    <div data-reveal className="border-t border-white/10 py-7 last:border-b">
+      <div className="mb-5 grid gap-2 md:grid-cols-[10rem_1fr_auto] md:items-center md:gap-6">
         <div className="flex items-center gap-3">
-          <span className="font-mono text-[0.6rem] text-slate-600">{String(index + 1).padStart(2, "0")}</span>
-          <h3 className={`font-mono text-xs uppercase ${group.accent}`}>{group.title}</h3>
+          <span className="font-mono text-[0.58rem] text-white/25">{String(index + 1).padStart(2, "0")}</span>
+          <h3 className={`font-mono text-[0.68rem] uppercase ${group.accent}`}>{group.title}</h3>
         </div>
-        <p className="text-xs leading-5 text-slate-400 sm:text-sm">{group.description}</p>
-        <span className="hidden font-mono text-[0.6rem] uppercase text-slate-600 md:block">{group.items.length} tecnologias</span>
+        <p className="text-xs leading-5 text-steel sm:text-sm">{group.description}</p>
+        <span className="hidden font-mono text-[0.58rem] uppercase text-white/25 md:block">{group.items.length} tecnologias</span>
       </div>
 
-      <div className="stack-marquee border-y border-white/10 bg-white/[0.02]" data-direction={group.direction ?? "normal"} role="list" aria-label={group.title}>
+      <div className="stack-marquee border-y border-white/10 bg-ink/45" data-direction={group.direction ?? "normal"} role="list" aria-label={group.title}>
         <div className="stack-marquee__track">
           {repeatedItems.map((item, itemIndex) => (
-            <div
-              key={`${item.label}-${itemIndex}`}
-              className="stack-pill"
-              role={item.clone ? undefined : "listitem"}
-              aria-hidden={item.clone ? true : undefined}
-              data-clone={item.clone ? "true" : undefined}
-            >
+            <div key={`${item.label}-${itemIndex}`} className="stack-pill" role={item.clone ? undefined : "listitem"} aria-hidden={item.clone ? true : undefined} data-clone={item.clone ? "true" : undefined}>
               <StackLogo label={item.label} className="h-5 w-5" />
               <span>{item.label}</span>
             </div>
@@ -74,17 +68,19 @@ export function Experience() {
   const ref = useScrollReveal<HTMLElement>();
 
   return (
-    <section id="stack" ref={ref} className="border-y border-white/10 bg-white/[0.025] px-5 py-20 sm:py-24">
-      <div className="mx-auto max-w-6xl">
-        <div data-reveal className="grid gap-6 border-b border-white/10 pb-8 md:grid-cols-[1fr_22rem] md:items-end">
-          <div>
-            <p className="font-mono text-xs uppercase text-mint">Stack</p>
-            <h2 className="mt-4 max-w-2xl text-3xl font-semibold leading-tight text-white sm:text-4xl">Tecnologias entre produto, dados e defesa.</h2>
-          </div>
-          <p className="text-sm leading-6 text-slate-400">Uma base multidisciplinar para construir a experiência, sustentar a operação e proteger o que importa.</p>
+    <section id="stack" ref={ref} className="border-y border-white/10 bg-graphite px-5 py-16 sm:px-8 sm:py-24">
+      <div className="mx-auto max-w-7xl">
+        <div data-reveal className="flex items-center justify-between border-b border-white/12 pb-4 font-mono text-[0.65rem] uppercase text-steel">
+          <span>Sistema técnico</span>
+          <span>03</span>
         </div>
 
-        <div className="mt-8">
+        <div data-reveal className="grid gap-5 border-b border-white/12 py-8 lg:grid-cols-[1fr_25rem] lg:items-end lg:py-10">
+          <h2 className="max-w-3xl font-display text-3xl font-semibold leading-[1.08] text-ceramic sm:text-4xl lg:text-5xl">Tecnologias conectadas por intenção.</h2>
+          <p className="max-w-md text-sm leading-6 text-steel sm:text-base sm:leading-7">Uma base multidisciplinar para desenhar a experiência, sustentar a operação e proteger o produto.</p>
+        </div>
+
+        <div>
           {stackGroups.map((group, index) => (
             <StackCarousel key={group.title} group={group} index={index} />
           ))}

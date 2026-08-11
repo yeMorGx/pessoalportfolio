@@ -1,33 +1,58 @@
 "use client";
 
 import { Github, Linkedin, Mail } from "lucide-react";
+import { PortfolioIcon } from "@/components/ui/PortfolioIcon";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
+
+const contactLinks = [
+  { href: "mailto:gabrielmcgoes@gmail.com", label: "Email", icon: Mail },
+  { href: "https://github.com/yeMorGx", label: "GitHub", icon: Github },
+  { href: "https://www.linkedin.com/in/gabrielmcgoes", label: "LinkedIn", icon: Linkedin }
+];
 
 export function Contact() {
   const ref = useScrollReveal<HTMLElement>();
 
   return (
-    <section id="contato" ref={ref} className="px-5 py-24">
-      <div className="mx-auto max-w-6xl">
-        <div data-reveal className="max-w-3xl">
-          <p className="font-mono text-sm uppercase text-mint">Contato</p>
-          <h2 className="mt-4 text-4xl font-semibold tracking-normal text-white sm:text-5xl">Vamos construir algo que pareça tão bom quanto funciona.</h2>
-          <p className="mt-6 text-lg leading-8 text-slate-300">Aberto para projetos full-stack, dashboards, áreas administrativas e interfaces com um pouco mais de presença.</p>
+    <section id="contato" ref={ref} className="bg-ceramic px-5 py-16 text-ink sm:px-8 sm:py-24">
+      <div className="mx-auto max-w-7xl">
+        <div data-reveal className="flex items-center justify-between border-b border-ink/15 pb-4 font-mono text-[0.65rem] uppercase text-ink/55">
+          <span>Contato / disponibilidade</span>
+          <span>04</span>
         </div>
-        <div data-reveal className="mt-10 flex flex-wrap gap-3">
-          <a href="mailto:contato@example.com" className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:bg-mint">
-            <Mail size={16} />
-            Email
-          </a>
-          <a href="https://github.com/" className="inline-flex items-center gap-2 rounded-full border border-white/14 px-5 py-3 text-sm text-white transition hover:border-mint/70">
-            <Github size={16} />
-            GitHub
-          </a>
-          <a href="https://linkedin.com/" className="inline-flex items-center gap-2 rounded-full border border-white/14 px-5 py-3 text-sm text-white transition hover:border-mint/70">
-            <Linkedin size={16} />
-            LinkedIn
+
+        <div className="grid gap-10 py-9 lg:grid-cols-[1fr_20rem] lg:items-end lg:py-14">
+          <div data-reveal>
+            <p className="font-mono text-[0.68rem] uppercase text-coral">Vamos conversar</p>
+            <h2 className="mt-5 max-w-4xl font-display text-3xl font-semibold leading-[1.06] sm:text-4xl lg:text-5xl">Tem um produto para construir ou uma equipe que precisa de mais força?</h2>
+            <p className="mt-6 max-w-2xl text-base leading-7 text-ink/65">Estou aberto a oportunidades full-stack e projetos em que engenharia, experiência e clareza precisam andar juntas.</p>
+          </div>
+
+          <a data-reveal href="mailto:gabrielmcgoes@gmail.com" className="group inline-flex min-h-14 items-center justify-between bg-ink px-5 text-sm font-semibold text-ceramic transition-colors hover:bg-coral focus:outline-none focus-visible:ring-2 focus-visible:ring-ink">
+            Iniciar conversa
+            <PortfolioIcon name="link" className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </a>
         </div>
+
+        <div data-reveal className="grid border-t border-ink/15 sm:grid-cols-3">
+          {contactLinks.map(({ href, label, icon: Icon }) => (
+            <a
+              key={label}
+              href={href}
+              target={href.startsWith("http") ? "_blank" : undefined}
+              rel={href.startsWith("http") ? "noreferrer" : undefined}
+              className="group flex min-h-16 items-center justify-between border-b border-ink/15 py-4 text-sm font-semibold transition-colors hover:text-coral sm:border-b-0 sm:border-r sm:px-5 sm:first:pl-0 sm:last:border-r-0 sm:last:pr-0"
+            >
+              <span className="flex items-center gap-3"><Icon size={16} />{label}</span>
+              <PortfolioIcon name="link" className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </a>
+          ))}
+        </div>
+
+        <footer data-reveal className="mt-14 flex flex-col gap-3 border-t border-ink/15 pt-5 font-mono text-[0.6rem] uppercase text-ink/50 sm:flex-row sm:items-center sm:justify-between">
+          <span>Gabriel Morgado / Full-stack developer</span>
+          <span>São Paulo, Brasil</span>
+        </footer>
       </div>
     </section>
   );
