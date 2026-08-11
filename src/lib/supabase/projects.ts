@@ -24,6 +24,7 @@ function normalizeProject(project: RawProject): Project {
     product_overview: project.product_overview || null,
     gallery_image_urls: Array.isArray(project.gallery_image_urls) ? project.gallery_image_urls : [],
     gallery_image_sizes: galleryImageSizes,
+    gallery_image_descriptions: Array.isArray(project.gallery_image_descriptions) ? project.gallery_image_descriptions.map(String) : [],
     video_url: project.video_url || null,
     product_role: project.product_role || null,
     product_features: Array.isArray(project.product_features) ? project.product_features : [],

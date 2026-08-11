@@ -8,6 +8,7 @@ export type Project = {
   product_overview: string | null;
   gallery_image_urls: string[];
   gallery_image_sizes: ProjectGalleryImageSize[];
+  gallery_image_descriptions: string[];
   video_url: string | null;
   product_role: string | null;
   product_features: string[];
@@ -32,6 +33,7 @@ export const fallbackProjects: Project[] = [
     product_overview: "Um CRM operacional pensado para diminuir ruído entre leads, atividades e decisões de venda. A experiência concentra indicadores, próximos passos e contexto do cliente em uma interface rápida de escanear.",
     gallery_image_urls: ["/project-atlas.svg"],
     gallery_image_sizes: ["medium"],
+    gallery_image_descriptions: ["Visão principal do pipeline comercial, com indicadores e tarefas reunidos para leitura rápida."],
     video_url: null,
     product_role: "Full-stack developer",
     product_features: ["Pipeline visual", "Indicadores em tempo real", "Gestão de tarefas comerciais"],
@@ -52,6 +54,7 @@ export const fallbackProjects: Project[] = [
     product_overview: "Uma camada analítica para transformar eventos de produto em leitura objetiva. O foco é revelar padrões de uso, retenção e oportunidades sem enterrar o usuário em gráficos soltos.",
     gallery_image_urls: ["/project-pulse.svg"],
     gallery_image_sizes: ["medium"],
+    gallery_image_descriptions: ["Painel analítico que transforma eventos de uso em métricas claras para apoiar decisões de produto."],
     video_url: null,
     product_role: "Frontend e visual analytics",
     product_features: ["Coortes", "Métricas de produto", "Visualizações responsivas"],
@@ -72,6 +75,7 @@ export const fallbackProjects: Project[] = [
     product_overview: "Um painel privado para controlar conteúdo de projetos com autenticação, uploads e estados de destaque. A proposta é dar autonomia sem transformar o site em um CMS genérico.",
     gallery_image_urls: ["/project-forge.svg"],
     gallery_image_sizes: ["medium"],
+    gallery_image_descriptions: ["Área de gestão do conteúdo, com controles de publicação, edição de projetos e upload de mídia."],
     video_url: null,
     product_role: "Arquitetura e implementação",
     product_features: ["Auth", "CRUD de projetos", "Upload de imagens"],

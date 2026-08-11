@@ -88,11 +88,18 @@ function parseGallery(value: string | null) {
   };
 }
 
-function parseGallerySizes(value: string | null) {
-  return (value ?? "")
-    .split(/\r?\n|,/)
-    .map((item) => normalizeGallerySize(item))
-    .filter(Boolean);
+function parseGallerySizes(values: FormDataEntryValue[]) {
+  return values
+    .filter((value): value is string => typeof value === "string")
+    .map((value) => normalizeGallerySize(value));
+}
+
+function parseGalleryDescriptions(values: FormDataEntryValue[], length: number) {
+  const descriptions = values
+    .filter((value): value is string => typeof value === "string")
+    .map((value) => value.trim());
+
+  return Array.from({ length }, (_, index) => descriptions[index] ?? "");
 }
 
 function toInteger(value: string | null) {
@@ -202,11 +209,10 @@ export async function saveProjectAction(formData: FormData) {
   const coverImageUrl = await uploadCover(formData, currentCoverUrl);
   const gallery = parseGallery(getOptionalString(formData, "gallery_image_urls"));
   const uploadedGalleryUrls = await uploadGalleryImages(formData);
-  const uploadedGallerySizes = parseGallerySizes(getOptionalString(formData, "gallery_image_sizes"));
+  const submittedGallerySizes = parseGallerySizes(formData.getAll("gallery_image_sizes"));
   const galleryUrls = uploadedGalleryUrls?.length ? uploadedGalleryUrls : gallery.urls;
-  const gallerySizes = uploadedGalleryUrls?.length
-    ? uploadedGalleryUrls.map((_, index) => uploadedGallerySizes[index] ?? "medium")
-    : gallery.sizes;
+  const gallerySizes = galleryUrls.map((_, index) => submittedGallerySizes[index] ?? gallery.sizes[index] ?? "medium");
+  const galleryDescriptions = parseGalleryDescriptions(formData.getAll("gallery_image_descriptions"), galleryUrls.length);
 
   const payload = {
     title,
@@ -217,6 +223,7 @@ export async function saveProjectAction(formData: FormData) {
     product_overview: getOptionalString(formData, "product_overview"),
     gallery_image_urls: galleryUrls,
     gallery_image_sizes: gallerySizes,
+    gallery_image_descriptions: galleryDescriptions,
     video_url: getOptionalString(formData, "video_url"),
     product_role: getOptionalString(formData, "product_role"),
     product_features: parseTextList(getOptionalString(formData, "product_features")),

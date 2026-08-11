@@ -107,7 +107,7 @@ export function ProjectShowcase({ project }: { project: Project }) {
   }, []);
 
   return (
-    <main ref={rootRef} className="min-h-screen bg-ink text-white">
+    <main ref={rootRef} className="min-h-screen overflow-x-hidden bg-ink text-white">
       <section className="relative overflow-hidden border-b border-white/10 px-5 pb-12 pt-6 sm:px-8 sm:pb-16 sm:pt-8">
         <div className="technical-grid absolute right-0 top-0 h-full w-full opacity-40 lg:w-[62%]" aria-hidden="true" />
         <div className="relative mx-auto max-w-7xl">
@@ -208,7 +208,13 @@ export function ProjectShowcase({ project }: { project: Project }) {
             <SectionLabel number={project.video_url ? "03" : "02"}>Galeria</SectionLabel>
             <h2 className="mt-5 font-display text-2xl font-semibold text-ceramic sm:text-3xl">Telas e detalhes do produto.</h2>
           </div>
-          <ProjectGalleryCarousel images={gallery} sizes={project.gallery_image_sizes} title={project.title} />
+          <ProjectGalleryCarousel
+            images={gallery}
+            sizes={project.gallery_image_sizes}
+            descriptions={project.gallery_image_descriptions}
+            title={project.title}
+            fallbackDescription={project.description}
+          />
         </div>
       </section>
 

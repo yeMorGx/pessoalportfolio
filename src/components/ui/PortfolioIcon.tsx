@@ -4,8 +4,8 @@ const iconPaths = {
   link: "/icons/arrow-link.svg",
   up: "/icons/arrow-up.svg",
   down: "/icons/arrow-down.svg",
-  left: "/icons/arrow-left.svg",
-  right: "/icons/arrow-right.svg"
+  left: "/icons/arrow-right.svg",
+  right: "/icons/arrow-left.svg"
 } as const;
 
 type PortfolioIconProps = {

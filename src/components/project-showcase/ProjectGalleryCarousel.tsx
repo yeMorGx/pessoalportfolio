@@ -1,17 +1,25 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { PortfolioIcon } from "@/components/ui/PortfolioIcon";
-import { prefersReducedMotion } from "@/lib/gsap";
+import { getGsap, prefersReducedMotion } from "@/lib/gsap";
 import type { ProjectGalleryImageSize } from "@/lib/projects";
 
 type ProjectGalleryCarouselProps = {
   images: string[];
   sizes: ProjectGalleryImageSize[];
+  descriptions: string[];
   title: string;
+  fallbackDescription: string;
 };
 
-const gap = 16;
+type LoopController = {
+  kill: () => void;
+  pause: () => void;
+  resume: () => void;
+};
 
 function normalizeIndex(index: number, length: number) {
   return ((index % length) + length) % length;
@@ -19,248 +27,268 @@ function normalizeIndex(index: number, length: number) {
 
 function getImageClass(size: ProjectGalleryImageSize | undefined) {
   if (size === "small" || size === "medium") {
-    return "object-contain p-4 sm:p-7";
+    return "object-contain p-4 sm:p-6";
   }
 
   return "object-cover";
 }
 
-export function ProjectGalleryCarousel({ images, sizes, title }: ProjectGalleryCarouselProps) {
+export function ProjectGalleryCarousel({ images, sizes, descriptions, title, fallbackDescription }: ProjectGalleryCarouselProps) {
   const itemCount = images.length;
   const canLoop = itemCount > 1;
-  const initialIndex = canLoop ? itemCount : 0;
   const viewportRef = useRef<HTMLDivElement | null>(null);
-  const slideRef = useRef<HTMLElement | null>(null);
-  const pointerStartRef = useRef<number | null>(null);
-  const suppressClickRef = useRef(false);
-  const [activeIndex, setActiveIndex] = useState(initialIndex);
-  const [metrics, setMetrics] = useState({ viewportWidth: 0, slideWidth: 0 });
-  const [transitionEnabled, setTransitionEnabled] = useState(true);
-  const [isAnimating, setIsAnimating] = useState(false);
-  const logicalIndex = normalizeIndex(activeIndex, itemCount);
-
-  const renderedImages = useMemo(() => {
-    if (!canLoop) {
-      return images.map((src, index) => ({ src, sourceIndex: index }));
-    }
-
-    return Array.from({ length: itemCount * 3 }, (_, index) => ({
-      src: images[index % itemCount],
-      sourceIndex: index % itemCount
-    }));
-  }, [canLoop, images, itemCount]);
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const firstSetRef = useRef<HTMLDivElement | null>(null);
+  const modalRef = useRef<HTMLDivElement | null>(null);
+  const modalPanelRef = useRef<HTMLDivElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const loopRef = useRef<LoopController | null>(null);
+  const [hoveredKey, setHoveredKey] = useState<string | null>(null);
+  const [isHovering, setIsHovering] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const isModalOpen = selectedIndex !== null;
+  const copies = useMemo(() => (canLoop ? [0, 1] : [0]), [canLoop]);
 
   useEffect(() => {
     const viewport = viewportRef.current;
-    const slide = slideRef.current;
+    const track = trackRef.current;
+    const firstSet = firstSetRef.current;
 
-    if (!viewport || !slide) {
+    if (!viewport || !track || !firstSet || !canLoop || prefersReducedMotion()) {
       return undefined;
     }
 
-    const updateMetrics = () => {
-      setMetrics({
-        viewportWidth: viewport.clientWidth,
-        slideWidth: slide.getBoundingClientRect().width
-      });
+    const { gsap } = getGsap();
+    let loop: LoopController | null = null;
+    let observer: ResizeObserver | null = null;
+    const context = gsap.context(() => {
+      const buildLoop = () => {
+        loop?.kill();
+        const distance = firstSet.getBoundingClientRect().width;
+
+        if (distance <= 0) {
+          return;
+        }
+
+        gsap.set(track, { x: 0 });
+        loop = gsap.to(track, {
+          x: -distance,
+          duration: Math.max(18, distance / 52),
+          ease: "none",
+          repeat: -1
+        });
+        loopRef.current = loop;
+      };
+
+      buildLoop();
+      observer = new ResizeObserver(buildLoop);
+      observer.observe(firstSet);
+    }, viewport);
+
+    return () => {
+      observer?.disconnect();
+      loop?.kill();
+      loopRef.current = null;
+      context.revert();
+    };
+  }, [canLoop, itemCount]);
+
+  useEffect(() => {
+    if (isHovering || isModalOpen) {
+      loopRef.current?.pause();
+    } else {
+      loopRef.current?.resume();
+    }
+  }, [isHovering, isModalOpen]);
+
+  useEffect(() => {
+    if (!isModalOpen) {
+      return undefined;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setSelectedIndex(null);
+      }
+
+      if (event.key === "ArrowLeft" && canLoop) {
+        setSelectedIndex((current) => normalizeIndex((current ?? 0) - 1, itemCount));
+      }
+
+      if (event.key === "ArrowRight" && canLoop) {
+        setSelectedIndex((current) => normalizeIndex((current ?? 0) + 1, itemCount));
+      }
     };
 
-    updateMetrics();
-    const observer = new ResizeObserver(updateMetrics);
-    observer.observe(viewport);
-    observer.observe(slide);
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+    closeButtonRef.current?.focus();
 
-    return () => observer.disconnect();
-  }, [renderedImages.length]);
+    let context: { revert: () => void } | undefined;
 
-  const move = useCallback(
-    (direction: -1 | 1) => {
-      if (!canLoop || isAnimating) {
-        return;
-      }
-
-      const reducedMotion = prefersReducedMotion();
-      setTransitionEnabled(!reducedMotion);
-
-      if (reducedMotion) {
-        setActiveIndex((current) => {
-          const next = current + direction;
-
-          if (next >= itemCount * 2) {
-            return next - itemCount;
-          }
-
-          if (next < itemCount) {
-            return next + itemCount;
-          }
-
-          return next;
-        });
-        return;
-      }
-
-      setIsAnimating(true);
-      setActiveIndex((current) => current + direction);
-    },
-    [canLoop, isAnimating, itemCount]
-  );
-
-  const moveToSlide = useCallback(
-    (renderedIndex: number) => {
-      if (!canLoop || isAnimating || renderedIndex === activeIndex) {
-        return;
-      }
-
-      const reducedMotion = prefersReducedMotion();
-      setTransitionEnabled(!reducedMotion);
-
-      if (reducedMotion) {
-        const sourceIndex = normalizeIndex(renderedIndex, itemCount);
-        setActiveIndex(itemCount + sourceIndex);
-        return;
-      }
-
-      setIsAnimating(true);
-      setActiveIndex(renderedIndex);
-    },
-    [activeIndex, canLoop, isAnimating, itemCount]
-  );
-
-  const handleTransitionEnd = () => {
-    setIsAnimating(false);
-
-    if (!canLoop) {
-      return;
+    if (!prefersReducedMotion() && modalRef.current && modalPanelRef.current) {
+      const { gsap } = getGsap();
+      context = gsap.context(() => {
+        gsap.fromTo(modalRef.current, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.28, ease: "power2.out" });
+        gsap.fromTo(modalPanelRef.current, { y: 24, scale: 0.985 }, { y: 0, scale: 1, duration: 0.45, ease: "power3.out" });
+      }, modalRef);
     }
 
-    let correctedIndex = activeIndex;
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+      context?.revert();
+      previousFocus?.focus();
+    };
+  }, [canLoop, isModalOpen, itemCount]);
 
-    if (activeIndex >= itemCount * 2) {
-      correctedIndex = activeIndex - itemCount;
-    } else if (activeIndex < itemCount) {
-      correctedIndex = activeIndex + itemCount;
-    }
-
-    if (correctedIndex !== activeIndex) {
-      setTransitionEnabled(false);
-      setActiveIndex(correctedIndex);
-      requestAnimationFrame(() => requestAnimationFrame(() => setTransitionEnabled(true)));
-    }
-  };
-
-  const offset = metrics.viewportWidth / 2 - metrics.slideWidth / 2 - activeIndex * (metrics.slideWidth + gap);
+  const selectedDescription = selectedIndex === null
+    ? ""
+    : descriptions[selectedIndex]?.trim() || fallbackDescription;
 
   return (
-    <div data-project-reveal className="mt-8">
+    <div data-project-reveal className="relative left-1/2 mt-8 w-screen -translate-x-1/2">
       <div
         ref={viewportRef}
-        className="relative overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-mint"
+        className="relative overflow-hidden py-8 sm:py-10"
         role="region"
         aria-roledescription="carrossel"
         aria-label={`Galeria de ${title}`}
-        tabIndex={0}
-        onKeyDown={(event) => {
-          if (event.key === "ArrowLeft") {
-            event.preventDefault();
-            move(-1);
-          }
-
-          if (event.key === "ArrowRight") {
-            event.preventDefault();
-            move(1);
-          }
-        }}
-        onPointerDown={(event) => {
-          suppressClickRef.current = false;
-          pointerStartRef.current = event.clientX;
-        }}
-        onPointerUp={(event) => {
-          if (pointerStartRef.current === null) {
-            return;
-          }
-
-          const distance = event.clientX - pointerStartRef.current;
-          pointerStartRef.current = null;
-
-          if (Math.abs(distance) >= 42) {
-            suppressClickRef.current = true;
-            move(distance > 0 ? -1 : 1);
-            requestAnimationFrame(() => {
-              suppressClickRef.current = false;
-            });
-          }
-        }}
-        onPointerCancel={() => {
-          pointerStartRef.current = null;
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => {
+          setIsHovering(false);
+          setHoveredKey(null);
         }}
       >
-        <div
-          className="flex items-center py-4 will-change-transform sm:py-6"
-          style={{
-            gap,
-            transform: `translate3d(${offset}px, 0, 0)`,
-            transition: transitionEnabled ? "transform 700ms cubic-bezier(0.22, 1, 0.36, 1)" : "none"
-          }}
-          onTransitionEnd={(event) => {
-            if (event.currentTarget === event.target) {
-              handleTransitionEnd();
-            }
-          }}
-        >
-          {renderedImages.map((image, renderedIndex) => {
-            const isActive = renderedIndex === activeIndex;
-            const size = sizes[image.sourceIndex] ?? "medium";
+        <div ref={trackRef} className={`flex w-max will-change-transform ${canLoop ? "" : "mx-auto"}`}>
+          {copies.map((copyIndex) => (
+            <div
+              key={copyIndex}
+              ref={copyIndex === 0 ? firstSetRef : undefined}
+              className="flex shrink-0 gap-4 pr-4"
+              aria-hidden={copyIndex > 0}
+            >
+              {images.map((src, sourceIndex) => {
+                const itemKey = `${copyIndex}-${sourceIndex}`;
+                const isHovered = hoveredKey === itemKey;
+                const hasHoveredItem = hoveredKey !== null;
+                const size = sizes[sourceIndex] ?? "medium";
 
-            return (
-              <figure
-                key={`${image.src}-${renderedIndex}`}
-                ref={renderedIndex === 0 ? slideRef : undefined}
-                className={`relative w-[82vw] max-w-[60rem] shrink-0 transition-[transform,opacity,filter] duration-700 sm:w-[72vw] lg:w-[58vw] ${isActive ? "z-10 scale-100 opacity-100 blur-0" : "scale-[0.86] opacity-35 blur-[3px]"}`}
-                aria-hidden={!isActive}
-              >
-                <button
-                  type="button"
-                  className="relative block aspect-[16/10] w-full overflow-hidden border border-white/12 bg-graphite text-left shadow-2xl shadow-black/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-mint"
-                  onClick={(event) => {
-                    if (suppressClickRef.current) {
-                      event.preventDefault();
-                      return;
-                    }
-
-                    moveToSlide(renderedIndex);
-                  }}
-                  tabIndex={isActive ? 0 : -1}
-                  aria-label={isActive ? `Imagem ${logicalIndex + 1} de ${itemCount}` : undefined}
-                >
-                  <img src={image.src} alt={isActive ? `${title}, tela ${logicalIndex + 1}` : ""} loading={isActive ? "eager" : "lazy"} className={`h-full w-full ${getImageClass(size)}`} />
-                  <span className="absolute bottom-0 left-0 flex h-9 items-center bg-ink px-3 font-mono text-[0.58rem] uppercase text-steel">
-                    Tela {String(image.sourceIndex + 1).padStart(2, "0")}
-                  </span>
-                </button>
-              </figure>
-            );
-          })}
+                return (
+                  <figure
+                    key={itemKey}
+                    className={`relative w-[78vw] max-w-[32rem] shrink-0 transition-[transform,opacity,filter] duration-500 ease-out sm:w-[48vw] lg:w-[36vw] ${isHovered ? "z-10 -translate-y-5 scale-[1.025] opacity-100 blur-0" : hasHoveredItem ? "scale-[0.97] opacity-35 blur-[4px]" : "opacity-100 blur-0"}`}
+                    onMouseEnter={() => setHoveredKey(itemKey)}
+                    onMouseLeave={() => setHoveredKey(null)}
+                  >
+                    <button
+                      type="button"
+                      className="group relative block aspect-[16/10] w-full overflow-hidden border border-white/15 bg-graphite text-left shadow-2xl shadow-black/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-mint"
+                      onClick={() => setSelectedIndex(sourceIndex)}
+                      tabIndex={copyIndex === 0 ? 0 : -1}
+                      aria-label={`Abrir detalhes da tela ${sourceIndex + 1}`}
+                    >
+                      <img
+                        src={src}
+                        alt={`${title}, tela ${sourceIndex + 1}`}
+                        loading={copyIndex === 0 && sourceIndex === 0 ? "eager" : "lazy"}
+                        className={`h-full w-full transition-transform duration-700 group-hover:scale-[1.015] ${getImageClass(size)}`}
+                      />
+                      <span className="absolute bottom-0 left-0 flex h-9 items-center bg-ink px-3 font-mono text-[0.58rem] uppercase text-steel">
+                        Tela {String(sourceIndex + 1).padStart(2, "0")}
+                      </span>
+                    </button>
+                  </figure>
+                );
+              })}
+            </div>
+          ))}
         </div>
       </div>
 
-      <div className="mx-auto mt-3 flex max-w-7xl items-center justify-between border-y border-white/10 py-3">
-        <p className="font-mono text-[0.6rem] uppercase text-steel" aria-live="polite">
-          {String(logicalIndex + 1).padStart(2, "0")} / {String(itemCount).padStart(2, "0")}
+      <div className="mx-auto flex max-w-7xl items-center justify-between border-y border-white/10 px-5 py-3 sm:px-8">
+        <p className="font-mono text-[0.6rem] uppercase text-steel">
+          {canLoop ? "Galeria em movimento" : "Imagem do produto"}
         </p>
-
-        {canLoop ? (
-          <div className="flex items-center gap-2">
-            <button type="button" onClick={() => move(-1)} disabled={isAnimating} className="inline-flex h-11 w-11 items-center justify-center border border-white/15 text-ceramic transition-colors hover:border-mint hover:text-mint focus:outline-none focus-visible:ring-2 focus-visible:ring-mint disabled:cursor-wait disabled:opacity-40" aria-label="Imagem anterior" title="Imagem anterior">
-              <PortfolioIcon name="left" className="h-4 w-4" />
-            </button>
-            <button type="button" onClick={() => move(1)} disabled={isAnimating} className="inline-flex h-11 w-11 items-center justify-center border border-white/15 text-ceramic transition-colors hover:border-coral hover:text-coral focus:outline-none focus-visible:ring-2 focus-visible:ring-coral disabled:cursor-wait disabled:opacity-40" aria-label="Próxima imagem" title="Próxima imagem">
-              <PortfolioIcon name="right" className="h-4 w-4" />
-            </button>
-          </div>
-        ) : (
-          <span className="font-mono text-[0.58rem] uppercase text-white/30">Imagem única</span>
-        )}
+        <span className="font-mono text-[0.58rem] uppercase text-white/30">
+          {String(itemCount).padStart(2, "0")} {itemCount === 1 ? "tela" : "telas"}
+        </span>
       </div>
+
+      {selectedIndex !== null ? createPortal((
+        <div
+          ref={modalRef}
+          className="fixed inset-0 z-[80] flex items-center justify-center overflow-y-auto bg-black/85 px-3 py-5 backdrop-blur-md sm:px-6 sm:py-8"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              setSelectedIndex(null);
+            }
+          }}
+        >
+          <div
+            ref={modalPanelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="gallery-dialog-title"
+            className="relative grid w-full max-w-6xl overflow-hidden border border-white/15 bg-ink shadow-2xl lg:grid-cols-[1.55fr_0.75fr]"
+          >
+            <button
+              ref={closeButtonRef}
+              type="button"
+              onClick={() => setSelectedIndex(null)}
+              className="absolute right-3 top-3 z-20 inline-flex h-10 w-10 items-center justify-center border border-white/20 bg-ink/85 text-ceramic backdrop-blur transition-colors hover:border-coral hover:text-coral focus:outline-none focus-visible:ring-2 focus-visible:ring-coral"
+              aria-label="Fechar detalhes da imagem"
+              title="Fechar"
+            >
+              <X size={18} />
+            </button>
+
+            <div className="flex min-h-[18rem] items-center justify-center bg-black/45 p-3 sm:p-6 lg:min-h-[36rem]">
+              <img
+                src={images[selectedIndex]}
+                alt={`${title}, tela ${selectedIndex + 1}`}
+                className={`max-h-[72vh] w-full ${getImageClass(sizes[selectedIndex])}`}
+              />
+            </div>
+
+            <div className="flex flex-col border-t border-white/10 p-5 sm:p-7 lg:border-l lg:border-t-0">
+              <p className="font-mono text-[0.62rem] uppercase text-mint">{title} / Tela {String(selectedIndex + 1).padStart(2, "0")}</p>
+              <h3 id="gallery-dialog-title" className="mt-5 font-display text-2xl font-semibold text-ceramic">Sobre esta tela.</h3>
+              <p className="mt-5 text-sm leading-7 text-slate-300 sm:text-base">{selectedDescription}</p>
+
+              {canLoop ? (
+                <div className="mt-auto flex items-center justify-between border-t border-white/10 pt-6">
+                  <span className="font-mono text-[0.58rem] uppercase text-steel">
+                    {String(selectedIndex + 1).padStart(2, "0")} / {String(itemCount).padStart(2, "0")}
+                  </span>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedIndex(normalizeIndex(selectedIndex - 1, itemCount))}
+                      className="inline-flex h-10 w-10 items-center justify-center border border-white/15 text-ceramic transition-colors hover:border-mint hover:text-mint focus:outline-none focus-visible:ring-2 focus-visible:ring-mint"
+                      aria-label="Imagem anterior"
+                      title="Imagem anterior"
+                    >
+                      <PortfolioIcon name="left" className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedIndex(normalizeIndex(selectedIndex + 1, itemCount))}
+                      className="inline-flex h-10 w-10 items-center justify-center border border-white/15 text-ceramic transition-colors hover:border-coral hover:text-coral focus:outline-none focus-visible:ring-2 focus-visible:ring-coral"
+                      aria-label="Próxima imagem"
+                      title="Próxima imagem"
+                    >
+                      <PortfolioIcon name="right" className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      ), document.body) : null}
     </div>
   );
 }

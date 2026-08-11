@@ -346,12 +346,7 @@ export function AdminProjects({
                     Enviar imagens da galeria
                     <input name="gallery_images" className="sr-only" type="file" accept="image/*" multiple onChange={handleGalleryPreview} />
                   </label>
-                  <textarea
-                    name="gallery_image_sizes"
-                    aria-label="Tamanhos das imagens"
-                    className="min-h-20 w-full rounded-sm border border-white/12 bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-mint"
-                    placeholder={"Tamanho por imagem enviada\npequeno, medio, grande ou total"}
-                  />
+                  <p className="text-xs leading-5 text-slate-500">Cada imagem pode ter seu próprio enquadramento e uma descrição exibida ao abrir a tela.</p>
                 </div>
               </div>
 
@@ -362,7 +357,19 @@ export function AdminProjects({
                     {galleryPreviewUrls.map((imageUrl, index) => (
                       <div key={imageUrl} className="overflow-hidden rounded-sm border border-mint/20 bg-black/25">
                         <img src={imageUrl} alt={`Prévia da imagem ${index + 1}`} className="aspect-[16/10] w-full object-cover" />
-                        <span className="block border-t border-white/10 px-3 py-2 text-xs text-slate-400">Imagem {index + 1}</span>
+                        <div className="space-y-3 border-t border-white/10 p-3">
+                          <label className="block text-xs text-slate-400">Enquadramento
+                            <select name="gallery_image_sizes" defaultValue="medium" className="mt-2 w-full rounded-sm border border-white/12 bg-ink px-3 py-2 text-sm text-white outline-none focus:border-mint">
+                              <option value="small">Pequeno</option>
+                              <option value="medium">Médio</option>
+                              <option value="large">Grande</option>
+                              <option value="full">Total</option>
+                            </select>
+                          </label>
+                          <label className="block text-xs text-slate-400">Descrição da tela
+                            <textarea name="gallery_image_descriptions" className="mt-2 min-h-24 w-full rounded-sm border border-white/12 bg-ink px-3 py-2 text-sm text-white outline-none focus:border-mint" placeholder={`O que a tela ${index + 1} apresenta?`} />
+                          </label>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -374,7 +381,19 @@ export function AdminProjects({
                     {selectedProject.gallery_image_urls.map((imageUrl, index) => (
                       <div key={`${imageUrl}-${index}`} className="overflow-hidden rounded-sm border border-white/10 bg-black/25">
                         <img src={imageUrl} alt={`Imagem atual ${index + 1}`} className="aspect-[16/10] w-full object-cover" />
-                        <span className="block border-t border-white/10 px-3 py-2 text-xs text-slate-400">{selectedProject.gallery_image_sizes[index] ?? "medium"}</span>
+                        <div className="space-y-3 border-t border-white/10 p-3">
+                          <label className="block text-xs text-slate-400">Enquadramento
+                            <select name="gallery_image_sizes" defaultValue={selectedProject.gallery_image_sizes[index] ?? "medium"} className="mt-2 w-full rounded-sm border border-white/12 bg-ink px-3 py-2 text-sm text-white outline-none focus:border-mint">
+                              <option value="small">Pequeno</option>
+                              <option value="medium">Médio</option>
+                              <option value="large">Grande</option>
+                              <option value="full">Total</option>
+                            </select>
+                          </label>
+                          <label className="block text-xs text-slate-400">Descrição da tela
+                            <textarea name="gallery_image_descriptions" defaultValue={selectedProject.gallery_image_descriptions[index] ?? ""} className="mt-2 min-h-24 w-full rounded-sm border border-white/12 bg-ink px-3 py-2 text-sm text-white outline-none focus:border-mint" placeholder={`O que a tela ${index + 1} apresenta?`} />
+                          </label>
+                        </div>
                       </div>
                     ))}
                   </div>
