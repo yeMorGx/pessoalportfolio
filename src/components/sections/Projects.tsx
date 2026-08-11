@@ -9,18 +9,18 @@ export function Projects({ projects }: { projects: Project[] }) {
   const orderedProjects = [...projects].sort((a, b) => a.order - b.order);
 
   return (
-    <section id="projetos" ref={ref} className="px-5 py-24">
+    <section id="projetos" ref={ref} className="px-5 py-20 sm:py-24">
       <div className="mx-auto max-w-6xl">
-        <div data-reveal className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
+        <div data-reveal className="grid gap-6 border-b border-white/10 pb-8 md:grid-cols-[1fr_22rem] md:items-end">
           <div>
-            <p className="font-mono text-sm uppercase text-mint">Projetos</p>
-            <h2 className="mt-4 max-w-3xl text-4xl font-semibold tracking-normal text-white sm:text-5xl">Sistemas com cara de produto pronto.</h2>
+            <p className="font-mono text-xs uppercase text-mint">Projetos selecionados</p>
+            <h2 className="mt-4 max-w-2xl text-3xl font-semibold leading-tight text-white sm:text-4xl">Produtos pensados do fluxo à entrega.</h2>
           </div>
-          <p className="max-w-md text-sm leading-6 text-slate-400">Cards com tilt no desktop e fallback estável em toque, mantendo performance e leitura limpa.</p>
+          <p className="text-sm leading-6 text-slate-400">Aplicações que conectam interface, regras de negócio, dados e operação em experiências completas.</p>
         </div>
-        <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {orderedProjects.map((project) => (
-            <ProjectCard key={project.id} project={project} />
+        <div className="mt-8 grid gap-5 md:grid-cols-2">
+          {orderedProjects.map((project, index) => (
+            <ProjectCard key={project.id} project={project} index={index} variant={index === 0 ? "lead" : "default"} />
           ))}
         </div>
       </div>

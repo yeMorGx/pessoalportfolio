@@ -1,122 +1,66 @@
 "use client";
 
-import { Braces, Crosshair, KeyRound, Radar, ShieldAlert, type LucideIcon } from "lucide-react";
+import { StackLogo } from "@/components/ui/StackLogo";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
-
-type StackItem = {
-  label: string;
-  simpleIcon?: string;
-  externalIcon?: string;
-  wideIcon?: boolean;
-  Icon?: LucideIcon;
-  customIcon?: "hive";
-};
 
 type StackGroup = {
   title: string;
+  description: string;
   direction?: "normal" | "reverse";
-  items: StackItem[];
+  accent: string;
+  items: string[];
 };
 
 const stackGroups: StackGroup[] = [
   {
-    title: "Dev - Front",
-    items: [
-      { label: "JavaScript", simpleIcon: "javascript" },
-      { label: "TypeScript", simpleIcon: "typescript" },
-      { label: "Next.js", simpleIcon: "nextdotjs" },
-      { label: "React", simpleIcon: "react" },
-      { label: "HTML5", simpleIcon: "html5" },
-      { label: "CSS", simpleIcon: "css" }
-    ]
+    title: "Dev / Front",
+    description: "Interfaces, componentes e experiências responsivas.",
+    accent: "text-mint",
+    items: ["JavaScript", "TypeScript", "Next.js", "React", "HTML5", "CSS"]
   },
   {
-    title: "Dev - Back",
+    title: "Dev / Back",
+    description: "Serviços, autenticação, dados e integrações.",
     direction: "reverse",
-    items: [
-      { label: "Python", simpleIcon: "python" },
-      { label: "MySQL", simpleIcon: "mysql" },
-      { label: "PHP", simpleIcon: "php" },
-      { label: "Composer", simpleIcon: "composer" },
-      { label: "Laravel", simpleIcon: "laravel" },
-      { label: "Rust", simpleIcon: "rust" },
-      { label: "PostgreSQL", simpleIcon: "postgresql" },
-      { label: "Supabase", simpleIcon: "supabase" },
-      { label: "API", Icon: Braces },
-      { label: "SSO", Icon: KeyRound }
-    ]
+    accent: "text-coral",
+    items: ["Python", "MySQL", "PHP", "Composer", "Laravel", "Rust", "PostgreSQL", "Supabase", "API", "SSO"]
   },
   {
     title: "Ciber",
-    items: [
-      { label: "Wazuh", externalIcon: "https://wazuh.com/brand-assets/Wazuh-Logo.svg", wideIcon: true },
-      { label: "TheHive", customIcon: "hive" },
-      { label: "OWASP Top 10", simpleIcon: "owasp" },
-      { label: "RedTeam", Icon: Crosshair },
-      { label: "SOC", Icon: Radar },
-      { label: "Threat Defense", Icon: ShieldAlert }
-    ]
+    description: "Monitoramento, resposta e segurança de aplicações.",
+    accent: "text-steel",
+    items: ["Wazuh", "TheHive", "OWASP Top 10", "RedTeam", "SOC"]
   }
 ];
 
-function HiveIcon() {
-  return (
-    <svg className="h-6 w-6" viewBox="0 0 48 48" fill="none" aria-hidden="true">
-      <path d="M18 6h12l6 10-6 10H18l-6-10 6-10Z" stroke="currentColor" strokeWidth="3" strokeLinejoin="round" />
-      <path d="M8 22h12l6 10-6 10H8L2 32l6-10Z" stroke="currentColor" strokeWidth="3" strokeLinejoin="round" />
-      <path d="M28 22h12l6 10-6 10H28l-6-10 6-10Z" stroke="currentColor" strokeWidth="3" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function StackIcon({ item }: { item: StackItem }) {
-  if (item.simpleIcon) {
-    return (
-      <img
-        src={`https://cdn.simpleicons.org/${item.simpleIcon}/ffffff`}
-        alt=""
-        className="h-6 w-6 object-contain"
-        loading="lazy"
-      />
-    );
-  }
-
-  if (item.externalIcon) {
-    return (
-      <img
-        src={item.externalIcon}
-        alt=""
-        className={`${item.wideIcon ? "h-5 w-16" : "h-6 w-6"} object-contain brightness-0 invert`}
-        loading="lazy"
-      />
-    );
-  }
-
-  if (item.customIcon === "hive") {
-    return <HiveIcon />;
-  }
-
-  if (item.Icon) {
-    return <item.Icon size={24} strokeWidth={1.8} aria-hidden="true" />;
-  }
-
-  return null;
-}
-
-function StackCarousel({ group }: { group: StackGroup }) {
-  const repeatedItems = [...group.items, ...group.items];
+function StackCarousel({ group, index }: { group: StackGroup; index: number }) {
+  const repeatedItems = [
+    ...group.items.map((label) => ({ label, clone: false })),
+    ...group.items.map((label) => ({ label, clone: true }))
+  ];
 
   return (
-    <div data-reveal className="overflow-hidden border-y border-white/10 py-5">
-      <div className="mb-4 flex items-center justify-between gap-4">
-        <h3 className="font-mono text-sm uppercase text-mint">{group.title}</h3>
-        <span className="h-px flex-1 bg-white/10" />
+    <div data-reveal className="border-t border-white/10 py-6 last:border-b">
+      <div className="mb-5 grid gap-2 md:grid-cols-[9rem_1fr_auto] md:items-center md:gap-6">
+        <div className="flex items-center gap-3">
+          <span className="font-mono text-[0.6rem] text-slate-600">{String(index + 1).padStart(2, "0")}</span>
+          <h3 className={`font-mono text-xs uppercase ${group.accent}`}>{group.title}</h3>
+        </div>
+        <p className="text-xs leading-5 text-slate-400 sm:text-sm">{group.description}</p>
+        <span className="hidden font-mono text-[0.6rem] uppercase text-slate-600 md:block">{group.items.length} tecnologias</span>
       </div>
-      <div className="stack-marquee" data-direction={group.direction ?? "normal"}>
+
+      <div className="stack-marquee border-y border-white/10 bg-white/[0.02]" data-direction={group.direction ?? "normal"} role="list" aria-label={group.title}>
         <div className="stack-marquee__track">
-          {repeatedItems.map((item, index) => (
-            <div key={`${item.label}-${index}`} className="stack-pill">
-              <StackIcon item={item} />
+          {repeatedItems.map((item, itemIndex) => (
+            <div
+              key={`${item.label}-${itemIndex}`}
+              className="stack-pill"
+              role={item.clone ? undefined : "listitem"}
+              aria-hidden={item.clone ? true : undefined}
+              data-clone={item.clone ? "true" : undefined}
+            >
+              <StackLogo label={item.label} className="h-5 w-5" />
               <span>{item.label}</span>
             </div>
           ))}
@@ -130,15 +74,19 @@ export function Experience() {
   const ref = useScrollReveal<HTMLElement>();
 
   return (
-    <section id="stack" ref={ref} className="border-y border-white/10 bg-white/[0.03] px-5 py-24">
+    <section id="stack" ref={ref} className="border-y border-white/10 bg-white/[0.025] px-5 py-20 sm:py-24">
       <div className="mx-auto max-w-6xl">
-        <div data-reveal>
-          <p className="font-mono text-sm uppercase text-mint">Stack</p>
-          <h2 className="mt-4 max-w-3xl text-4xl font-semibold tracking-normal text-white sm:text-5xl">Stack viva, em camadas de produto e segurança.</h2>
+        <div data-reveal className="grid gap-6 border-b border-white/10 pb-8 md:grid-cols-[1fr_22rem] md:items-end">
+          <div>
+            <p className="font-mono text-xs uppercase text-mint">Stack</p>
+            <h2 className="mt-4 max-w-2xl text-3xl font-semibold leading-tight text-white sm:text-4xl">Tecnologias entre produto, dados e defesa.</h2>
+          </div>
+          <p className="text-sm leading-6 text-slate-400">Uma base multidisciplinar para construir a experiência, sustentar a operação e proteger o que importa.</p>
         </div>
-        <div className="mt-12 space-y-8">
-          {stackGroups.map((group) => (
-            <StackCarousel key={group.title} group={group} />
+
+        <div className="mt-8">
+          {stackGroups.map((group, index) => (
+            <StackCarousel key={group.title} group={group} index={index} />
           ))}
         </div>
       </div>

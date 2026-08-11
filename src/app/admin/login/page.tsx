@@ -1,5 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
-import { LogIn } from "lucide-react";
+import { ArrowLeft, LogIn } from "lucide-react";
 import { signInAction } from "@/app/admin/actions";
 
 export default async function LoginPage({
@@ -15,24 +16,33 @@ export default async function LoginPage({
       ? "Supabase não está configurado neste ambiente. Confira as variáveis na Vercel."
       : params?.error === "unauthorized"
         ? "Esta conta não tem acesso ao painel."
+        : params?.error === "missing"
+          ? "Preencha o email e a senha."
         : params?.error
           ? "Não foi possível entrar. Verifique suas credenciais."
           : null;
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-5">
-      <section className="w-full max-w-md border border-white/12 bg-white/[0.04] p-8">
-        <p className="font-mono text-sm uppercase text-mint">Admin</p>
-        <h1 className="mt-4 text-3xl font-semibold text-white">Entrar no painel</h1>
-        <p className="mt-3 text-sm leading-6 text-slate-300">
-          A autenticação com Supabase está preparada para ser conectada quando as variáveis de ambiente forem configuradas.
-        </p>
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-ink px-5 py-10">
+      <div className="hero-grid absolute inset-0 opacity-35" aria-hidden="true" />
+      <section className="relative w-full max-w-md rounded-sm border border-white/12 bg-ink/95 p-6 shadow-2xl shadow-black/35 sm:p-8">
+        <div className="flex items-center justify-between border-b border-white/10 pb-5">
+          <div className="flex items-center gap-3">
+            <Image src="/logo.svg" alt="" width={28} height={28} />
+            <span className="text-sm font-semibold text-white">Gabriel Morgado</span>
+          </div>
+          <span className="font-mono text-[0.62rem] uppercase text-mint">Admin</span>
+        </div>
+
+        <h1 className="mt-7 text-2xl font-semibold text-white sm:text-3xl">Entrar no painel</h1>
+        <p className="mt-2 text-sm leading-6 text-slate-400">Acesso reservado para gerenciar os projetos publicados.</p>
         {errorMessage ? (
-          <p className="mt-5 border border-coral/40 bg-coral/10 px-4 py-3 text-sm text-coral">
+          <p role="alert" className="mt-5 rounded-sm border border-coral/40 bg-coral/10 px-4 py-3 text-sm text-coral">
             {errorMessage}
           </p>
         ) : null}
-        <Link href="/auth/google" className="mt-8 inline-flex w-full items-center justify-center gap-2 border border-white/12 bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:bg-mint">
+
+        <Link href="/auth/google" className="mt-7 inline-flex h-12 w-full items-center justify-center gap-2 rounded-sm border border-white/12 bg-white px-4 text-sm font-semibold text-ink transition-colors hover:bg-mint focus:outline-none focus-visible:ring-2 focus-visible:ring-mint">
           <LogIn size={16} />
           Entrar com Google
         </Link>
@@ -42,20 +52,21 @@ export default async function LoginPage({
           <span className="h-px flex-1 bg-white/10" />
         </div>
         <form action={signInAction} className="space-y-4">
-          <label className="block text-sm text-slate-300">
+          <label className="block text-xs text-slate-400">
             Email
-            <input name="email" className="mt-2 w-full border border-white/12 bg-ink px-4 py-3 text-white outline-none focus:border-mint" type="email" placeholder="voce@email.com" required />
+            <input name="email" autoComplete="email" className="mt-2 h-12 w-full rounded-sm border border-white/12 bg-black/25 px-4 text-sm text-white outline-none focus:border-mint" type="email" placeholder="voce@email.com" required />
           </label>
-          <label className="block text-sm text-slate-300">
+          <label className="block text-xs text-slate-400">
             Senha
-            <input name="password" className="mt-2 w-full border border-white/12 bg-ink px-4 py-3 text-white outline-none focus:border-mint" type="password" placeholder="********" required />
+            <input name="password" autoComplete="current-password" className="mt-2 h-12 w-full rounded-sm border border-white/12 bg-black/25 px-4 text-sm text-white outline-none focus:border-mint" type="password" placeholder="********" required />
           </label>
-          <button className="w-full bg-mint px-4 py-3 text-sm font-semibold text-ink" type="submit">
+          <button className="h-12 w-full rounded-sm bg-mint px-4 text-sm font-semibold text-ink transition-colors hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-mint" type="submit">
             Entrar
           </button>
         </form>
-        <Link className="mt-6 inline-block text-sm text-slate-400 hover:text-white" href="/">
-          Voltar para o site
+        <Link className="group mt-6 inline-flex items-center gap-2 text-xs text-slate-400 transition-colors hover:text-white" href="/">
+          <ArrowLeft className="transition-transform group-hover:-translate-x-0.5" size={14} />
+          Site público
         </Link>
       </section>
     </main>
