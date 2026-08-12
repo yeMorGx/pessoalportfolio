@@ -5,6 +5,17 @@ import { redirect } from "next/navigation";
 import { isAllowedAdminEmail } from "@/lib/auth/admin";
 import { createSupabaseServerClient, hasSupabaseConfig } from "@/lib/supabase/server";
 
+const PROJECT_ASSET_BUCKET = "project-covers";
+const MAX_PROJECT_IMAGE_BYTES = 20 * 1024 * 1024;
+
+export type ProjectUploadTargetResult =
+  | { ok: true; path: string; token: string }
+  | { ok: false; message: string };
+
+export type SaveProjectResult =
+  | { ok: true }
+  | { ok: false; message: string };
+
 function getOptionalString(formData: FormData, key: string) {
   const value = formData.get(key);
 
@@ -111,66 +122,23 @@ function parseCoverDisplay(value: string | null): "thumbnail" | "fullscreen" {
   return value === "fullscreen" ? "fullscreen" : "thumbnail";
 }
 
-async function uploadCover(formData: FormData, fallbackUrl: string | null) {
-  const file = formData.get("cover");
+function getUploadExtension(fileName: string, contentType: string) {
+  const extensionFromName = fileName.split(".").pop()?.trim().toLowerCase();
 
-  if (!(file instanceof File) || file.size === 0) {
-    return fallbackUrl ?? "/project-forge.svg";
+  if (extensionFromName && /^[a-z0-9]{2,5}$/.test(extensionFromName)) {
+    return extensionFromName;
   }
 
-  const supabase = await createSupabaseServerClient();
+  const extensionsByType: Record<string, string> = {
+    "image/avif": "avif",
+    "image/gif": "gif",
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/svg+xml": "svg",
+    "image/webp": "webp"
+  };
 
-  if (!supabase) {
-    throw new Error("Supabase não está configurado.");
-  }
-
-  const extension = file.name.split(".").pop() ?? "webp";
-  const path = `${crypto.randomUUID()}.${extension}`;
-  const { error } = await supabase.storage.from("project-covers").upload(path, file, {
-    cacheControl: "31536000",
-    upsert: false
-  });
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  const { data } = supabase.storage.from("project-covers").getPublicUrl(path);
-  return data.publicUrl;
-}
-
-async function uploadGalleryImages(formData: FormData) {
-  const files = formData.getAll("gallery_images").filter((file): file is File => file instanceof File && file.size > 0);
-
-  if (!files.length) {
-    return null;
-  }
-
-  const supabase = await createSupabaseServerClient();
-
-  if (!supabase) {
-    throw new Error("Supabase não está configurado.");
-  }
-
-  const uploadedUrls: string[] = [];
-
-  for (const file of files) {
-    const extension = file.name.split(".").pop() ?? "webp";
-    const path = `gallery/${crypto.randomUUID()}.${extension}`;
-    const { error } = await supabase.storage.from("project-covers").upload(path, file, {
-      cacheControl: "31536000",
-      upsert: false
-    });
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    const { data } = supabase.storage.from("project-covers").getPublicUrl(path);
-    uploadedUrls.push(data.publicUrl);
-  }
-
-  return uploadedUrls;
+  return extensionsByType[contentType] ?? "webp";
 }
 
 async function requireAdminSession() {
@@ -196,58 +164,125 @@ async function requireAdminSession() {
   return supabase;
 }
 
-export async function saveProjectAction(formData: FormData) {
+export async function createProjectUploadTargetAction(input: {
+  fileName: string;
+  contentType: string;
+  size: number;
+  kind: "cover" | "gallery";
+}): Promise<ProjectUploadTargetResult> {
   if (!hasSupabaseConfig()) {
-    throw new Error("Configure NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY antes de salvar.");
+    return { ok: false, message: "Supabase não está configurado neste ambiente." };
   }
 
   const supabase = await requireAdminSession();
 
-  const title = getRequiredString(formData, "title");
-  const id = getOptionalString(formData, "id");
-  const currentCoverUrl = getOptionalString(formData, "current_cover_image_url");
-  const coverImageUrl = await uploadCover(formData, currentCoverUrl);
-  const gallery = parseGallery(getOptionalString(formData, "gallery_image_urls"));
-  const uploadedGalleryUrls = await uploadGalleryImages(formData);
-  const submittedGallerySizes = parseGallerySizes(formData.getAll("gallery_image_sizes"));
-  const galleryUrls = uploadedGalleryUrls?.length ? uploadedGalleryUrls : gallery.urls;
-  const gallerySizes = galleryUrls.map((_, index) => submittedGallerySizes[index] ?? gallery.sizes[index] ?? "medium");
-  const galleryDescriptions = parseGalleryDescriptions(formData.getAll("gallery_image_descriptions"), galleryUrls.length);
-
-  const payload = {
-    title,
-    slug: getOptionalString(formData, "slug") ?? slugify(title),
-    description: getRequiredString(formData, "description"),
-    cover_image_url: coverImageUrl,
-    cover_display: parseCoverDisplay(getOptionalString(formData, "cover_display")),
-    product_overview: getOptionalString(formData, "product_overview"),
-    gallery_image_urls: galleryUrls,
-    gallery_image_sizes: gallerySizes,
-    gallery_image_descriptions: galleryDescriptions,
-    video_url: getOptionalString(formData, "video_url"),
-    product_role: getOptionalString(formData, "product_role"),
-    product_features: parseTextList(getOptionalString(formData, "product_features")),
-    product_results: parseTextList(getOptionalString(formData, "product_results")),
-    tech_stack: parseStack(getOptionalString(formData, "tech_stack")),
-    project_url: getOptionalString(formData, "project_url"),
-    repo_url: getOptionalString(formData, "repo_url"),
-    featured: formData.get("featured") === "on",
-    order: toInteger(getOptionalString(formData, "order"))
-  };
-
-  const query = id
-    ? supabase.from("projects").update(payload).eq("id", id)
-    : supabase.from("projects").insert(payload);
-
-  const { error } = await query;
-
-  if (error) {
-    throw new Error(error.message);
+  if (!input.contentType.startsWith("image/")) {
+    return { ok: false, message: "O arquivo selecionado não é uma imagem válida." };
   }
 
-  revalidatePath("/");
-  revalidatePath("/admin");
-  redirect("/admin");
+  if (!Number.isFinite(input.size) || input.size <= 0 || input.size > MAX_PROJECT_IMAGE_BYTES) {
+    return { ok: false, message: "Cada imagem deve ter no máximo 20 MB." };
+  }
+
+  const extension = getUploadExtension(input.fileName, input.contentType);
+  const path = `uploads/${input.kind}/${crypto.randomUUID()}.${extension}`;
+  const { data, error } = await supabase.storage
+    .from(PROJECT_ASSET_BUCKET)
+    .createSignedUploadUrl(path);
+
+  if (error) {
+    return { ok: false, message: `Não foi possível preparar o upload: ${error.message}` };
+  }
+
+  return { ok: true, path: data.path, token: data.token };
+}
+
+export async function discardProjectUploadsAction(paths: string[]) {
+  if (!hasSupabaseConfig()) {
+    return;
+  }
+
+  const safePaths = paths.filter((path) => /^uploads\/(cover|gallery)\/[a-f0-9-]+\.[a-z0-9]{2,5}$/i.test(path));
+
+  if (!safePaths.length) {
+    return;
+  }
+
+  const supabase = await requireAdminSession();
+  await supabase.storage.from(PROJECT_ASSET_BUCKET).remove(safePaths);
+}
+
+function getSaveErrorMessage(error: { code?: string; message?: string }) {
+  if (error.code === "23505") {
+    return "Já existe um projeto com esse endereço. Volte ao início e escolha outro slug.";
+  }
+
+  if (error.code === "42703" || error.code === "PGRST204") {
+    return "O banco de dados ainda não possui todos os campos do projeto. Aplique as migrações do Supabase.";
+  }
+
+  return error.message?.trim()
+    ? `Não foi possível salvar o projeto: ${error.message}`
+    : "Não foi possível salvar o projeto. Tente novamente.";
+}
+
+export async function saveProjectAction(formData: FormData): Promise<SaveProjectResult> {
+  if (!hasSupabaseConfig()) {
+    return { ok: false, message: "Supabase não está configurado neste ambiente." };
+  }
+
+  const supabase = await requireAdminSession();
+
+  try {
+    const title = getRequiredString(formData, "title");
+    const id = getOptionalString(formData, "id");
+    const currentCoverUrl = getOptionalString(formData, "current_cover_image_url");
+    const coverImageUrl = getOptionalString(formData, "cover_image_url") ?? currentCoverUrl ?? "/project-forge.svg";
+    const gallery = parseGallery(getOptionalString(formData, "gallery_image_urls"));
+    const submittedGallerySizes = parseGallerySizes(formData.getAll("gallery_image_sizes"));
+    const gallerySizes = gallery.urls.map((_, index) => submittedGallerySizes[index] ?? gallery.sizes[index] ?? "medium");
+    const galleryDescriptions = parseGalleryDescriptions(formData.getAll("gallery_image_descriptions"), gallery.urls.length);
+
+    const payload = {
+      title,
+      slug: getOptionalString(formData, "slug") ?? slugify(title),
+      description: getRequiredString(formData, "description"),
+      cover_image_url: coverImageUrl,
+      cover_display: parseCoverDisplay(getOptionalString(formData, "cover_display")),
+      product_overview: getOptionalString(formData, "product_overview"),
+      gallery_image_urls: gallery.urls,
+      gallery_image_sizes: gallerySizes,
+      gallery_image_descriptions: galleryDescriptions,
+      video_url: getOptionalString(formData, "video_url"),
+      product_role: getOptionalString(formData, "product_role"),
+      product_features: parseTextList(getOptionalString(formData, "product_features")),
+      product_results: parseTextList(getOptionalString(formData, "product_results")),
+      tech_stack: parseStack(getOptionalString(formData, "tech_stack")),
+      project_url: getOptionalString(formData, "project_url"),
+      repo_url: getOptionalString(formData, "repo_url"),
+      featured: formData.get("featured") === "on",
+      order: toInteger(getOptionalString(formData, "order"))
+    };
+
+    const query = id
+      ? supabase.from("projects").update(payload).eq("id", id)
+      : supabase.from("projects").insert(payload);
+
+    const { error } = await query;
+
+    if (error) {
+      return { ok: false, message: getSaveErrorMessage(error) };
+    }
+
+    revalidatePath("/");
+    revalidatePath("/admin");
+    return { ok: true };
+  } catch (error) {
+    return {
+      ok: false,
+      message: error instanceof Error ? error.message : "Não foi possível salvar o projeto."
+    };
+  }
 }
 
 export async function deleteProjectAction(formData: FormData) {

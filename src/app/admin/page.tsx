@@ -6,13 +6,14 @@ export default async function AdminPage({
 }: {
   searchParams?: Promise<{
     deleted?: string;
+    created?: string;
     updated?: string;
     error?: string;
   }>;
 }) {
   const params = await searchParams;
   const projects = await getAdminProjects();
-  const status = params?.error ? "error" : params?.deleted ? "deleted" : params?.updated ? "updated" : undefined;
+  const status = params?.error ? "error" : params?.created ? "created" : params?.deleted ? "deleted" : params?.updated ? "updated" : undefined;
 
   return <AdminProjects initialProjects={projects} status={status} />;
 }

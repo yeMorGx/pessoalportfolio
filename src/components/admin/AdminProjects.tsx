@@ -4,9 +4,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, Check, ChevronLeft, ChevronRight, Edit3, Eye, FileText, FolderKanban, ImageIcon, Link2, LogOut, Plus, Search, Star, Trash2, Upload, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { deleteProjectAction, saveProjectAction, signOutAction, toggleFeaturedAction } from "@/app/admin/actions";
+import { createProjectUploadTargetAction, deleteProjectAction, discardProjectUploadsAction, saveProjectAction, signOutAction, toggleFeaturedAction } from "@/app/admin/actions";
 import { StackLogo } from "@/components/ui/StackLogo";
 import type { Project } from "@/lib/projects";
+import { createSupabaseBrowserClient } from "@/lib/supabase";
+
+const PROJECT_ASSET_BUCKET = "project-covers";
+const MAX_PROJECT_IMAGE_BYTES = 20 * 1024 * 1024;
 
 const stackGroups = [
   {
@@ -69,12 +73,24 @@ function getGalleryFormValue(project: Project | null) {
     .join("\n");
 }
 
+function getImageValidationError(file: File) {
+  if (!file.type.startsWith("image/")) {
+    return `${file.name} não é uma imagem válida.`;
+  }
+
+  if (file.size > MAX_PROJECT_IMAGE_BYTES) {
+    return `${file.name} ultrapassa o limite de 20 MB.`;
+  }
+
+  return null;
+}
+
 export function AdminProjects({
   initialProjects,
   status
 }: {
   initialProjects: Project[];
-  status?: "deleted" | "updated" | "error";
+  status?: "created" | "deleted" | "updated" | "error";
 }) {
   const [projects] = useState(initialProjects);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -87,6 +103,9 @@ export function AdminProjects({
   const [draftPreview, setDraftPreview] = useState<ProjectDraftPreview | null>(null);
   const [projectQuery, setProjectQuery] = useState("");
   const [projectFilter, setProjectFilter] = useState<"all" | "featured">("all");
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveProgress, setSaveProgress] = useState("");
+  const [saveError, setSaveError] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
   const modalBodyRef = useRef<HTMLDivElement | null>(null);
   const featuredCount = useMemo(() => projects.filter((project) => project.featured).length, [projects]);
@@ -112,7 +131,7 @@ export function AdminProjects({
 
     const previousOverflow = document.body.style.overflow;
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+      if (event.key === "Escape" && !isSaving) {
         setIsModalOpen(false);
         setSelectedProject(null);
       }
@@ -125,17 +144,21 @@ export function AdminProjects({
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isModalOpen]);
+  }, [isModalOpen, isSaving]);
 
   useEffect(() => {
     return () => {
       if (coverPreviewUrl) {
         URL.revokeObjectURL(coverPreviewUrl);
       }
+    };
+  }, [coverPreviewUrl]);
 
+  useEffect(() => {
+    return () => {
       galleryPreviewUrls.forEach((url) => URL.revokeObjectURL(url));
     };
-  }, [coverPreviewUrl, galleryPreviewUrls]);
+  }, [galleryPreviewUrls]);
 
   function openCreateForm() {
     setSelectedProject(null);
@@ -145,6 +168,8 @@ export function AdminProjects({
     setCurrentStep(0);
     setHighestStep(0);
     setDraftPreview(null);
+    setSaveError(null);
+    setSaveProgress("");
     setIsModalOpen(true);
   }
 
@@ -156,10 +181,16 @@ export function AdminProjects({
     setCurrentStep(0);
     setHighestStep(0);
     setDraftPreview(null);
+    setSaveError(null);
+    setSaveProgress("");
     setIsModalOpen(true);
   }
 
   function closeForm() {
+    if (isSaving) {
+      return;
+    }
+
     setIsModalOpen(false);
     setSelectedProject(null);
     setCoverPreviewUrl(null);
@@ -167,6 +198,8 @@ export function AdminProjects({
     setCurrentStep(0);
     setHighestStep(0);
     setDraftPreview(null);
+    setSaveError(null);
+    setSaveProgress("");
   }
 
   function readDraftPreview() {
@@ -244,12 +277,147 @@ export function AdminProjects({
 
   function handleCoverPreview(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
+    const validationError = file ? getImageValidationError(file) : null;
+
+    if (validationError) {
+      event.target.value = "";
+      setCoverPreviewUrl(null);
+      setSaveError(validationError);
+      return;
+    }
+
+    setSaveError(null);
     setCoverPreviewUrl(file ? URL.createObjectURL(file) : null);
   }
 
   function handleGalleryPreview(event: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? []);
+    const validationError = files.map(getImageValidationError).find(Boolean);
+
+    if (validationError) {
+      event.target.value = "";
+      setGalleryPreviewUrls([]);
+      setSaveError(validationError);
+      return;
+    }
+
+    setSaveError(null);
     setGalleryPreviewUrls(files.map((file) => URL.createObjectURL(file)));
+  }
+
+  async function handleProjectSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (currentStep !== editorSteps.length - 1) {
+      continueEditor();
+      return;
+    }
+
+    const form = event.currentTarget;
+
+    if (!form.reportValidity()) {
+      return;
+    }
+
+    const formData = new FormData(form);
+    const cover = formData.get("cover");
+    const coverFile = cover instanceof File && cover.size > 0 ? cover : null;
+    const galleryFiles = formData.getAll("gallery_images")
+      .filter((file): file is File => file instanceof File && file.size > 0);
+    const files = [coverFile, ...galleryFiles].filter((file): file is File => Boolean(file));
+    const validationError = files.map(getImageValidationError).find(Boolean);
+
+    if (validationError) {
+      setSaveError(validationError);
+      return;
+    }
+
+    const supabase = createSupabaseBrowserClient();
+
+    if (!supabase) {
+      setSaveError("Supabase não está configurado neste ambiente.");
+      return;
+    }
+
+    const uploadedPaths: string[] = [];
+
+    setIsSaving(true);
+    setSaveError(null);
+
+    try {
+      formData.delete("cover");
+      formData.delete("gallery_images");
+
+      if (files.length) {
+        setSaveProgress(`Enviando imagens 0 / ${files.length}`);
+      } else {
+        setSaveProgress("Salvando projeto...");
+      }
+
+      const uploadImage = async (file: File, kind: "cover" | "gallery") => {
+        const target = await createProjectUploadTargetAction({
+          fileName: file.name,
+          contentType: file.type,
+          size: file.size,
+          kind
+        });
+
+        if (!target.ok) {
+          throw new Error(target.message);
+        }
+
+        const { error } = await supabase.storage
+          .from(PROJECT_ASSET_BUCKET)
+          .uploadToSignedUrl(target.path, target.token, file, {
+            cacheControl: "31536000",
+            contentType: file.type
+          });
+
+        if (error) {
+          throw new Error(`Falha ao enviar ${file.name}: ${error.message}`);
+        }
+
+        uploadedPaths.push(target.path);
+        setSaveProgress(`Enviando imagens ${uploadedPaths.length} / ${files.length}`);
+
+        return supabase.storage.from(PROJECT_ASSET_BUCKET).getPublicUrl(target.path).data.publicUrl;
+      };
+
+      if (coverFile) {
+        formData.set("cover_image_url", await uploadImage(coverFile, "cover"));
+      }
+
+      if (galleryFiles.length) {
+        const galleryUrls: string[] = [];
+
+        for (const file of galleryFiles) {
+          galleryUrls.push(await uploadImage(file, "gallery"));
+        }
+
+        formData.set("gallery_image_urls", galleryUrls.join("\n"));
+      }
+
+      setSaveProgress("Salvando projeto...");
+      const result = await saveProjectAction(formData);
+
+      if (!result.ok) {
+        throw new Error(result.message);
+      }
+
+      window.location.assign(selectedProject ? "/admin?updated=1" : "/admin?created=1");
+    } catch (error) {
+      if (uploadedPaths.length) {
+        try {
+          await discardProjectUploadsAction(uploadedPaths);
+        } catch {
+          // The original save error is more useful than a cleanup failure.
+        }
+      }
+
+      setSaveError(error instanceof Error ? error.message : "Não foi possível salvar o projeto.");
+      setSaveProgress("");
+      setIsSaving(false);
+    }
   }
 
   return (
@@ -304,6 +472,7 @@ export function AdminProjects({
 
           {status ? (
             <p className={`mt-5 inline-flex border px-3 py-2 text-sm ${status === "error" ? "border-coral/40 bg-coral/10 text-coral" : "border-mint/40 bg-mint/10 text-mint"}`}>
+              {status === "created" ? "Projeto criado." : null}
               {status === "deleted" ? "Projeto excluído." : null}
               {status === "updated" ? "Projeto atualizado." : null}
               {status === "error" ? "Não foi possível concluir a ação. Confira sua sessão e tente novamente." : null}
@@ -422,7 +591,7 @@ export function AdminProjects({
                 <p className="font-mono text-[0.62rem] uppercase text-mint">Editor de produto</p>
                 <h2 id="project-dialog-title" className="mt-1 text-xl font-semibold text-white">{selectedProject ? "Editar projeto" : "Novo projeto"}</h2>
               </div>
-              <button title="Fechar" onClick={closeForm} className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-sm border border-white/12 text-slate-300 transition hover:border-coral hover:text-coral" type="button" aria-label="Fechar">
+              <button title="Fechar" onClick={closeForm} disabled={isSaving} className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-sm border border-white/12 text-slate-300 transition hover:border-coral hover:text-coral disabled:cursor-not-allowed disabled:opacity-50" type="button" aria-label="Fechar">
                 <X size={18} />
               </button>
             </div>
@@ -458,13 +627,7 @@ export function AdminProjects({
             <form
               ref={formRef}
               key={selectedProject?.id ?? "new"}
-              action={saveProjectAction}
-              onSubmit={(event) => {
-                if (currentStep !== editorSteps.length - 1) {
-                  event.preventDefault();
-                  continueEditor();
-                }
-              }}
+              onSubmit={handleProjectSubmit}
               className="flex min-h-0 flex-1 flex-col overflow-hidden"
             >
               <input name="id" type="hidden" value={selectedProject?.id ?? ""} readOnly />
@@ -472,6 +635,12 @@ export function AdminProjects({
               <input name="gallery_image_urls" type="hidden" value={getGalleryFormValue(selectedProject)} readOnly />
 
               <div ref={modalBodyRef} className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
+              {saveError ? (
+                <div role="alert" aria-live="assertive" className="mb-5 border border-coral/40 bg-coral/10 px-4 py-3 text-sm leading-6 text-coral">
+                  <strong className="block text-xs uppercase text-white">O projeto não foi salvo</strong>
+                  <span className="mt-1 block">{saveError}</span>
+                </div>
+              ) : null}
               <section data-editor-step="0" hidden={currentStep !== 0} className="space-y-6">
               <div className="flex items-start gap-4 border-b border-white/10 pb-4">
                 <span className="font-mono text-[0.62rem] text-steel">01</span>
@@ -609,6 +778,7 @@ export function AdminProjects({
                     {selectedProject ? "Trocar capa" : "Upload de capa"}
                     <input name="cover" className="sr-only" type="file" accept="image/*" onChange={handleCoverPreview} />
                   </label>
+                  <p className="text-[0.68rem] leading-5 text-slate-600">JPG, PNG, WebP ou AVIF, com até 20 MB.</p>
                   {coverPreviewUrl || selectedProject?.cover_image_url ? (
                     <div className="overflow-hidden rounded-sm border border-white/10 bg-black/25">
                       <img src={coverPreviewUrl ?? selectedProject?.cover_image_url} alt="Prévia da capa" className="aspect-[16/9] w-full object-cover" />
@@ -625,6 +795,7 @@ export function AdminProjects({
                     <input name="gallery_images" className="sr-only" type="file" accept="image/*" multiple onChange={handleGalleryPreview} />
                   </label>
                   <p className="text-xs leading-5 text-slate-500">Cada imagem pode ter seu próprio enquadramento e uma descrição exibida ao abrir a tela.</p>
+                  <p className="text-[0.68rem] leading-5 text-slate-600">Até 20 MB por imagem. O envio acontece direto para a galeria.</p>
                 </div>
               </div>
 
@@ -782,14 +953,14 @@ export function AdminProjects({
 
               <div className="flex shrink-0 flex-col gap-3 border-t border-white/10 bg-ink px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                 <div className="flex items-center justify-between gap-4 sm:justify-start">
-                  <button onClick={closeForm} type="button" className="h-10 px-2 text-sm text-slate-500 transition hover:text-white">
+                  <button onClick={closeForm} disabled={isSaving} type="button" className="h-10 px-2 text-sm text-slate-500 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-50">
                     Cancelar
                   </button>
-                  <span className="font-mono text-[0.58rem] uppercase text-slate-600">{currentStep + 1} / {editorSteps.length}</span>
+                  <span aria-live="polite" className="font-mono text-[0.58rem] uppercase text-slate-600">{saveProgress || `${currentStep + 1} / ${editorSteps.length}`}</span>
                 </div>
                 <div className="flex gap-2">
                   {currentStep > 0 ? (
-                    <button onClick={() => goToStep(currentStep - 1)} type="button" className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-sm border border-white/12 px-4 text-sm text-slate-300 transition hover:border-white/30 hover:text-white sm:flex-none">
+                    <button onClick={() => goToStep(currentStep - 1)} disabled={isSaving} type="button" className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-sm border border-white/12 px-4 text-sm text-slate-300 transition hover:border-white/30 hover:text-white disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none">
                       <ChevronLeft size={16} /> Voltar
                     </button>
                   ) : null}
@@ -798,8 +969,8 @@ export function AdminProjects({
                       Continuar <ChevronRight size={16} />
                     </button>
                   ) : (
-                    <button type="submit" className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-sm bg-mint px-5 text-sm font-semibold text-ink transition-colors hover:bg-white sm:flex-none">
-                      <Check size={16} /> {selectedProject ? "Salvar alterações" : "Criar projeto"}
+                    <button type="submit" disabled={isSaving} className="inline-flex h-11 min-w-40 flex-1 items-center justify-center gap-2 rounded-sm bg-mint px-5 text-sm font-semibold text-ink transition-colors hover:bg-white disabled:cursor-wait disabled:opacity-70 sm:flex-none">
+                      <Check size={16} /> {isSaving ? "Salvando..." : selectedProject ? "Salvar alterações" : "Criar projeto"}
                     </button>
                   )}
                 </div>

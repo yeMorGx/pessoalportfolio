@@ -32,6 +32,44 @@ codigo.
 - O arquivo gerado `tsconfig.tsbuildinfo` esta modificado localmente e nao deve
   ser incluido em commit sem necessidade.
 
+## Trabalho em andamento - correcao do upload de projetos
+
+Estado: **local / nao publicada**.
+
+- Em 2026-08-12, a confirmacao da etapa final do editor de projetos falhou em
+  producao com o digest `946842490@E394`.
+- O log de runtime da Vercel confirmou `Body exceeded 1 MB limit`, status
+  `413`, no `POST /admin`. A causa era o envio da capa e de todas as imagens da
+  galeria dentro do corpo de uma unica Server Action.
+- `src/app/admin/actions.ts` agora gera URLs assinadas e temporarias para cada
+  imagem depois de validar a sessao do administrador. A Server Action final
+  recebe somente URLs e dados textuais pequenos.
+- `src/components/admin/AdminProjects.tsx` envia cada arquivo diretamente do
+  navegador ao Supabase Storage, mostra progresso, bloqueia envios duplicados
+  e mantem o modal aberto quando ocorre uma falha.
+- O ciclo das URLs de previa da capa e da galeria foi separado. Isso corrige a
+  capa quebrada que aparecia na revisao ao selecionar a galeria depois dela.
+- Erros esperados do banco agora aparecem dentro da revisao. Slug duplicado e
+  banco sem as migracoes necessarias recebem mensagens especificas, sem cair
+  na pagina generica de erro do Next.js.
+- Arquivos enviados durante uma tentativa que falhar sao removidos do Storage
+  para evitar midia orfa.
+- Capa e imagens da galeria aceitam ate 20 MB por arquivo. O limite da Server
+  Action deixa de depender do tamanho total da galeria.
+- `src/app/admin/page.tsx` diferencia a confirmacao de projeto criado da de
+  projeto atualizado.
+- Verificacoes locais concluidas: `npm run typecheck`, `npm run lint` e
+  `npm run build` aprovados.
+- QA visual concluido em rota temporaria local, removida depois do teste: capa
+  e duas imagens de galeria permaneceram validas na revisao, todas com
+  dimensoes naturais carregadas. Nenhum projeto de teste foi criado e nenhum
+  arquivo foi enviado ao Supabase durante essa verificacao.
+- Depois da remocao da rota temporaria e do cache de tipos correspondente,
+  `npm run lint`, `npm run typecheck`, `npm run build` e `git diff --check`
+  foram aprovados. O build final contem somente as oito rotas esperadas.
+- Pendente: commit, push e confirmacao do novo deploy em producao. Ate essas
+  etapas terminarem, esta correcao continua local / nao publicada.
+
 ## Lote publicado em 2026-08-12
 
 As mudancas abaixo foram publicadas no commit funcional `a14d95c` depois das
