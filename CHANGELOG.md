@@ -17,11 +17,11 @@ codigo.
 
 - Data do registro: 2026-08-12.
 - Branch: `main`.
-- Ultimo commit funcional publicado: `a14d95c`
-  (`feat: refine portfolio experience and admin`).
+- Ultimo commit funcional publicado: `cf5ca18`
+  (`fix: upload project media directly to Supabase`).
 - Documento de continuidade publicado inicialmente no commit `2e8a69f`.
-- Deploy: Vercel conectado a `main`; o lote `a14d95c` foi enviado e verificado
-  em producao em 2026-08-12.
+- Deploy: Vercel conectado a `main`; a correcao `cf5ca18` foi enviada e
+  verificada em producao em 2026-08-12.
 - Producao: `https://pessoalportfolio.vercel.app`, respondendo `200` e servindo
   o novo header e a localizacao da Baixada Santista.
 - Banco e autenticacao: Supabase Postgres, Auth e Storage.
@@ -32,9 +32,9 @@ codigo.
 - O arquivo gerado `tsconfig.tsbuildinfo` esta modificado localmente e nao deve
   ser incluido em commit sem necessidade.
 
-## Trabalho em andamento - correcao do upload de projetos
+## Correcao publicada - upload de projetos
 
-Estado: **local / nao publicada**.
+Estado: **publicada** no commit `cf5ca18`.
 
 - Em 2026-08-12, a confirmacao da etapa final do editor de projetos falhou em
   producao com o digest `946842490@E394`.
@@ -67,8 +67,10 @@ Estado: **local / nao publicada**.
 - Depois da remocao da rota temporaria e do cache de tipos correspondente,
   `npm run lint`, `npm run typecheck`, `npm run build` e `git diff --check`
   foram aprovados. O build final contem somente as oito rotas esperadas.
-- Pendente: commit, push e confirmacao do novo deploy em producao. Ate essas
-  etapas terminarem, esta correcao continua local / nao publicada.
+- O commit `cf5ca18` foi enviado para `main`. O deploy de producao
+  `pessoalportfolio-d39kh5xf5-yemorgxs-projects.vercel.app` ficou `Ready` em
+  44 segundos. A URL publica respondeu `200`, `/admin` manteve o redirecionamento
+  `307` para `/admin/login` e nao havia erros registrados no novo deploy.
 
 ## Lote publicado em 2026-08-12
 
