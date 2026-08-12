@@ -17,11 +17,13 @@ codigo.
 
 - Data do registro: 2026-08-12.
 - Branch: `main`.
-- Ultimo commit funcional publicado: `c3ba232`
-  (`feat: add signature footer wordmark`).
+- Ultimo commit funcional publicado: `a14d95c`
+  (`feat: refine portfolio experience and admin`).
 - Documento de continuidade publicado inicialmente no commit `2e8a69f`.
-- Deploy: Vercel conectado a `main`; mudancas em `main` acionam o deploy.
-- Producao conhecida: `https://pessoalportfolio.vercel.app`.
+- Deploy: Vercel conectado a `main`; o lote `a14d95c` foi enviado e verificado
+  em producao em 2026-08-12.
+- Producao: `https://pessoalportfolio.vercel.app`, respondendo `200` e servindo
+  o novo header e a localizacao da Baixada Santista.
 - Banco e autenticacao: Supabase Postgres, Auth e Storage.
 - Contato provisorio: `gabrielmcgoes@gmail.com`.
 - Contato futuro: `contact@gabrielmorgado.dev` quando o dominio for comprado.
@@ -30,10 +32,10 @@ codigo.
 - O arquivo gerado `tsconfig.tsbuildinfo` esta modificado localmente e nao deve
   ser incluido em commit sem necessidade.
 
-## Trabalho em andamento - local / nao publicado
+## Lote publicado em 2026-08-12
 
-As mudancas abaixo estao no workspace, passaram pelas verificacoes descritas,
-mas ainda nao receberam commit nem push.
+As mudancas abaixo foram publicadas no commit funcional `a14d95c` depois das
+verificacoes descritas nesta secao.
 
 ### Continuidade entre IAs e dispositivos
 
@@ -41,8 +43,8 @@ mas ainda nao receberam commit nem push.
 - Este documento foi criado como fonte de passagem de contexto.
 - O `AGENTS.md` agora obriga futuras IAs a ler e atualizar o changelog em
   qualquer alteracao do projeto.
-- Esta documentacao esta publicada no repositorio; os itens tecnicos seguintes
-  continuam locais ate a conclusao do fluxo em andamento.
+- Esta documentacao e os itens tecnicos seguintes estao publicados no
+  repositorio.
 
 ### Logo 3D metalico
 
@@ -98,8 +100,7 @@ mas ainda nao receberam commit nem push.
 - QA em viewport de iPhone confirmou linhas alinhadas e ausencia de overflow
   horizontal.
 - `npm run lint`, `npm run typecheck` e `git diff --check` aprovados depois do
-  ajuste. `npm run build` tambem aprovado. Alteracao local / nao publicada
-  junto ao restante do trabalho atual.
+  ajuste. `npm run build` tambem aprovado e a alteracao esta publicada.
 
 ### Localizacao 3D e recorte do footer
 
@@ -117,7 +118,7 @@ mas ainda nao receberam commit nem push.
   sair da pagina para evitar acumulo de memoria.
 - QA visual aprovado em desktop e viewport de iPhone. O globo, o marcador, o
   recorte do wordmark e o link do Google Maps renderizaram sem sobreposicao ou
-  overflow horizontal. Alteracao local / nao publicada.
+  overflow horizontal.
 - Ajuste posterior solicitado pelo usuario: a superficie abstrata preta e os
   continentes aproximados foram substituidos por texturas terrestres reais de
   cor e relevo, armazenadas localmente em `public/earth-atmos-2048.jpg` e
@@ -129,7 +130,7 @@ mas ainda nao receberam commit nem push.
   e o marcador coral visiveis no enquadramento. O ultimo ajuste clareou a
   textura, reduziu o reflexo verde e manteve a direcao escura do componente.
 - `npm run lint`, `npm run typecheck`, `git diff --check` e `npm run build`
-  aprovados depois da troca da superficie. Alteracao local / nao publicada.
+  aprovados depois da troca da superficie. Alteracao publicada.
 
 ### Catalogo ampliado de tecnologias
 
@@ -152,7 +153,7 @@ mas ainda nao receberam commit nem push.
   o teste. O cache correspondente em `.next/types/app/qa-stacks` tambem foi
   removido.
 - `npm run lint`, `npm run typecheck` e `npm run build` aprovados apos a
-  remocao da rota de QA. Alteracao local / nao publicada.
+  remocao da rota de QA. Alteracao publicada.
 
 ### Verificacoes ja executadas nessas mudancas
 
@@ -172,7 +173,7 @@ mas ainda nao receberam commit nem push.
 - Uma nova rodada completa devera ser executada depois que as decisoes de
   contato e curriculo forem implementadas.
 
-### QA consolidado do lote local - 2026-08-12
+### QA consolidado do lote - 2026-08-12
 
 - Pagina publica validada em desktop: dois canvases 3D renderizados, logo
   metalico sem camadas se atravessando, globo de localizacao visivel, nenhuma
@@ -197,8 +198,8 @@ mas ainda nao receberam commit nem push.
 - `npm run lint`, `npm run typecheck` e `npm run build` ja estavam aprovados
   depois da ultima mudanca de codigo. Depois deles, somente este planejamento e
   os resultados de QA foram adicionados ao changelog.
-- Proximo passo: apresentar este lote ao usuario e aguardar aprovacao antes de
-  commit, push para `main` e deploy na Vercel.
+- O usuario aprovou o lancamento. O commit `a14d95c` foi enviado para `main` e
+  a pagina publica da Vercel confirmou a nova versao com resposta `200`.
 
 ## Decisoes pendentes do usuario
 
@@ -226,19 +227,26 @@ Recomendacao atual:
 
 ## Proximos passos planejados
 
-1. Executar QA consolidado do lote local ja implementado: logo 3D, header,
-   admin, divisores, globo de localizacao, footer e catalogo de tecnologias.
-2. Corrigir qualquer regressao encontrada e repetir lint, typecheck e build.
-3. Apresentar o resultado ao usuario e, com aprovacao, criar commit e enviar
-   para `main`, acionando o deploy da Vercel.
-4. Como penultima funcionalidade, implementar o formulario de contato com
+1. Como penultima funcionalidade, implementar o formulario de contato com
    envio, feedback e protecao contra abuso.
-5. Como ultima funcionalidade, implementar solicitacao, aprovacao e download
+2. Como ultima funcionalidade, implementar solicitacao, aprovacao e download
    protegido do curriculo para recrutadores.
-6. Executar QA final dos fluxos de contato e curriculo antes da publicacao
+3. Executar QA final dos fluxos de contato e curriculo antes da publicacao
    definitiva dessas funcionalidades.
 
 ## Funcionalidades publicadas importantes
+
+### Commit `a14d95c` - experiencia publica e admin refinados
+
+- Logo 3D consolidado em uma unica peca metalica.
+- Header publico reorganizado sem expor o acesso ao admin.
+- Painel administrativo redesenhado e editor de projetos estabilizado.
+- Catalogo ampliado de tecnologias com grupos e logos.
+- Divisores da secao de contato corrigidos para desktop e iOS.
+- Localizacao 3D da Baixada Santista com texturas terrestres reais, marcador
+  coral e link para o Google Maps.
+- Footer `MORGADO` recortado com fade na base.
+- Lint, typecheck, build e QA visual desktop/mobile aprovados antes do push.
 
 ### Commit `c3ba232` - footer de assinatura
 
