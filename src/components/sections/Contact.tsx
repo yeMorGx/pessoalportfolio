@@ -1,6 +1,7 @@
 "use client";
 
 import { Github, Linkedin, Mail } from "lucide-react";
+import { FooterLocation } from "@/components/sections/FooterLocation";
 import { FooterWordmark } from "@/components/sections/FooterWordmark";
 import { PortfolioIcon } from "@/components/ui/PortfolioIcon";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
@@ -35,14 +36,14 @@ export function Contact() {
           </a>
         </div>
 
-        <div data-reveal className="grid border-t border-ink/15 sm:grid-cols-3">
-          {contactLinks.map(({ href, label, icon: Icon }) => (
+        <div data-reveal className="grid border-y border-ink/15 sm:grid-cols-3">
+          {contactLinks.map(({ href, label, icon: Icon }, index) => (
             <a
               key={label}
               href={href}
               target={href.startsWith("http") ? "_blank" : undefined}
               rel={href.startsWith("http") ? "noreferrer" : undefined}
-              className="group flex min-h-16 items-center justify-between border-b border-ink/15 py-4 text-sm font-semibold transition-colors hover:text-coral sm:border-b-0 sm:border-r sm:px-5 sm:first:pl-0 sm:last:border-r-0 sm:last:pr-0"
+              className={`group flex min-h-16 items-center justify-between py-4 text-sm font-semibold transition-colors hover:text-coral sm:px-5 sm:first:pl-0 sm:last:pr-0 ${index > 0 ? "border-t border-ink/15 sm:border-l sm:border-t-0" : ""}`}
             >
               <span className="flex items-center gap-3"><Icon size={16} />{label}</span>
               <PortfolioIcon name="link" className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -50,11 +51,13 @@ export function Contact() {
           ))}
         </div>
 
+        <FooterLocation />
+
         <FooterWordmark />
 
         <footer data-reveal className="mt-5 flex flex-col gap-3 font-mono text-[0.6rem] uppercase text-ink/50 sm:flex-row sm:items-center sm:justify-between">
           <span>Gabriel Morgado / Full-stack developer</span>
-          <span>São Paulo, Brasil</span>
+          <a href="https://www.google.com/maps/search/?api=1&query=-23.962,-46.363" target="_blank" rel="noreferrer" className="transition-colors hover:text-coral">Baixada Santista / Brasil</a>
         </footer>
       </div>
     </section>

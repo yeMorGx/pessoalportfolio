@@ -82,24 +82,136 @@ mas ainda nao receberam commit nem push.
 - Lista mostra ordem, capa, rota, stacks, quantidade de telas, status e acoes.
 - Validada visualmente em desktop e mobile; busca testada com sucesso.
 
+### Divisores da secao de contato
+
+- Arquivos: `src/components/sections/Contact.tsx` e
+  `src/components/sections/FooterWordmark.tsx`.
+- A lista de Email, GitHub e LinkedIn agora usa uma unica moldura horizontal;
+  os itens internos possuem apenas um divisor, evitando emendas ou linhas
+  interrompidas no iOS.
+- Removida a borda inferior duplicada do wordmark. A linha animada com o
+  marcador coral passou a ser o unico fechamento visual do bloco `MORGADO`.
+- O fundo do novo header foi corrigido para manter o contraste sobre a secao
+  clara de contato, inclusive no Safari/iOS.
+- A altura de linha do wordmark foi normalizada para impedir recortes nas
+  letras arredondadas junto a regua inferior.
+- QA em viewport de iPhone confirmou linhas alinhadas e ausencia de overflow
+  horizontal.
+- `npm run lint`, `npm run typecheck` e `git diff --check` aprovados depois do
+  ajuste. `npm run build` tambem aprovado. Alteracao local / nao publicada
+  junto ao restante do trabalho atual.
+
+### Localizacao 3D e recorte do footer
+
+- Arquivos: `src/components/three/LocationGlobe.tsx`,
+  `src/components/sections/FooterLocation.tsx`, `Contact.tsx` e
+  `FooterWordmark.tsx`.
+- Nova faixa clicavel de localizacao com globo 3D metalico, continentes em
+  pontos, grade geografica e marcador na Baixada Santista.
+- O bloco identifica Santos / Sao Vicente e abre o Google Maps nas
+  coordenadas aproximadas `-23.962, -46.363`.
+- O wordmark `MORGADO` agora termina recortado e desaparece por mascara suave
+  na base, seguindo a referencia sem copiar sua composicao.
+- O globo reage de forma sutil ao ponteiro e permanece estatico quando o
+  usuario prefere movimento reduzido. Sua geometria tambem e descartada ao
+  sair da pagina para evitar acumulo de memoria.
+- QA visual aprovado em desktop e viewport de iPhone. O globo, o marcador, o
+  recorte do wordmark e o link do Google Maps renderizaram sem sobreposicao ou
+  overflow horizontal. Alteracao local / nao publicada.
+- Ajuste posterior solicitado pelo usuario: a superficie abstrata preta e os
+  continentes aproximados foram substituidos por texturas terrestres reais de
+  cor e relevo, armazenadas localmente em `public/earth-atmos-2048.jpg` e
+  `public/earth-normal-2048.jpg`.
+- A grade tecnica foi suavizada, a iluminacao foi recalibrada e a orientacao
+  inicial agora coloca a Baixada Santista na face visivel do globo. O marcador
+  coral e a interacao por ponteiro foram preservados.
+- QA visual confirmou continentes e relevo reconheciveis, com a America do Sul
+  e o marcador coral visiveis no enquadramento. O ultimo ajuste clareou a
+  textura, reduziu o reflexo verde e manteve a direcao escura do componente.
+- `npm run lint`, `npm run typecheck`, `git diff --check` e `npm run build`
+  aprovados depois da troca da superficie. Alteracao local / nao publicada.
+
+### Catalogo ampliado de tecnologias
+
+- Arquivos: `src/components/admin/AdminProjects.tsx` e
+  `src/components/ui/StackLogo.tsx`.
+- O primeiro estagio do editor de projetos agora organiza as sugestoes em
+  Frontend, Backend, Mobile, Dados, Plataforma e APIs e Seguranca.
+- Foram adicionadas opcoes como Tailwind CSS, Vue.js, Angular, Svelte, Node.js,
+  Java, Spring Boot, C#, .NET, Go, Ruby, Perl, Flutter, MongoDB, Redis, Docker,
+  Kubernetes e provedores de nuvem, entre outras.
+- O campo livre continua disponivel para qualquer tecnologia fora do catalogo.
+- As novas opcoes usam logos via CDN quando ha um icone correspondente e
+  mantem o fallback textual para tecnologias personalizadas. AWS e Azure usam
+  o catalogo Dashboard Icons porque nao estao disponiveis nos identificadores
+  atuais do Simple Icons.
+- Selecao multipla validada com Tailwind CSS e Go; o campo foi atualizado para
+  `Tailwind CSS, Go` e ambos os botoes mantiveram o estado selecionado.
+- Layout aprovado em desktop e viewport mobile de 390 x 844, sem overflow
+  horizontal. A rota temporaria `src/app/qa-stacks/page.tsx` foi removida apos
+  o teste. O cache correspondente em `.next/types/app/qa-stacks` tambem foi
+  removido.
+- `npm run lint`, `npm run typecheck` e `npm run build` aprovados apos a
+  remocao da rota de QA. Alteracao local / nao publicada.
+
 ### Verificacoes ja executadas nessas mudancas
 
-- `npm run typecheck`: aprovado apos remover a rota temporaria de QA.
-- `npm run lint`: aprovado antes do ultimo ajuste documental.
+- `npm run typecheck`: aprovado na rodada final de 2026-08-12.
+- `npm run lint`: aprovado; a compilacao de producao tambem repetiu a
+  verificacao de lint e tipos com sucesso.
+- `npm run build`: aprovado na rodada final de 2026-08-12, com as oito paginas
+  geradas e sem erro de compilacao.
+- `git diff --check`: aprovado, sem erros de espaco em branco.
 - QA visual do 3D, header, modal e admin realizado no navegador local.
+- QA final do rodape realizado em viewport mobile de 390 x 844: dois canvases
+  3D carregados, nenhum erro ou aviso no navegador e link de localizacao
+  apontando para `https://www.google.com/maps/search/?api=1&query=-23.962,-46.363`.
 - Uma rota temporaria `src/app/qa-admin/page.tsx` foi criada para testes e ja
   foi removida. O cache correspondente em `.next/types/app/qa-admin` tambem
   foi removido.
-- Ainda falta executar a rodada final de lint, typecheck e build depois que as
-  proximas decisoes forem implementadas.
+- Uma nova rodada completa devera ser executada depois que as decisoes de
+  contato e curriculo forem implementadas.
+
+### QA consolidado do lote local - 2026-08-12
+
+- Pagina publica validada em desktop: dois canvases 3D renderizados, logo
+  metalico sem camadas se atravessando, globo de localizacao visivel, nenhuma
+  imagem quebrada, nenhum link publico para `/admin` e ausencia de overflow
+  horizontal.
+- Pagina publica validada em viewport mobile de 390 x 844: hero 3D enquadrado,
+  dois canvases carregados, nenhuma imagem quebrada e menu movel abrindo e
+  fechando com Sobre, Projetos, Stack e Contato.
+- Pagina de projeto validada em desktop e mobile sem overflow ou imagens
+  quebradas. O modal da galeria abriu com imagem, titulo, descricao e controle
+  de fechamento corretos.
+- Os projetos atuais do Supabase possuem uma tela de galeria cada. Por isso, o
+  loop automatico com multiplas imagens nao foi reexecutado neste QA
+  consolidado; o comportamento havia sido validado no trabalho anterior do
+  carrossel e seu codigo nao foi alterado neste lote.
+- A rota `/admin` redirecionou corretamente para `/admin/login`. Os campos de
+  e-mail e senha continuam obrigatorios e o acesso Google aponta para
+  `/auth/google`. Nenhum erro ou aviso apareceu no navegador.
+- O painel autenticado e o editor guiado ja haviam sido validados por rota
+  temporaria de QA, removida depois do teste. Nesta rodada nao foi realizada
+  autenticacao real nem alteracao de dados no Supabase.
+- `npm run lint`, `npm run typecheck` e `npm run build` ja estavam aprovados
+  depois da ultima mudanca de codigo. Depois deles, somente este planejamento e
+  os resultados de QA foram adicionados ao changelog.
+- Proximo passo: apresentar este lote ao usuario e aguardar aprovacao antes de
+  commit, push para `main` e deploy na Vercel.
 
 ## Decisoes pendentes do usuario
 
-O trabalho parou aguardando estas respostas:
+Ordem definida pelo usuario em 2026-08-12: o formulario de contato e o fluxo
+de curriculo para recrutadores serao as duas ultimas funcionalidades. Como o
+site ainda esta em teste, essas decisoes nao bloqueiam o fechamento e a
+publicacao do conjunto visual e administrativo que ja esta pronto.
 
-1. Autorizar **Resend + Supabase** para formulario de contato e notificacoes.
-2. Confirmar se a solicitacao de curriculo deve exigir e-mail corporativo,
-   empresa, site ou LinkedIn e justificativa, com aprovacao manual no admin.
+Quando essas duas etapas finais forem retomadas, ainda sera necessario:
+
+1. Autorizar e configurar **Resend + Supabase** para o formulario de contato.
+2. Confirmar os dados exigidos na solicitacao de curriculo e a aprovacao
+   manual no admin.
 3. Enviar o curriculo em PDF para testar o download protegido final.
 
 Recomendacao atual:
@@ -114,16 +226,17 @@ Recomendacao atual:
 
 ## Proximos passos planejados
 
-1. Receber as tres respostas acima.
-2. Criar formulario de contato no site, com feedback de envio e protecao
-   contra abuso.
-3. Criar tabela e fluxo de solicitacao de curriculo no Supabase.
-4. Adicionar uma fila de solicitacoes ao admin, com aprovar e recusar.
-5. Gerar link de download temporario somente apos aprovacao.
-6. Executar QA completo de desktop, mobile, autenticacao, envio e download.
-7. Rodar lint, typecheck e build.
-8. Atualizar este arquivo, criar commit e enviar para `main` somente depois da
-   aprovacao do usuario.
+1. Executar QA consolidado do lote local ja implementado: logo 3D, header,
+   admin, divisores, globo de localizacao, footer e catalogo de tecnologias.
+2. Corrigir qualquer regressao encontrada e repetir lint, typecheck e build.
+3. Apresentar o resultado ao usuario e, com aprovacao, criar commit e enviar
+   para `main`, acionando o deploy da Vercel.
+4. Como penultima funcionalidade, implementar o formulario de contato com
+   envio, feedback e protecao contra abuso.
+5. Como ultima funcionalidade, implementar solicitacao, aprovacao e download
+   protegido do curriculo para recrutadores.
+6. Executar QA final dos fluxos de contato e curriculo antes da publicacao
+   definitiva dessas funcionalidades.
 
 ## Funcionalidades publicadas importantes
 

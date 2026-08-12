@@ -2,35 +2,38 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Check, ChevronLeft, ChevronRight, Edit3, Eye, FileText, ImageIcon, Link2, LogOut, Plus, Star, Trash2, Upload, X } from "lucide-react";
+import { ArrowLeft, Check, ChevronLeft, ChevronRight, Edit3, Eye, FileText, FolderKanban, ImageIcon, Link2, LogOut, Plus, Search, Star, Trash2, Upload, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { deleteProjectAction, saveProjectAction, signOutAction, toggleFeaturedAction } from "@/app/admin/actions";
 import { StackLogo } from "@/components/ui/StackLogo";
 import type { Project } from "@/lib/projects";
 
-const commonStacks = [
-  "JavaScript",
-  "TypeScript",
-  "Next.js",
-  "React",
-  "HTML5",
-  "CSS",
-  "Python",
-  "MySQL",
-  "PHP",
-  "Composer",
-  "Laravel",
-  "Rust",
-  "PostgreSQL",
-  "Supabase",
-  "API",
-  "SSO",
-  "Wazuh",
-  "TheHive",
-  "OWASP Top 10",
-  "RedTeam",
-  "SOC"
-];
+const stackGroups = [
+  {
+    label: "Frontend",
+    technologies: ["JavaScript", "TypeScript", "React", "Next.js", "Vue.js", "Nuxt.js", "Angular", "Svelte", "Tailwind CSS", "Sass", "HTML5", "CSS"]
+  },
+  {
+    label: "Backend",
+    technologies: ["Node.js", "Express", "NestJS", "Python", "Django", "FastAPI", "PHP", "Laravel", "Composer", "Java", "Spring Boot", "C#", ".NET", "Go", "Rust", "Ruby", "Ruby on Rails", "Perl"]
+  },
+  {
+    label: "Mobile",
+    technologies: ["React Native", "Flutter", "Dart", "Kotlin", "Swift"]
+  },
+  {
+    label: "Dados",
+    technologies: ["PostgreSQL", "MySQL", "MariaDB", "MongoDB", "Redis", "SQLite", "Prisma", "Supabase", "Firebase"]
+  },
+  {
+    label: "Plataforma e APIs",
+    technologies: ["API", "REST", "GraphQL", "SSO", "Docker", "Kubernetes", "AWS", "Google Cloud", "Azure", "Vercel", "GitHub Actions"]
+  },
+  {
+    label: "Segurança",
+    technologies: ["Wazuh", "TheHive", "OWASP Top 10", "Kali Linux", "RedTeam", "SOC"]
+  }
+] as const;
 
 const editorSteps = [
   { label: "Essencial", detail: "Nome, resumo e tecnologias", icon: FileText },
@@ -82,9 +85,23 @@ export function AdminProjects({
   const [currentStep, setCurrentStep] = useState(0);
   const [highestStep, setHighestStep] = useState(0);
   const [draftPreview, setDraftPreview] = useState<ProjectDraftPreview | null>(null);
+  const [projectQuery, setProjectQuery] = useState("");
+  const [projectFilter, setProjectFilter] = useState<"all" | "featured">("all");
   const formRef = useRef<HTMLFormElement | null>(null);
   const modalBodyRef = useRef<HTMLDivElement | null>(null);
   const featuredCount = useMemo(() => projects.filter((project) => project.featured).length, [projects]);
+  const galleryImageCount = useMemo(() => projects.reduce((total, project) => total + project.gallery_image_urls.length, 0), [projects]);
+  const visibleProjects = useMemo(() => {
+    const normalizedQuery = projectQuery.trim().toLowerCase();
+
+    return projects.filter((project) => {
+      const matchesFilter = projectFilter === "all" || project.featured;
+      const matchesQuery = !normalizedQuery || [project.title, project.slug, ...project.tech_stack]
+        .some((value) => value.toLowerCase().includes(normalizedQuery));
+
+      return matchesFilter && matchesQuery;
+    });
+  }, [projectFilter, projectQuery, projects]);
   const previewCoverUrl = coverPreviewUrl ?? selectedProject?.cover_image_url ?? "/project-forge.svg";
   const previewGalleryUrls = galleryPreviewUrls.length ? galleryPreviewUrls : selectedProject?.gallery_image_urls ?? [];
 
@@ -236,107 +253,169 @@ export function AdminProjects({
   }
 
   return (
-    <main className="min-h-screen bg-ink px-4 py-6 sm:px-5 sm:py-8">
-      <div className="mx-auto max-w-7xl">
-        <div className="flex flex-col justify-between gap-5 border-b border-white/10 pb-6 md:flex-row md:items-center">
-          <div>
-            <Link href="/" className="inline-flex items-center gap-2 text-sm text-slate-400 transition hover:text-white">
-              <ArrowLeft size={16} />
-              Site público
-            </Link>
-            <h1 className="mt-4 text-2xl font-semibold text-white sm:text-3xl">Painel de projetos</h1>
-            <p className="mt-2 text-sm text-slate-400">{projects.length} projetos cadastrados, {featuredCount} em destaque.</p>
-            {status ? (
-              <p className={`mt-4 inline-flex border px-3 py-2 text-sm ${status === "error" ? "border-coral/40 bg-coral/10 text-coral" : "border-mint/40 bg-mint/10 text-mint"}`}>
-                {status === "deleted" ? "Projeto excluído." : null}
-                {status === "updated" ? "Projeto atualizado." : null}
-                {status === "error" ? "Não foi possível concluir a ação. Confira sua sessão e tente novamente." : null}
-              </p>
-            ) : null}
+    <main className="min-h-screen bg-ink text-white">
+      <div className="mx-auto grid min-h-screen max-w-[96rem] lg:grid-cols-[15rem_minmax(0,1fr)]">
+        <aside className="flex border-b border-white/10 bg-black/20 lg:sticky lg:top-0 lg:h-screen lg:flex-col lg:border-b-0 lg:border-r">
+          <div className="flex min-w-0 flex-1 items-center gap-3 px-4 py-4 lg:flex-none lg:border-b lg:border-white/10 lg:px-5 lg:py-6">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center border border-white/10 bg-white/[0.04]">
+              <Image src="/logo.svg" alt="" width={20} height={20} />
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-semibold">Gabriel Morgado</span>
+              <span className="mt-0.5 block font-mono text-[0.55rem] uppercase text-steel">Controle editorial</span>
+            </span>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <button onClick={openCreateForm} className="inline-flex h-11 items-center justify-center gap-2 rounded-sm bg-mint px-4 text-sm font-semibold text-ink transition-colors hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-mint">
-              <Plus size={16} />
-              Novo projeto
-            </button>
-            <form action={signOutAction}>
-              <button className="inline-flex h-11 items-center justify-center gap-2 rounded-sm border border-white/12 px-4 text-sm text-white transition-colors hover:border-white/30" type="submit">
-                <LogOut size={16} />
-                Sair
+
+          <nav className="hidden flex-1 px-3 py-5 lg:block" aria-label="Navegação do painel">
+            <p className="px-3 font-mono text-[0.55rem] uppercase text-slate-600">Conteúdo</p>
+            <div className="mt-3 flex min-h-11 items-center gap-3 border-l-2 border-mint bg-white/[0.04] px-3 text-sm text-white">
+              <FolderKanban size={16} className="text-mint" />
+              Projetos
+              <span className="ml-auto font-mono text-[0.58rem] text-slate-500">{projects.length}</span>
+            </div>
+          </nav>
+
+          <div className="flex items-center gap-2 px-3 py-3 lg:block lg:border-t lg:border-white/10 lg:px-4 lg:py-4">
+            <Link href="/" className="inline-flex h-10 items-center gap-2 px-2 text-xs text-slate-400 transition hover:text-white lg:w-full">
+              <ArrowLeft size={14} />
+              <span className="hidden sm:inline">Ver site público</span>
+            </Link>
+            <form action={signOutAction} className="lg:mt-1">
+              <button className="inline-flex h-10 items-center gap-2 px-2 text-xs text-slate-400 transition hover:text-coral lg:w-full" type="submit">
+                <LogOut size={14} />
+                <span className="hidden sm:inline">Encerrar sessão</span>
               </button>
             </form>
           </div>
-        </div>
+        </aside>
 
-        <section className="mt-8">
-          <div className="overflow-hidden border border-white/10">
-            <div className="hidden grid-cols-[1fr_6rem_6rem] border-b border-white/10 bg-white/[0.04] px-4 py-3 font-mono text-[0.62rem] uppercase text-slate-400 md:grid">
-              <span>Projeto</span>
-              <span>Destaque</span>
-              <span>Ações</span>
+        <div className="min-w-0 px-4 py-6 sm:px-6 lg:px-10 lg:py-9">
+          <header className="flex flex-col justify-between gap-5 border-b border-white/10 pb-7 sm:flex-row sm:items-end">
+            <div>
+              <p className="font-mono text-[0.58rem] uppercase text-mint">Portfólio / Conteúdo</p>
+              <h1 className="mt-3 font-display text-3xl font-semibold sm:text-4xl">Projetos</h1>
+              <p className="mt-2 text-sm text-slate-500">Organize os estudos de caso publicados no site.</p>
             </div>
-            {projects.map((project) => (
-              <div key={project.id} className="grid items-center gap-4 border-b border-white/10 px-4 py-4 last:border-b-0 md:grid-cols-[1fr_6rem_6rem] md:gap-3">
-                <div className="flex min-w-0 items-center gap-4">
-                  <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-sm border border-white/10 bg-white/6">
-                    <Image src={project.cover_image_url || "/project-forge.svg"} alt={`Capa de ${project.title}`} fill sizes="96px" className="object-cover" />
-                  </div>
-                  <div className="min-w-0">
-                    <h2 className="truncate font-medium text-white">{project.title}</h2>
-                    <div className="mt-2 flex flex-wrap items-center gap-2">
-                      <span className="border border-white/10 px-2 py-0.5 text-[0.65rem] text-slate-400">
-                        {project.cover_display === "fullscreen" ? "Fullscreen" : "Miniatura"}
-                      </span>
-                      {project.tech_stack.slice(0, 4).map((tech) => (
-                        <span key={tech} className="inline-flex items-center gap-1.5 border border-white/10 px-2 py-0.5 text-[0.65rem] text-slate-300">
-                          <StackLogo label={tech} className="h-3 w-3" />
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <form action={toggleFeaturedAction} className="flex items-center justify-between md:block">
-                  <input name="id" type="hidden" value={project.id} />
-                  <input name="featured" type="hidden" value={String(project.featured)} />
-                  <span className="font-mono text-[0.62rem] uppercase text-steel md:hidden">Destaque</span>
-                  <button title="Alternar destaque" className="inline-flex h-10 w-10 items-center justify-center rounded-sm border border-white/12 text-slate-300 transition hover:border-mint hover:text-mint" type="submit" aria-label="Alternar destaque">
-                    <Star size={16} fill={project.featured ? "currentColor" : "none"} />
-                  </button>
-                </form>
-                <div className="flex justify-end gap-2 border-t border-white/10 pt-3 md:border-t-0 md:pt-0">
-                  <button title="Editar projeto" onClick={() => openEditForm(project)} className="inline-flex h-10 w-10 items-center justify-center rounded-sm border border-white/12 text-slate-300 transition hover:border-mint hover:text-mint" type="button" aria-label="Editar projeto">
-                    <Edit3 size={16} />
-                  </button>
-                  <form action={deleteProjectAction} onSubmit={(event) => {
-                    if (!window.confirm(`Excluir "${project.title}"?`)) {
-                      event.preventDefault();
-                    }
-                  }}>
-                    <input name="id" type="hidden" value={project.id} />
-                    <button title="Excluir projeto" className="inline-flex h-10 w-10 items-center justify-center rounded-sm border border-white/12 text-slate-300 transition hover:border-coral hover:text-coral" type="submit" aria-label="Excluir projeto">
-                      <Trash2 size={16} />
-                    </button>
-                  </form>
-                </div>
+            <button onClick={openCreateForm} className="inline-flex h-11 items-center justify-center gap-2 bg-mint px-4 text-sm font-semibold text-ink transition-colors hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-mint">
+              <Plus size={16} />
+              Novo projeto
+            </button>
+          </header>
+
+          {status ? (
+            <p className={`mt-5 inline-flex border px-3 py-2 text-sm ${status === "error" ? "border-coral/40 bg-coral/10 text-coral" : "border-mint/40 bg-mint/10 text-mint"}`}>
+              {status === "deleted" ? "Projeto excluído." : null}
+              {status === "updated" ? "Projeto atualizado." : null}
+              {status === "error" ? "Não foi possível concluir a ação. Confira sua sessão e tente novamente." : null}
+            </p>
+          ) : null}
+
+          <dl className="mt-7 grid grid-cols-3 border-y border-white/10">
+            {[
+              ["Publicados", projects.length],
+              ["Destaques", featuredCount],
+              ["Telas na galeria", galleryImageCount]
+            ].map(([label, value], index) => (
+              <div key={label} className={`py-4 ${index ? "border-l border-white/10 pl-4 sm:pl-6" : "pr-4"}`}>
+                <dt className="font-mono text-[0.52rem] uppercase text-slate-500 sm:text-[0.58rem]">{label}</dt>
+                <dd className="mt-2 text-2xl font-semibold text-white">{value}</dd>
               </div>
             ))}
-            {!projects.length ? (
-              <div className="px-4 py-10 text-sm text-slate-400">Nenhum projeto cadastrado ainda.</div>
-            ) : null}
-          </div>
-        </section>
+          </dl>
+
+          <section className="mt-8">
+            <div className="flex flex-col gap-3 border-b border-white/10 pb-4 md:flex-row md:items-center md:justify-between">
+              <div className="relative w-full md:max-w-sm">
+                <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                <input
+                  value={projectQuery}
+                  onChange={(event) => setProjectQuery(event.target.value)}
+                  type="search"
+                  aria-label="Buscar projetos"
+                  placeholder="Buscar por nome, slug ou tecnologia"
+                  className="h-11 w-full border border-white/10 bg-black/20 pl-10 pr-3 text-sm text-white outline-none transition focus:border-mint/60"
+                />
+              </div>
+              <div className="grid grid-cols-2 border border-white/10" aria-label="Filtrar projetos">
+                <button type="button" onClick={() => setProjectFilter("all")} aria-pressed={projectFilter === "all"} className={`h-10 px-4 text-xs transition ${projectFilter === "all" ? "bg-white text-ink" : "text-slate-400 hover:text-white"}`}>Todos</button>
+                <button type="button" onClick={() => setProjectFilter("featured")} aria-pressed={projectFilter === "featured"} className={`h-10 border-l border-white/10 px-4 text-xs transition ${projectFilter === "featured" ? "bg-white text-ink" : "text-slate-400 hover:text-white"}`}>Destaques</button>
+              </div>
+            </div>
+
+            <div className="overflow-hidden border-x border-b border-white/10">
+              <div className="hidden grid-cols-[4rem_minmax(0,1fr)_7rem_7rem_7rem] border-b border-white/10 bg-white/[0.025] px-4 py-3 font-mono text-[0.55rem] uppercase text-slate-500 md:grid">
+                <span>Ordem</span>
+                <span>Projeto</span>
+                <span>Mídia</span>
+                <span>Status</span>
+                <span className="text-right">Ações</span>
+              </div>
+              {visibleProjects.map((project) => (
+                <div key={project.id} className="grid gap-4 border-b border-white/10 px-4 py-4 last:border-b-0 md:grid-cols-[4rem_minmax(0,1fr)_7rem_7rem_7rem] md:items-center md:gap-0">
+                  <span className="hidden font-mono text-xs text-slate-500 md:block">{String(project.order).padStart(2, "0")}</span>
+                  <div className="flex min-w-0 items-center gap-4">
+                    <div className="relative h-16 w-24 shrink-0 overflow-hidden border border-white/10 bg-white/5">
+                      <Image src={project.cover_image_url || "/project-forge.svg"} alt={`Capa de ${project.title}`} fill sizes="96px" className="object-cover" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h2 className="truncate text-sm font-medium text-white">{project.title}</h2>
+                        <span className="font-mono text-[0.52rem] text-slate-600 md:hidden">#{String(project.order).padStart(2, "0")}</span>
+                      </div>
+                      <p className="mt-1 truncate font-mono text-[0.58rem] text-slate-600">/projetos/{project.slug}</p>
+                      <div className="mt-2 flex items-center gap-2 overflow-hidden">
+                        {project.tech_stack.slice(0, 3).map((tech) => (
+                          <span key={tech} className="inline-flex shrink-0 items-center gap-1.5 text-[0.62rem] text-slate-400">
+                            <StackLogo label={tech} className="h-3 w-3" />
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between md:block">
+                    <span className="font-mono text-[0.55rem] uppercase text-slate-600 md:hidden">Mídia</span>
+                    <span className="text-xs text-slate-400">{project.gallery_image_urls.length} {project.gallery_image_urls.length === 1 ? "tela" : "telas"}</span>
+                  </div>
+
+                  <form action={toggleFeaturedAction} className="flex items-center justify-between md:block">
+                    <input name="id" type="hidden" value={project.id} />
+                    <input name="featured" type="hidden" value={String(project.featured)} />
+                    <span className="font-mono text-[0.55rem] uppercase text-slate-600 md:hidden">Status</span>
+                    <button title="Alternar destaque" className={`inline-flex h-8 items-center gap-2 px-2 text-[0.62rem] transition ${project.featured ? "bg-mint/10 text-mint" : "border border-white/10 text-slate-500 hover:text-white"}`} type="submit" aria-label="Alternar destaque">
+                      <Star size={13} fill={project.featured ? "currentColor" : "none"} />
+                      {project.featured ? "Destaque" : "Normal"}
+                    </button>
+                  </form>
+
+                  <div className="flex justify-end gap-2 border-t border-white/10 pt-3 md:border-t-0 md:pt-0">
+                    <button title="Editar projeto" onClick={() => openEditForm(project)} className="inline-flex h-9 w-9 items-center justify-center border border-white/10 text-slate-400 transition hover:border-mint hover:text-mint" type="button" aria-label="Editar projeto">
+                      <Edit3 size={15} />
+                    </button>
+                    <form action={deleteProjectAction} onSubmit={(event) => {
+                      if (!window.confirm(`Excluir "${project.title}"?`)) {
+                        event.preventDefault();
+                      }
+                    }}>
+                      <input name="id" type="hidden" value={project.id} />
+                      <button title="Excluir projeto" className="inline-flex h-9 w-9 items-center justify-center border border-white/10 text-slate-400 transition hover:border-coral hover:text-coral" type="submit" aria-label="Excluir projeto">
+                        <Trash2 size={15} />
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              ))}
+              {!visibleProjects.length ? (
+                <div className="px-4 py-12 text-center text-sm text-slate-500">Nenhum projeto corresponde à busca.</div>
+              ) : null}
+            </div>
+          </section>
+        </div>
       </div>
 
       {isModalOpen ? (
-        <div
-          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/80 px-3 py-4 backdrop-blur-sm sm:px-4 md:py-8"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) {
-              closeForm();
-            }
-          }}
-        >
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/80 px-3 py-4 backdrop-blur-sm sm:px-4 md:py-8">
           <div role="dialog" aria-modal="true" aria-labelledby="project-dialog-title" className="flex max-h-[calc(100svh-2rem)] w-full max-w-5xl flex-col overflow-hidden rounded-sm border border-white/12 bg-ink shadow-2xl md:max-h-[calc(100svh-4rem)]">
             <div className="z-10 flex shrink-0 items-start justify-between gap-4 border-b border-white/10 bg-ink/95 px-5 py-4 backdrop-blur">
               <div>
@@ -423,17 +502,24 @@ export function AdminProjects({
                   <input name="tech_stack" value={stackValue} onChange={(event) => setStackValue(event.target.value)} className="mt-2 w-full rounded-sm border border-white/12 bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder="Escolha abaixo ou digite separando por vírgulas" />
                   <span className="mt-1.5 block text-[0.68rem] leading-4 text-slate-600">Clique nas opções frequentes ou escreva uma tecnologia nova.</span>
                 </label>
-                <div className="flex flex-wrap gap-2">
-                  {commonStacks.map((tech) => {
-                    const isSelected = stackValue.split(",").some((item) => item.trim().toLowerCase() === tech.toLowerCase());
+                <div className="space-y-4 border-t border-white/10 pt-4">
+                  {stackGroups.map((group) => (
+                    <div key={group.label} className="grid gap-2 sm:grid-cols-[7.5rem_minmax(0,1fr)]">
+                      <p className="pt-2 font-mono text-[0.55rem] uppercase text-slate-600">{group.label}</p>
+                      <div className="flex flex-wrap gap-2">
+                        {group.technologies.map((tech) => {
+                          const isSelected = stackValue.split(",").some((item) => item.trim().toLowerCase() === tech.toLowerCase());
 
-                    return (
-                    <button key={tech} type="button" aria-pressed={isSelected} onClick={() => toggleStack(tech)} className={`inline-flex h-8 items-center gap-2 rounded-sm border px-3 text-xs transition-colors ${isSelected ? "border-mint/50 bg-mint/10 text-mint" : "border-white/10 bg-white/[0.03] text-slate-300 hover:border-white/25"}`}>
-                      <StackLogo label={tech} className="h-4 w-4" />
-                      {tech}
-                    </button>
-                    );
-                  })}
+                          return (
+                            <button key={tech} type="button" aria-pressed={isSelected} onClick={() => toggleStack(tech)} className={`inline-flex h-8 items-center gap-2 rounded-sm border px-3 text-xs transition-colors ${isSelected ? "border-mint/50 bg-mint/10 text-mint" : "border-white/10 bg-white/[0.03] text-slate-300 hover:border-white/25"}`}>
+                              <StackLogo label={tech} className="h-4 w-4" />
+                              {tech}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
               </section>
