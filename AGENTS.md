@@ -4,6 +4,11 @@ Este arquivo orienta qualquer agente de IA (Claude Code, Cursor, etc.) que for
 ajudar a construir e manter este projeto. Leia por completo antes de gerar
 código.
 
+Depois deste arquivo, leia obrigatoriamente `CHANGELOG.md`. Ele e o documento
+de continuidade do projeto e registra o ponto exato em que o trabalho parou,
+o que esta publicado, o que ainda esta apenas local e quais decisoes dependem
+do usuario.
+
 ## 1. Visão geral do projeto
 
 Site de portfólio pessoal para um desenvolvedor full-stack, com foco forte em
@@ -170,3 +175,23 @@ Campos sugeridos como ponto de partida (ajustar conforme necessidade):
   de uma pessoa só.
 - Não é necessário editor de texto rico (WYSIWYG) a menos que peça — campos
   de texto simples/textarea resolvem para descrição de projeto.
+
+## 10. Continuidade e CHANGELOG
+
+O arquivo `CHANGELOG.md` e obrigatorio e deve funcionar como passagem de
+contexto entre IAs, chats e dispositivos.
+
+- Antes de alterar o projeto, ler `CHANGELOG.md` por completo e conferir
+  `git status` para distinguir mudancas publicadas, mudancas locais do usuario
+  e trabalho ainda em andamento.
+- Toda alteracao de codigo, configuracao, banco, asset ou comportamento deve
+  atualizar `CHANGELOG.md` no mesmo ciclo de trabalho.
+- Registrar a data, arquivos ou areas afetadas, comportamento alterado,
+  validacoes executadas, estado de commit/deploy e proximos passos.
+- Nao apagar o historico para simplificar o arquivo. Resumir entradas antigas
+  quando necessario, preservando decisoes e marcos importantes.
+- Marcar explicitamente uma alteracao como **local / nao publicada** ate que o
+  commit e o push realmente tenham sido concluidos.
+- Nunca registrar senhas, tokens, chaves de API ou valores secretos de `.env`.
+- Ao terminar uma tarefa parcialmente, deixar uma instrucao concreta de onde
+  retomar e quais perguntas ainda precisam de resposta do usuario.
