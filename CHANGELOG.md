@@ -17,11 +17,11 @@ codigo.
 
 - Data do registro: 2026-08-12.
 - Branch: `main`.
-- Ultimo commit funcional publicado: `f2a8813`
-  (`style: add space around hero logo`).
+- Ultimo commit funcional publicado: `a7b6617`
+  (`fix: refine mobile hero layout`).
 - Documento de continuidade publicado inicialmente no commit `2e8a69f`.
-- Deploy: Vercel conectado a `main`; a correcao `cf5ca18` foi enviada e
-  verificada em producao em 2026-08-12.
+- Deploy: Vercel conectado a `main`; o refinamento mobile `a7b6617` foi
+  enviado e verificado em producao em 2026-08-12.
 - Producao: `https://pessoalportfolio.vercel.app`, respondendo `200` e servindo
   o novo header e a localizacao da Baixada Santista.
 - Banco e autenticacao: Supabase Postgres, Auth e Storage.
@@ -91,9 +91,9 @@ Estado: **publicado** no commit `f2a8813`.
   `pessoalportfolio-afzra3654-yemorgxs-projects.vercel.app` ficou `Ready` em
   40 segundos, a URL publica respondeu `200` e nao registrou erros de runtime.
 
-## Trabalho em andamento - hero e header mobile
+## Ajuste publicado - hero e header mobile
 
-Estado: **local / nao publicado**.
+Estado: **publicado** no commit `a7b6617`.
 
 - `src/components/sections/SiteHeader.tsx`: removido o texto `GM` do header
   mobile. O link da marca mantem um nome acessivel e mostra apenas a logo no
@@ -115,7 +115,9 @@ Estado: **local / nao publicado**.
   enquadramento 3D anterior mantido e sem overflow.
 - `npm run lint`, `npm run typecheck`, `npm run build` e `git diff --check`
   aprovados; o build final manteve as oito rotas esperadas.
-- Pendente: commit, push e confirmacao do deploy.
+- O commit `a7b6617` foi enviado para `main`. O deploy de producao
+  `pessoalportfolio-kehqo6692-yemorgxs-projects.vercel.app` ficou `Ready` em
+  41 segundos, a URL publica respondeu `200` e nao registrou erros de runtime.
 
 ## Lote publicado em 2026-08-12
 
