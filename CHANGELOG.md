@@ -17,8 +17,10 @@ codigo.
 
 - Data do registro: 2026-08-12.
 - Branch: `main`.
-- Ultimo commit publicado: `c3ba232` (`feat: add signature footer wordmark`).
-- Deploy: Vercel conectado a `main`; o deploy do commit acima foi acionado.
+- Ultimo commit funcional publicado: `c3ba232`
+  (`feat: add signature footer wordmark`).
+- Documento de continuidade publicado inicialmente no commit `2e8a69f`.
+- Deploy: Vercel conectado a `main`; mudancas em `main` acionam o deploy.
 - Producao conhecida: `https://pessoalportfolio.vercel.app`.
 - Banco e autenticacao: Supabase Postgres, Auth e Storage.
 - Contato provisorio: `gabrielmcgoes@gmail.com`.
@@ -39,8 +41,8 @@ mas ainda nao receberam commit nem push.
 - Este documento foi criado como fonte de passagem de contexto.
 - O `AGENTS.md` agora obriga futuras IAs a ler e atualizar o changelog em
   qualquer alteracao do projeto.
-- Esta documentacao sera publicada separadamente; os itens tecnicos seguintes
-  continuarao locais ate a conclusao do fluxo em andamento.
+- Esta documentacao esta publicada no repositorio; os itens tecnicos seguintes
+  continuam locais ate a conclusao do fluxo em andamento.
 
 ### Logo 3D metalico
 
