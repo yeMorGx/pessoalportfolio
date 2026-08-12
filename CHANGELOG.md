@@ -72,6 +72,23 @@ Estado: **publicada** no commit `cf5ca18`.
   44 segundos. A URL publica respondeu `200`, `/admin` manteve o redirecionamento
   `307` para `/admin/login` e nao havia erros registrados no novo deploy.
 
+## Trabalho em andamento - espacamento da logo 3D
+
+Estado: **local / nao publicada**.
+
+- `src/components/sections/Hero.tsx`: o palco da logo 3D foi deslocado
+  levemente para a direita somente a partir do desktop, aumentando o respiro
+  entre o objeto e os textos do hero sem alterar escala, camera ou mobile.
+- Deslocamento visual: aproximadamente 3% no desktop e 4% em telas largas.
+- QA visual aprovado no desktop: a logo ganhou um intervalo maior em relacao
+  ao fim do texto, permaneceu centralizada dentro da reticula e nao sofreu
+  recorte.
+- QA em viewport mobile de 390 x 844 aprovado: o deslocamento nao e aplicado,
+  os dois canvases 3D carregaram e nao houve overflow horizontal.
+- `npm run lint`, `npm run typecheck`, `npm run build` e `git diff --check`
+  aprovados; o build final manteve as oito rotas esperadas.
+- Pendente: commit, push e confirmacao do deploy.
+
 ## Lote publicado em 2026-08-12
 
 As mudancas abaixo foram publicadas no commit funcional `a14d95c` depois das

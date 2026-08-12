@@ -74,7 +74,9 @@ export function Hero() {
               <img src="/logo.svg" alt="" className="h-40 w-40 opacity-90 sm:h-56 sm:w-56" />
             </div>
           ) : (
-            <LogoScene scrollProgress={scrollProgress} />
+            <div className="h-full w-full lg:pl-[6%] xl:pl-[8%]">
+              <LogoScene scrollProgress={scrollProgress} />
+            </div>
           )}
         </div>
         <div className="scene-reticle absolute right-[8%] top-[12%] hidden h-[70%] w-[52%] lg:block" />
