@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Edit3, LogOut, Plus, Star, Trash2, Upload, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { ArrowLeft, Check, ChevronLeft, ChevronRight, Edit3, Eye, FileText, ImageIcon, Link2, LogOut, Plus, Star, Trash2, Upload, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { deleteProjectAction, saveProjectAction, signOutAction, toggleFeaturedAction } from "@/app/admin/actions";
 import { StackLogo } from "@/components/ui/StackLogo";
 import type { Project } from "@/lib/projects";
@@ -32,6 +32,30 @@ const commonStacks = [
   "SOC"
 ];
 
+const editorSteps = [
+  { label: "Essencial", detail: "Nome, resumo e tecnologias", icon: FileText },
+  { label: "Produto", detail: "Contexto, links e resultados", icon: Link2 },
+  { label: "Mídia", detail: "Capa, galeria e descrições", icon: ImageIcon },
+  { label: "Revisão", detail: "Confira antes de salvar", icon: Eye }
+] as const;
+
+type ProjectDraftPreview = {
+  title: string;
+  slug: string;
+  description: string;
+  role: string;
+  overview: string;
+  stacks: string[];
+  features: string[];
+  results: string[];
+  coverDisplay: "thumbnail" | "fullscreen";
+  featured: boolean;
+  order: string;
+  projectUrl: string;
+  repoUrl: string;
+  videoUrl: string;
+};
+
 function getGalleryFormValue(project: Project | null) {
   if (!project) {
     return "";
@@ -55,7 +79,14 @@ export function AdminProjects({
   const [stackValue, setStackValue] = useState("");
   const [coverPreviewUrl, setCoverPreviewUrl] = useState<string | null>(null);
   const [galleryPreviewUrls, setGalleryPreviewUrls] = useState<string[]>([]);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [highestStep, setHighestStep] = useState(0);
+  const [draftPreview, setDraftPreview] = useState<ProjectDraftPreview | null>(null);
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const modalBodyRef = useRef<HTMLDivElement | null>(null);
   const featuredCount = useMemo(() => projects.filter((project) => project.featured).length, [projects]);
+  const previewCoverUrl = coverPreviewUrl ?? selectedProject?.cover_image_url ?? "/project-forge.svg";
+  const previewGalleryUrls = galleryPreviewUrls.length ? galleryPreviewUrls : selectedProject?.gallery_image_urls ?? [];
 
   useEffect(() => {
     if (!isModalOpen) {
@@ -94,6 +125,9 @@ export function AdminProjects({
     setStackValue("");
     setCoverPreviewUrl(null);
     setGalleryPreviewUrls([]);
+    setCurrentStep(0);
+    setHighestStep(0);
+    setDraftPreview(null);
     setIsModalOpen(true);
   }
 
@@ -102,6 +136,9 @@ export function AdminProjects({
     setStackValue(project.tech_stack.join(", "));
     setCoverPreviewUrl(null);
     setGalleryPreviewUrls([]);
+    setCurrentStep(0);
+    setHighestStep(0);
+    setDraftPreview(null);
     setIsModalOpen(true);
   }
 
@@ -110,6 +147,72 @@ export function AdminProjects({
     setSelectedProject(null);
     setCoverPreviewUrl(null);
     setGalleryPreviewUrls([]);
+    setCurrentStep(0);
+    setHighestStep(0);
+    setDraftPreview(null);
+  }
+
+  function readDraftPreview() {
+    const form = formRef.current;
+
+    if (!form) {
+      return null;
+    }
+
+    const formData = new FormData(form);
+    const getText = (name: string) => {
+      const value = formData.get(name);
+      return typeof value === "string" ? value.trim() : "";
+    };
+    const getList = (name: string) => getText(name)
+      .split(/\r?\n|,/)
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+    return {
+      title: getText("title") || "Projeto sem título",
+      slug: getText("slug"),
+      description: getText("description") || "Adicione um resumo para apresentar o projeto.",
+      role: getText("product_role") || "Produto digital",
+      overview: getText("product_overview"),
+      stacks: stackValue.split(",").map((item) => item.trim()).filter(Boolean),
+      features: getList("product_features"),
+      results: getList("product_results"),
+      coverDisplay: getText("cover_display") === "fullscreen" ? "fullscreen" : "thumbnail",
+      featured: formData.get("featured") === "on",
+      order: getText("order") || "0",
+      projectUrl: getText("project_url"),
+      repoUrl: getText("repo_url"),
+      videoUrl: getText("video_url")
+    } satisfies ProjectDraftPreview;
+  }
+
+  function goToStep(step: number) {
+    const nextStep = Math.min(Math.max(step, 0), editorSteps.length - 1);
+
+    if (nextStep === editorSteps.length - 1) {
+      setDraftPreview(readDraftPreview());
+    }
+
+    setHighestStep((current) => Math.max(current, nextStep));
+    setCurrentStep(nextStep);
+    modalBodyRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function continueEditor() {
+    const panel = formRef.current?.querySelector<HTMLElement>(`[data-editor-step="${currentStep}"]`);
+    const controls = panel
+      ? Array.from(panel.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>("input, textarea, select"))
+      : [];
+    const invalidControl = controls.find((control) => !control.disabled && !control.checkValidity());
+
+    if (invalidControl) {
+      invalidControl.reportValidity();
+      invalidControl.focus();
+      return;
+    }
+
+    goToStep(currentStep + 1);
   }
 
   function toggleStack(tech: string) {
@@ -234,8 +337,8 @@ export function AdminProjects({
             }
           }}
         >
-          <div role="dialog" aria-modal="true" aria-labelledby="project-dialog-title" className="w-full max-w-5xl rounded-sm border border-white/12 bg-ink shadow-2xl">
-            <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-white/10 bg-ink/95 px-5 py-4 backdrop-blur">
+          <div role="dialog" aria-modal="true" aria-labelledby="project-dialog-title" className="flex max-h-[calc(100svh-2rem)] w-full max-w-5xl flex-col overflow-hidden rounded-sm border border-white/12 bg-ink shadow-2xl md:max-h-[calc(100svh-4rem)]">
+            <div className="z-10 flex shrink-0 items-start justify-between gap-4 border-b border-white/10 bg-ink/95 px-5 py-4 backdrop-blur">
               <div>
                 <p className="font-mono text-[0.62rem] uppercase text-mint">Editor de produto</p>
                 <h2 id="project-dialog-title" className="mt-1 text-xl font-semibold text-white">{selectedProject ? "Editar projeto" : "Novo projeto"}</h2>
@@ -245,32 +348,80 @@ export function AdminProjects({
               </button>
             </div>
 
-            <form key={selectedProject?.id ?? "new"} action={saveProjectAction} className="space-y-6 p-4 sm:p-5">
+            <nav aria-label="Etapas do editor" className="grid shrink-0 grid-cols-4 border-b border-white/10 bg-black/20">
+              {editorSteps.map(({ label, detail, icon: Icon }, index) => {
+                const isCurrent = index === currentStep;
+                const isComplete = index < currentStep;
+                const isVisited = index <= highestStep;
+
+                return (
+                  <button
+                    key={label}
+                    type="button"
+                    onClick={() => goToStep(index)}
+                    disabled={!isVisited}
+                    aria-current={isCurrent ? "step" : undefined}
+                    className={`relative flex min-h-16 min-w-0 flex-col items-center justify-center gap-1.5 border-r border-white/10 px-1.5 text-center transition-colors last:border-r-0 sm:flex-row sm:justify-start sm:gap-2 sm:px-4 sm:text-left ${isCurrent ? "bg-white/[0.06] text-white" : isComplete ? "text-mint hover:bg-white/[0.03]" : isVisited ? "text-slate-400 hover:bg-white/[0.03] hover:text-white" : "cursor-not-allowed text-slate-600"}`}
+                  >
+                    <span className={`inline-flex h-6 w-6 shrink-0 items-center justify-center border sm:h-7 sm:w-7 ${isCurrent ? "border-mint text-mint" : isComplete ? "border-mint/40 bg-mint/10" : "border-white/10"}`}>
+                      {isComplete ? <Check size={14} /> : <Icon size={14} />}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-[0.62rem] font-medium sm:truncate sm:text-sm">{label}</span>
+                      <span className="mt-0.5 hidden truncate text-[0.65rem] text-slate-500 lg:block">{detail}</span>
+                    </span>
+                    <span className={`absolute inset-x-0 bottom-0 h-0.5 ${isCurrent ? "bg-mint" : isComplete ? "bg-mint/35" : "bg-transparent"}`} />
+                  </button>
+                );
+              })}
+            </nav>
+
+            <form
+              ref={formRef}
+              key={selectedProject?.id ?? "new"}
+              action={saveProjectAction}
+              onSubmit={(event) => {
+                if (currentStep !== editorSteps.length - 1) {
+                  event.preventDefault();
+                  continueEditor();
+                }
+              }}
+              className="flex min-h-0 flex-1 flex-col overflow-hidden"
+            >
               <input name="id" type="hidden" value={selectedProject?.id ?? ""} readOnly />
               <input name="current_cover_image_url" type="hidden" value={selectedProject?.cover_image_url ?? ""} readOnly />
               <input name="gallery_image_urls" type="hidden" value={getGalleryFormValue(selectedProject)} readOnly />
 
-              <div className="flex items-center gap-3 border-b border-white/10 pb-3">
+              <div ref={modalBodyRef} className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
+              <section data-editor-step="0" hidden={currentStep !== 0} className="space-y-6">
+              <div className="flex items-start gap-4 border-b border-white/10 pb-4">
                 <span className="font-mono text-[0.62rem] text-steel">01</span>
-                <p className="text-sm font-medium text-white">Informações principais</p>
+                <div>
+                  <p className="text-sm font-medium text-white">Comece pelo que identifica o projeto</p>
+                  <p className="mt-1 text-xs leading-5 text-slate-500">Essas informações aparecem primeiro no card e no topo da página.</p>
+                </div>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
-                <label className="text-xs text-slate-400">Título
+                <label className="text-xs text-slate-400">Título do projeto
                   <input name="title" className="mt-2 w-full rounded-sm border border-white/12 bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder="Nome do projeto" defaultValue={selectedProject?.title ?? ""} required />
+                  <span className="mt-1.5 block text-[0.68rem] leading-4 text-slate-600">Exemplo: Atlas CRM</span>
                 </label>
                 <label className="text-xs text-slate-400">Endereço da página
                   <input name="slug" className="mt-2 w-full rounded-sm border border-white/12 bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder="nome-do-projeto" defaultValue={selectedProject?.slug ?? ""} />
+                  <span className="mt-1.5 block text-[0.68rem] leading-4 text-slate-600">Pode ficar vazio: o endereço será criado a partir do título.</span>
                 </label>
               </div>
 
               <label className="block text-xs text-slate-400">Descrição curta
                 <textarea name="description" className="mt-2 min-h-24 w-full rounded-sm border border-white/12 bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder="Resumo usado no card e no topo da página" defaultValue={selectedProject?.description ?? ""} required />
+                <span className="mt-1.5 block text-[0.68rem] leading-4 text-slate-600">Duas ou três frases sobre o problema e o valor entregue.</span>
               </label>
 
               <div className="space-y-3">
                 <label className="block text-xs text-slate-400">Tecnologias
                   <input name="tech_stack" value={stackValue} onChange={(event) => setStackValue(event.target.value)} className="mt-2 w-full rounded-sm border border-white/12 bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder="Escolha abaixo ou digite separando por vírgulas" />
+                  <span className="mt-1.5 block text-[0.68rem] leading-4 text-slate-600">Clique nas opções frequentes ou escreva uma tecnologia nova.</span>
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {commonStacks.map((tech) => {
@@ -285,32 +436,73 @@ export function AdminProjects({
                   })}
                 </div>
               </div>
+              </section>
 
-              <div className="flex items-center gap-3 border-b border-white/10 pb-3 pt-2">
+              <section data-editor-step="1" hidden={currentStep !== 1} className="space-y-6">
+              <div className="flex items-start gap-4 border-b border-white/10 pb-4">
                 <span className="font-mono text-[0.62rem] text-steel">02</span>
-                <p className="text-sm font-medium text-white">Produto e publicação</p>
+                <div>
+                  <p className="text-sm font-medium text-white">Conte a história do produto</p>
+                  <p className="mt-1 text-xs leading-5 text-slate-500">Os links são opcionais. Preencha apenas o que já estiver pronto para ser visitado.</p>
+                </div>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
-                <input aria-label="URL do projeto" name="project_url" className="w-full rounded-sm border border-white/12 bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder="URL do projeto" defaultValue={selectedProject?.project_url ?? ""} />
-                <input aria-label="URL do repositório" name="repo_url" className="w-full rounded-sm border border-white/12 bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder="URL do repositório" defaultValue={selectedProject?.repo_url ?? ""} />
-                <input aria-label="URL do vídeo" name="video_url" className="w-full rounded-sm border border-white/12 bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder="URL de vídeo ou demo" defaultValue={selectedProject?.video_url ?? ""} />
-                <input aria-label="Papel no produto" name="product_role" className="w-full rounded-sm border border-white/12 bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder="Seu papel no produto" defaultValue={selectedProject?.product_role ?? ""} />
+                <label className="text-xs text-slate-400">Link público
+                  <input type="url" name="project_url" className="mt-2 w-full rounded-sm border border-white/12 bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder="https://produto.com" defaultValue={selectedProject?.project_url ?? ""} />
+                  <span className="mt-1.5 block text-[0.68rem] text-slate-600">Abre o produto funcionando.</span>
+                </label>
+                <label className="text-xs text-slate-400">Repositório
+                  <input type="url" name="repo_url" className="mt-2 w-full rounded-sm border border-white/12 bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder="https://github.com/..." defaultValue={selectedProject?.repo_url ?? ""} />
+                  <span className="mt-1.5 block text-[0.68rem] text-slate-600">Código-fonte, quando puder ser público.</span>
+                </label>
+                <label className="text-xs text-slate-400">Vídeo ou demonstração
+                  <input type="url" name="video_url" className="mt-2 w-full rounded-sm border border-white/12 bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder="YouTube, Vimeo ou arquivo de vídeo" defaultValue={selectedProject?.video_url ?? ""} />
+                  <span className="mt-1.5 block text-[0.68rem] text-slate-600">Aparece antes da galeria.</span>
+                </label>
+                <label className="text-xs text-slate-400">Seu papel no produto
+                  <input name="product_role" className="mt-2 w-full rounded-sm border border-white/12 bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder="Ex.: Full-stack developer" defaultValue={selectedProject?.product_role ?? ""} />
+                  <span className="mt-1.5 block text-[0.68rem] text-slate-600">Responsabilidade principal no projeto.</span>
+                </label>
               </div>
 
               <div className="grid gap-4 md:grid-cols-[1fr_10rem]">
-                <textarea aria-label="Visão do produto" name="product_overview" className="min-h-28 w-full rounded-sm border border-white/12 bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder="Contexto e problema resolvido" defaultValue={selectedProject?.product_overview ?? ""} />
-                <input aria-label="Ordem" name="order" className="w-full rounded-sm border border-white/12 bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder="Ordem" type="number" defaultValue={selectedProject?.order ?? projects.length + 1} />
+                <label className="text-xs text-slate-400">Visão do produto
+                  <textarea name="product_overview" className="mt-2 min-h-28 w-full rounded-sm border border-white/12 bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder="Explique o contexto, o problema e a solução" defaultValue={selectedProject?.product_overview ?? ""} />
+                </label>
+                <label className="text-xs text-slate-400">Posição na lista
+                  <input name="order" className="mt-2 w-full rounded-sm border border-white/12 bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-mint" type="number" min="0" defaultValue={selectedProject?.order ?? projects.length + 1} />
+                  <span className="mt-1.5 block text-[0.68rem] leading-4 text-slate-600">Menor aparece primeiro.</span>
+                </label>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
-                <textarea aria-label="Features" name="product_features" className="min-h-28 w-full rounded-sm border border-white/12 bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder="Features, uma por linha" defaultValue={selectedProject?.product_features.join("\n") ?? ""} />
-                <textarea aria-label="Resultados" name="product_results" className="min-h-28 w-full rounded-sm border border-white/12 bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder="Resultados e impactos, um por linha" defaultValue={selectedProject?.product_results.join("\n") ?? ""} />
+                <label className="text-xs text-slate-400">O que foi construído
+                  <textarea name="product_features" className="mt-2 min-h-28 w-full rounded-sm border border-white/12 bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder={"Pipeline visual\nIndicadores em tempo real"} defaultValue={selectedProject?.product_features.join("\n") ?? ""} />
+                  <span className="mt-1.5 block text-[0.68rem] text-slate-600">Uma funcionalidade por linha.</span>
+                </label>
+                <label className="text-xs text-slate-400">Resultados e impacto
+                  <textarea name="product_results" className="mt-2 min-h-28 w-full rounded-sm border border-white/12 bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-mint" placeholder={"Menos troca de contexto\nDecisões mais rápidas"} defaultValue={selectedProject?.product_results.join("\n") ?? ""} />
+                  <span className="mt-1.5 block text-[0.68rem] text-slate-600">Um resultado por linha.</span>
+                </label>
               </div>
 
-              <div className="flex items-center gap-3 border-b border-white/10 pb-3 pt-2">
+              <label className="flex items-start gap-3 border-y border-white/10 py-4 text-sm text-slate-300">
+                <input name="featured" className="mt-0.5 h-4 w-4 accent-mint" type="checkbox" defaultChecked={selectedProject?.featured ?? false} />
+                <span>
+                  <span className="block font-medium text-white">Destacar na página inicial</span>
+                  <span className="mt-1 block text-xs leading-5 text-slate-500">Use para os projetos que devem receber mais atenção no portfólio.</span>
+                </span>
+              </label>
+              </section>
+
+              <section data-editor-step="2" hidden={currentStep !== 2} className="space-y-6">
+              <div className="flex items-start gap-4 border-b border-white/10 pb-4">
                 <span className="font-mono text-[0.62rem] text-steel">03</span>
-                <p className="text-sm font-medium text-white">Imagens do produto</p>
+                <div>
+                  <p className="text-sm font-medium text-white">Mostre o produto em uso</p>
+                  <p className="mt-1 text-xs leading-5 text-slate-500">A capa apresenta o projeto. A galeria explica as telas em detalhes.</p>
+                </div>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
@@ -399,19 +591,131 @@ export function AdminProjects({
                   </div>
                 </div>
               ) : null}
+              </section>
 
-              <div className="flex flex-col gap-3 border-t border-white/10 pt-5 sm:flex-row sm:items-center sm:justify-between">
-                <label className="flex items-center gap-3 text-sm text-slate-300">
-                  <input name="featured" className="h-4 w-4 accent-mint" type="checkbox" defaultChecked={selectedProject?.featured ?? false} />
-                  Mostrar em destaque
-                </label>
-                <div className="flex gap-3">
-                  <button onClick={closeForm} type="button" className="h-11 rounded-sm border border-white/12 px-4 text-sm text-slate-300 transition hover:border-white/30 hover:text-white">
+              <section data-editor-step="3" hidden={currentStep !== 3} className="space-y-6">
+                <div className="flex items-start gap-4 border-b border-white/10 pb-4">
+                  <span className="font-mono text-[0.62rem] text-steel">04</span>
+                  <div>
+                    <p className="text-sm font-medium text-white">Revise como o projeto será apresentado</p>
+                    <p className="mt-1 text-xs leading-5 text-slate-500">Nada foi salvo ainda. Volte a qualquer etapa para ajustar.</p>
+                  </div>
+                </div>
+
+                {draftPreview ? (
+                  <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+                    <div className="overflow-hidden border border-white/12 bg-black/25">
+                      <div className={`aspect-[16/10] bg-graphite ${draftPreview.coverDisplay === "thumbnail" ? "p-5 sm:p-8" : ""}`}>
+                        <img src={previewCoverUrl} alt="Prévia da capa do projeto" className={`h-full w-full object-cover ${draftPreview.coverDisplay === "thumbnail" ? "border border-white/10" : ""}`} />
+                      </div>
+                      <div className="border-t border-white/10 p-5">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <span className="font-mono text-[0.58rem] uppercase text-steel">{draftPreview.role}</span>
+                          {draftPreview.featured ? <span className="font-mono text-[0.58rem] uppercase text-mint">Destaque</span> : null}
+                        </div>
+                        <h3 className="mt-4 font-display text-2xl font-semibold text-white">{draftPreview.title}</h3>
+                        <p className="mt-3 text-sm leading-6 text-slate-400">{draftPreview.description}</p>
+                        <div className="mt-5 flex flex-wrap gap-2">
+                          {draftPreview.stacks.length ? draftPreview.stacks.slice(0, 8).map((tech) => (
+                            <span key={tech} className="inline-flex h-7 items-center gap-2 border border-white/10 px-2.5 text-[0.68rem] text-slate-300">
+                              <StackLogo label={tech} className="h-3.5 w-3.5" />
+                              {tech}
+                            </span>
+                          )) : <span className="text-xs text-slate-600">Nenhuma tecnologia selecionada.</span>}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-5">
+                      <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                        <p className="font-mono text-[0.62rem] uppercase text-mint">Resumo da publicação</p>
+                        <button type="button" onClick={() => goToStep(0)} className="inline-flex items-center gap-1.5 text-xs text-slate-400 transition hover:text-white">
+                          <Edit3 size={13} /> Editar base
+                        </button>
+                      </div>
+
+                      <dl className="divide-y divide-white/10 border-y border-white/10 text-sm">
+                        <div className="flex items-start justify-between gap-4 py-3">
+                          <dt className="text-slate-500">Página</dt>
+                          <dd className="max-w-[65%] break-all text-right text-slate-200">/projetos/{draftPreview.slug || "gerado-pelo-titulo"}</dd>
+                        </div>
+                        <div className="flex items-start justify-between gap-4 py-3">
+                          <dt className="text-slate-500">Posição</dt>
+                          <dd className="text-slate-200">{draftPreview.order}</dd>
+                        </div>
+                        <div className="flex items-start justify-between gap-4 py-3">
+                          <dt className="text-slate-500">Links disponíveis</dt>
+                          <dd className="text-slate-200">{[draftPreview.projectUrl, draftPreview.repoUrl, draftPreview.videoUrl].filter(Boolean).length} de 3</dd>
+                        </div>
+                        <div className="flex items-start justify-between gap-4 py-3">
+                          <dt className="text-slate-500">Galeria</dt>
+                          <dd className="text-right text-slate-200">{previewGalleryUrls.length ? `${previewGalleryUrls.length} ${previewGalleryUrls.length === 1 ? "imagem" : "imagens"}` : "Somente a capa"}</dd>
+                        </div>
+                      </dl>
+
+                      {draftPreview.overview ? (
+                        <div>
+                          <p className="text-xs font-medium text-white">Visão do produto</p>
+                          <p className="mt-2 line-clamp-4 text-xs leading-5 text-slate-500">{draftPreview.overview}</p>
+                        </div>
+                      ) : null}
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="border border-white/10 p-3">
+                          <p className="font-mono text-[0.58rem] uppercase text-steel">Funcionalidades</p>
+                          <p className="mt-2 text-xl font-semibold text-white">{draftPreview.features.length}</p>
+                        </div>
+                        <div className="border border-white/10 p-3">
+                          <p className="font-mono text-[0.58rem] uppercase text-steel">Resultados</p>
+                          <p className="mt-2 text-xl font-semibold text-white">{draftPreview.results.length}</p>
+                        </div>
+                      </div>
+
+                      <button type="button" onClick={() => goToStep(2)} className="inline-flex h-10 w-full items-center justify-center gap-2 border border-white/12 text-xs text-slate-300 transition hover:border-mint/50 hover:text-white">
+                        <ImageIcon size={14} /> Revisar capa e galeria
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
+
+                {previewGalleryUrls.length ? (
+                  <div>
+                    <p className="mb-3 font-mono text-[0.6rem] uppercase text-steel">Imagens da galeria</p>
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                      {previewGalleryUrls.slice(0, 4).map((imageUrl, index) => (
+                        <div key={`${imageUrl}-${index}`} className="overflow-hidden border border-white/10 bg-black/25">
+                          <img src={imageUrl} alt={`Prévia da galeria ${index + 1}`} className="aspect-[16/10] w-full object-cover" />
+                          <span className="block border-t border-white/10 px-2 py-1.5 font-mono text-[0.55rem] uppercase text-slate-500">Tela {String(index + 1).padStart(2, "0")}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </section>
+              </div>
+
+              <div className="flex shrink-0 flex-col gap-3 border-t border-white/10 bg-ink px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                <div className="flex items-center justify-between gap-4 sm:justify-start">
+                  <button onClick={closeForm} type="button" className="h-10 px-2 text-sm text-slate-500 transition hover:text-white">
                     Cancelar
                   </button>
-                  <button type="submit" className="h-11 rounded-sm bg-white px-5 text-sm font-semibold text-ink transition-colors hover:bg-mint">
-                    Salvar projeto
-                  </button>
+                  <span className="font-mono text-[0.58rem] uppercase text-slate-600">{currentStep + 1} / {editorSteps.length}</span>
+                </div>
+                <div className="flex gap-2">
+                  {currentStep > 0 ? (
+                    <button onClick={() => goToStep(currentStep - 1)} type="button" className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-sm border border-white/12 px-4 text-sm text-slate-300 transition hover:border-white/30 hover:text-white sm:flex-none">
+                      <ChevronLeft size={16} /> Voltar
+                    </button>
+                  ) : null}
+                  {currentStep < editorSteps.length - 1 ? (
+                    <button onClick={continueEditor} type="button" className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-sm bg-white px-5 text-sm font-semibold text-ink transition-colors hover:bg-mint sm:flex-none">
+                      Continuar <ChevronRight size={16} />
+                    </button>
+                  ) : (
+                    <button type="submit" className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-sm bg-mint px-5 text-sm font-semibold text-ink transition-colors hover:bg-white sm:flex-none">
+                      <Check size={16} /> {selectedProject ? "Salvar alterações" : "Criar projeto"}
+                    </button>
+                  )}
                 </div>
               </div>
             </form>
