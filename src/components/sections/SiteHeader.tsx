@@ -36,12 +36,11 @@ export function SiteHeader() {
   return (
     <header ref={headerRef} className="fixed left-0 right-0 top-0 z-40 px-3 pt-3 sm:px-5 sm:pt-4">
       <div className="mx-auto flex h-14 max-w-7xl items-center border border-white/10 bg-ink/[0.88] px-3 shadow-[0_14px_40px_rgba(0,0,0,0.28)] backdrop-blur-xl sm:px-4">
-        <Link href="/" className="flex h-full shrink-0 items-center gap-3 pr-4 text-sm font-semibold text-ceramic focus:outline-none focus-visible:text-mint sm:pr-6">
+        <Link href="/" aria-label="Gabriel Morgado - início" className="flex h-full shrink-0 items-center pr-0 text-sm font-semibold text-ceramic focus:outline-none focus-visible:text-mint sm:gap-3 sm:pr-6">
           <span className="flex h-8 w-8 items-center justify-center border border-white/10 bg-white/[0.04]">
             <Image className="brand-mark h-5 w-5" src="/logo.svg" alt="" width={20} height={20} priority />
           </span>
           <span className="hidden sm:inline">Gabriel Morgado</span>
-          <span className="font-mono text-[0.58rem] uppercase text-steel sm:hidden">GM</span>
         </Link>
 
         <nav className="hidden h-full flex-1 items-stretch border-x border-white/10 md:flex" aria-label="Navegação principal">

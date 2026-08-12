@@ -65,8 +65,8 @@ function LogoObject({ scrollProgress }: LogoSceneProps) {
     const pointerX = isMobile ? 0 : state.pointer.x;
     const pointerY = isMobile ? 0 : state.pointer.y;
     const targetX = isMobile ? 0.16 : 1.25;
-    const targetY = isMobile ? 1.35 : 0.15;
-    const baseScale = isMobile ? 0.44 : 0.72;
+    const targetY = isMobile ? 1.05 : 0.15;
+    const baseScale = isMobile ? 0.38 : 0.72;
 
     object.position.x = THREE.MathUtils.lerp(object.position.x, targetX + pointerX * 0.12, damping);
     object.position.y = THREE.MathUtils.lerp(object.position.y, targetY + pointerY * 0.08 - progress * 0.35, damping);

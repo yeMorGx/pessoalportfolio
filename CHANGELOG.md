@@ -91,6 +91,32 @@ Estado: **publicado** no commit `f2a8813`.
   `pessoalportfolio-afzra3654-yemorgxs-projects.vercel.app` ficou `Ready` em
   40 segundos, a URL publica respondeu `200` e nao registrou erros de runtime.
 
+## Trabalho em andamento - hero e header mobile
+
+Estado: **local / nao publicado**.
+
+- `src/components/sections/SiteHeader.tsx`: removido o texto `GM` do header
+  mobile. O link da marca mantem um nome acessivel e mostra apenas a logo no
+  celular; o nome completo continua visivel a partir de `sm`.
+- `src/components/three/LogoScene.tsx`: a logo 3D mobile foi reduzida e
+  deslocada para baixo para aparecer inteira depois do header, sem alterar o
+  enquadramento desktop.
+- `src/components/sections/Hero.tsx`: a primeira tela mobile ficou um pouco
+  mais curta e os dois CTAs passaram a usar colunas estaveis, com tipografia e
+  padding adaptados para telas estreitas.
+- Abaixo de 360 px, o segundo CTA usa o rotulo curto `Contato`; em larguras
+  maiores continua `Entrar em contato`. Os dois rotulos nao quebram linha.
+- QA em 390 x 844 aprovado: logo inteira abaixo do header, CTAs alinhados em
+  uma linha, dois canvases carregados, sem `GM`, sem overflow e sem erros no
+  navegador.
+- QA adicional em 320 x 740 aprovado: `Ver projetos` e `Contato` permanecem
+  em uma linha e dentro dos botoes, sem overflow horizontal.
+- Desktop revisado depois das mudancas: nome completo preservado no header,
+  enquadramento 3D anterior mantido e sem overflow.
+- `npm run lint`, `npm run typecheck`, `npm run build` e `git diff --check`
+  aprovados; o build final manteve as oito rotas esperadas.
+- Pendente: commit, push e confirmacao do deploy.
+
 ## Lote publicado em 2026-08-12
 
 As mudancas abaixo foram publicadas no commit funcional `a14d95c` depois das
