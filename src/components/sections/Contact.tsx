@@ -1,6 +1,7 @@
 "use client";
 
 import { Github, Linkedin, Mail } from "lucide-react";
+import { FooterWordmark } from "@/components/sections/FooterWordmark";
 import { PortfolioIcon } from "@/components/ui/PortfolioIcon";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
@@ -49,7 +50,9 @@ export function Contact() {
           ))}
         </div>
 
-        <footer data-reveal className="mt-14 flex flex-col gap-3 border-t border-ink/15 pt-5 font-mono text-[0.6rem] uppercase text-ink/50 sm:flex-row sm:items-center sm:justify-between">
+        <FooterWordmark />
+
+        <footer data-reveal className="mt-5 flex flex-col gap-3 font-mono text-[0.6rem] uppercase text-ink/50 sm:flex-row sm:items-center sm:justify-between">
           <span>Gabriel Morgado / Full-stack developer</span>
           <span>São Paulo, Brasil</span>
         </footer>
