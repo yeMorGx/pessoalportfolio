@@ -17,8 +17,8 @@ codigo.
 
 - Data do registro: 2026-08-12.
 - Branch: `main`.
-- Ultimo commit funcional publicado: `cf5ca18`
-  (`fix: upload project media directly to Supabase`).
+- Ultimo commit funcional publicado: `f2a8813`
+  (`style: add space around hero logo`).
 - Documento de continuidade publicado inicialmente no commit `2e8a69f`.
 - Deploy: Vercel conectado a `main`; a correcao `cf5ca18` foi enviada e
   verificada em producao em 2026-08-12.
@@ -72,9 +72,9 @@ Estado: **publicada** no commit `cf5ca18`.
   44 segundos. A URL publica respondeu `200`, `/admin` manteve o redirecionamento
   `307` para `/admin/login` e nao havia erros registrados no novo deploy.
 
-## Trabalho em andamento - espacamento da logo 3D
+## Ajuste publicado - espacamento da logo 3D
 
-Estado: **local / nao publicada**.
+Estado: **publicado** no commit `f2a8813`.
 
 - `src/components/sections/Hero.tsx`: o palco da logo 3D foi deslocado
   levemente para a direita somente a partir do desktop, aumentando o respiro
@@ -87,7 +87,9 @@ Estado: **local / nao publicada**.
   os dois canvases 3D carregaram e nao houve overflow horizontal.
 - `npm run lint`, `npm run typecheck`, `npm run build` e `git diff --check`
   aprovados; o build final manteve as oito rotas esperadas.
-- Pendente: commit, push e confirmacao do deploy.
+- O commit `f2a8813` foi enviado para `main`. O deploy de producao
+  `pessoalportfolio-afzra3654-yemorgxs-projects.vercel.app` ficou `Ready` em
+  40 segundos, a URL publica respondeu `200` e nao registrou erros de runtime.
 
 ## Lote publicado em 2026-08-12
 
