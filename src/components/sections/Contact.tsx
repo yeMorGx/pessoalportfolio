@@ -1,6 +1,7 @@
 "use client";
 
 import { Github, Linkedin, Mail } from "lucide-react";
+import { ContactForm } from "@/components/sections/ContactForm";
 import { FooterLocation } from "@/components/sections/FooterLocation";
 import { FooterWordmark } from "@/components/sections/FooterWordmark";
 import { PortfolioIcon } from "@/components/ui/PortfolioIcon";
@@ -25,17 +26,16 @@ export function Contact({ locale }: { locale: Locale }) {
           <span>04</span>
         </div>
 
-        <div className="grid gap-10 py-9 lg:grid-cols-[1fr_20rem] lg:items-end lg:py-14">
+        <div className="grid gap-12 py-9 lg:grid-cols-[0.78fr_1.22fr] lg:gap-16 lg:py-14">
           <div data-reveal>
             <p className="font-mono text-[0.68rem] uppercase text-coral">{copy.eyebrow}</p>
-            <h2 className="mt-5 max-w-4xl font-display text-3xl font-semibold leading-[1.06] sm:text-4xl lg:text-5xl">{copy.heading}</h2>
+            <h2 className="mt-5 max-w-2xl font-display text-3xl font-semibold leading-[1.06] sm:text-4xl lg:text-5xl">{copy.heading}</h2>
             <p className="mt-6 max-w-2xl text-base leading-7 text-ink/65">{copy.body}</p>
           </div>
 
-          <a data-reveal href="mailto:gabrielmcgoes@gmail.com" className="group inline-flex min-h-14 items-center justify-between bg-ink px-5 text-sm font-semibold text-ceramic transition-colors hover:bg-coral focus:outline-none focus-visible:ring-2 focus-visible:ring-ink">
-            {copy.cta}
-            <PortfolioIcon name="link" className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-          </a>
+          <div data-reveal>
+            <ContactForm locale={locale} />
+          </div>
         </div>
 
         <div data-reveal className="grid border-y border-ink/15 sm:grid-cols-3">

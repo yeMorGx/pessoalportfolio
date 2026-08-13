@@ -91,7 +91,23 @@ export const siteCopy = {
       heading: "Have a product to build or a team that could use more momentum?",
       body: "I am open to full-stack opportunities and projects where engineering, experience and clarity need to move together.",
       cta: "Start a conversation",
-      location: "Santos region / Brazil"
+      location: "Santos region / Brazil",
+      form: {
+        name: "Name",
+        namePlaceholder: "Your name",
+        email: "Email",
+        emailPlaceholder: "you@company.com",
+        subject: "Subject",
+        subjectPlaceholder: "What would you like to build?",
+        message: "Message",
+        messagePlaceholder: "Share the context, goal and where I can help.",
+        privacy: "Your message is stored securely and used only to reply to this conversation.",
+        submit: "Send message",
+        sending: "Sending",
+        success: "Message received. I will reply by email.",
+        error: "The message could not be sent. Please try again.",
+        rateLimit: "You have sent several messages. Please wait 15 minutes and try again."
+      }
     },
     location: {
       ariaLabel: "Open the Santos region in Google Maps",
@@ -228,7 +244,23 @@ export const siteCopy = {
       heading: "Tem um produto para construir ou uma equipe que precisa de mais força?",
       body: "Estou aberto a oportunidades full-stack e projetos em que engenharia, experiência e clareza precisam andar juntas.",
       cta: "Iniciar conversa",
-      location: "Baixada Santista / Brasil"
+      location: "Baixada Santista / Brasil",
+      form: {
+        name: "Nome",
+        namePlaceholder: "Seu nome",
+        email: "E-mail",
+        emailPlaceholder: "voce@empresa.com",
+        subject: "Assunto",
+        subjectPlaceholder: "O que você gostaria de construir?",
+        message: "Mensagem",
+        messagePlaceholder: "Conte o contexto, o objetivo e como posso ajudar.",
+        privacy: "Sua mensagem é armazenada com segurança e usada apenas para responder esta conversa.",
+        submit: "Enviar mensagem",
+        sending: "Enviando",
+        success: "Mensagem recebida. Vou responder por e-mail.",
+        error: "Não foi possível enviar a mensagem. Tente novamente.",
+        rateLimit: "Você enviou várias mensagens. Aguarde 15 minutos e tente novamente."
+      }
     },
     location: {
       ariaLabel: "Abrir Baixada Santista no Google Maps",

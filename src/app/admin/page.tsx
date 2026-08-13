@@ -1,4 +1,5 @@
 import { AdminProjects } from "@/components/admin/AdminProjects";
+import { getUnreadContactMessageCount } from "@/lib/supabase/contactMessages";
 import { getAdminProjects } from "@/lib/supabase/projects";
 
 export default async function AdminPage({
@@ -11,9 +12,12 @@ export default async function AdminPage({
     error?: string;
   }>;
 }) {
-  const params = await searchParams;
-  const projects = await getAdminProjects();
+  const [params, projects, unreadMessageCount] = await Promise.all([
+    searchParams,
+    getAdminProjects(),
+    getUnreadContactMessageCount()
+  ]);
   const status = params?.error ? "error" : params?.created ? "created" : params?.deleted ? "deleted" : params?.updated ? "updated" : undefined;
 
-  return <AdminProjects initialProjects={projects} status={status} />;
+  return <AdminProjects initialProjects={projects} unreadMessageCount={unreadMessageCount} status={status} />;
 }

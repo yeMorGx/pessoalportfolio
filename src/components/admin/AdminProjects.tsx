@@ -1,10 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { ArrowLeft, Check, ChevronLeft, ChevronRight, Edit3, Eye, FileText, FolderKanban, ImageIcon, Link2, LogOut, Plus, Search, Star, Trash2, Upload, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Edit3, Eye, FileText, ImageIcon, Link2, Plus, Search, Star, Trash2, Upload, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { createProjectUploadTargetAction, deleteProjectAction, discardProjectUploadsAction, saveProjectAction, signOutAction, toggleFeaturedAction } from "@/app/admin/actions";
+import { createProjectUploadTargetAction, deleteProjectAction, discardProjectUploadsAction, saveProjectAction, toggleFeaturedAction } from "@/app/admin/actions";
+import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { ProjectLogo } from "@/components/ui/ProjectLogo";
 import { StackLogo } from "@/components/ui/StackLogo";
 import type { Project } from "@/lib/projects";
@@ -118,9 +118,11 @@ async function getLogoValidationError(file: File) {
 
 export function AdminProjects({
   initialProjects,
+  unreadMessageCount,
   status
 }: {
   initialProjects: Project[];
+  unreadMessageCount?: number;
   status?: "created" | "deleted" | "updated" | "error";
 }) {
   const [projects] = useState(initialProjects);
@@ -502,39 +504,7 @@ export function AdminProjects({
   return (
     <main className="min-h-screen bg-ink text-white">
       <div className="mx-auto grid min-h-screen max-w-[96rem] lg:grid-cols-[15rem_minmax(0,1fr)]">
-        <aside className="flex border-b border-white/10 bg-black/20 lg:sticky lg:top-0 lg:h-screen lg:flex-col lg:border-b-0 lg:border-r">
-          <div className="flex min-w-0 flex-1 items-center gap-3 px-4 py-4 lg:flex-none lg:border-b lg:border-white/10 lg:px-5 lg:py-6">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center border border-white/10 bg-white/[0.04]">
-              <Image src="/logo.svg" alt="" width={20} height={20} />
-            </span>
-            <span className="min-w-0">
-              <span className="block truncate text-sm font-semibold">Gabriel Morgado</span>
-              <span className="mt-0.5 block font-mono text-[0.55rem] uppercase text-steel">Controle editorial</span>
-            </span>
-          </div>
-
-          <nav className="hidden flex-1 px-3 py-5 lg:block" aria-label="Navegação do painel">
-            <p className="px-3 font-mono text-[0.55rem] uppercase text-slate-600">Conteúdo</p>
-            <div className="mt-3 flex min-h-11 items-center gap-3 border-l-2 border-mint bg-white/[0.04] px-3 text-sm text-white">
-              <FolderKanban size={16} className="text-mint" />
-              Projetos
-              <span className="ml-auto font-mono text-[0.58rem] text-slate-500">{projects.length}</span>
-            </div>
-          </nav>
-
-          <div className="flex items-center gap-2 px-3 py-3 lg:block lg:border-t lg:border-white/10 lg:px-4 lg:py-4">
-            <Link href="/" className="inline-flex h-10 items-center gap-2 px-2 text-xs text-slate-400 transition hover:text-white lg:w-full">
-              <ArrowLeft size={14} />
-              <span className="hidden sm:inline">Ver site público</span>
-            </Link>
-            <form action={signOutAction} className="lg:mt-1">
-              <button className="inline-flex h-10 items-center gap-2 px-2 text-xs text-slate-400 transition hover:text-coral lg:w-full" type="submit">
-                <LogOut size={14} />
-                <span className="hidden sm:inline">Encerrar sessão</span>
-              </button>
-            </form>
-          </div>
-        </aside>
+        <AdminSidebar active="projects" projectCount={projects.length} unreadMessageCount={unreadMessageCount} />
 
         <div className="min-w-0 px-4 py-6 sm:px-6 lg:px-10 lg:py-9">
           <header className="flex flex-col justify-between gap-5 border-b border-white/10 pb-7 sm:flex-row sm:items-end">
