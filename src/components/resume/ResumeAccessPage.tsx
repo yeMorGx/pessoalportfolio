@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Download, LoaderCircle, LockKeyhole } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase";
 import { getFunctionErrorCode } from "@/lib/supabase/functionErrors";
 
@@ -11,6 +11,11 @@ export function ResumeAccessPage() {
   const [locale, setLocale] = useState<"en" | "pt">("pt");
   const [loading, setLoading] = useState(false);
   const [errorCode, setErrorCode] = useState("");
+
+  useEffect(() => {
+    const language = window.location.hash.slice(1).split(".", 1)[0];
+    if (language === "en" || language === "pt") setLocale(language);
+  }, []);
   const copy = locale === "pt" ? {
     back: "Voltar ao portfólio",
     eyebrow: "Documento protegido",
@@ -43,7 +48,9 @@ export function ResumeAccessPage() {
       return;
     }
 
-    const token = window.location.hash.slice(1).trim();
+    const fragment = window.location.hash.slice(1).trim();
+    const [language, localizedToken] = fragment.split(".", 2);
+    const token = language === "en" || language === "pt" ? localizedToken ?? "" : fragment;
     const { data, error } = await supabase.functions.invoke("resume-access", {
       body: { action: "download", token }
     });

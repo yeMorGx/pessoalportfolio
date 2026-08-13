@@ -184,7 +184,7 @@ Deno.serve(async (request) => {
     const accessToken = generateToken();
     const accessTokenHash = await hashValue(accessToken);
     const expiresAt = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString();
-    const accessUrl = `${getSiteUrl(request)}/resume/access#${accessToken}`;
+    const accessUrl = `${getSiteUrl(request)}/resume/access#${resumeRequest.locale}.${accessToken}`;
     const notificationRequested = Boolean(Deno.env.get("RESEND_API_KEY"));
     const { error } = await supabase.from("resume_requests").update({
       status: "approved",
