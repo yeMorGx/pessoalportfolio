@@ -4,29 +4,9 @@ import { CheckCircle2, LoaderCircle, Send } from "lucide-react";
 import { useRef, useState, type FormEvent } from "react";
 import { siteCopy, type Locale } from "@/lib/i18n";
 import { createSupabaseBrowserClient } from "@/lib/supabase";
+import { getFunctionErrorCode } from "@/lib/supabase/functionErrors";
 
 type SubmitState = "idle" | "sending" | "success" | "error";
-
-async function getFunctionErrorCode(error: unknown, data: unknown) {
-  if (data && typeof data === "object" && "code" in data && typeof data.code === "string") {
-    return data.code;
-  }
-
-  if (error && typeof error === "object" && "context" in error) {
-    const context = (error as { context?: unknown }).context;
-
-    if (context instanceof Response) {
-      try {
-        const body = await context.clone().json() as { code?: unknown };
-        return typeof body.code === "string" ? body.code : undefined;
-      } catch {
-        return undefined;
-      }
-    }
-  }
-
-  return undefined;
-}
 
 export function ContactForm({ locale }: { locale: Locale }) {
   const copy = siteCopy[locale].contact.form;

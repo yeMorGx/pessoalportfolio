@@ -10,6 +10,14 @@ export function projectsPath(locale: Locale) {
   return locale === "pt" ? "/pt/projetos" : "/projects";
 }
 
+export function resumePath(locale: Locale) {
+  return locale === "pt" ? "/pt/curriculo" : "/resume";
+}
+
+export function resumeStatusPath(locale: Locale) {
+  return `${resumePath(locale)}/status`;
+}
+
 export function projectPath(locale: Locale, slug: string) {
   return `${projectsPath(locale)}/${slug}`;
 }
@@ -107,6 +115,68 @@ export const siteCopy = {
         success: "Message received. I will reply by email.",
         error: "The message could not be sent. Please try again.",
         rateLimit: "You have sent several messages. Please wait 15 minutes and try again."
+      }
+    },
+    resume: {
+      linkLabel: "Resume",
+      back: "Back to portfolio",
+      eyebrow: "Professional profile / controlled access",
+      heading: "Request access to my resume.",
+      body: "To keep professional information within relevant conversations, each request is reviewed before a temporary download link is released.",
+      steps: [
+        ["01", "Request", "Share who you are and the context of the opportunity."],
+        ["02", "Review", "I review the request manually and confirm the fit."],
+        ["03", "Access", "An approved request receives a private link valid for 72 hours."]
+      ],
+      form: {
+        name: "Name",
+        namePlaceholder: "Your full name",
+        email: "Professional email",
+        emailPlaceholder: "you@company.com",
+        company: "Company",
+        companyPlaceholder: "Company name",
+        jobTitle: "Role",
+        jobTitlePlaceholder: "Your role",
+        linkedin: "LinkedIn (optional)",
+        linkedinPlaceholder: "https://linkedin.com/in/...",
+        purpose: "Opportunity context",
+        purposePlaceholder: "Tell me about the role, team and why you would like to review my resume.",
+        privacy: "This information is used only to review your request and manage temporary access.",
+        submit: "Request access",
+        sending: "Submitting",
+        success: "Request received and awaiting review.",
+        track: "Track request",
+        trackingCode: "Keep this private tracking link. It is the only way to check the request without email.",
+        error: "The request could not be submitted. Please try again.",
+        rateLimit: "Several requests were sent from this connection. Please try again tomorrow."
+      },
+      status: {
+        eyebrow: "Resume request",
+        heading: "Request status",
+        tokenLabel: "Private tracking code",
+        tokenPlaceholder: "Paste the tracking code",
+        check: "Check status",
+        loading: "Checking",
+        pending: "Under review",
+        pendingBody: "Your request was received and is waiting for a manual review.",
+        approved: "Approved",
+        approvedBody: "A private access link has been prepared. Check the reply sent to your professional email or the message shared directly by Gabriel.",
+        rejected: "Not approved",
+        rejectedBody: "The request was reviewed, but access was not released at this time.",
+        revoked: "Access ended",
+        revokedBody: "The temporary access granted to this request has been revoked.",
+        expired: "Access expired",
+        expiredBody: "The 72-hour access period has ended. Submit a new request if access is still needed.",
+        notFound: "This tracking code is invalid or no longer available."
+      },
+      access: {
+        eyebrow: "Protected document",
+        heading: "Private resume access",
+        body: "This link is personal, temporary and should not be forwarded. The generated download address expires after 60 seconds.",
+        download: "Download PDF",
+        preparing: "Preparing download",
+        expired: "This access has expired or was revoked.",
+        unavailable: "The resume is temporarily unavailable. Please contact Gabriel."
       }
     },
     location: {
@@ -260,6 +330,68 @@ export const siteCopy = {
         success: "Mensagem recebida. Vou responder por e-mail.",
         error: "Não foi possível enviar a mensagem. Tente novamente.",
         rateLimit: "Você enviou várias mensagens. Aguarde 15 minutos e tente novamente."
+      }
+    },
+    resume: {
+      linkLabel: "Currículo",
+      back: "Voltar ao portfólio",
+      eyebrow: "Perfil profissional / acesso controlado",
+      heading: "Solicite acesso ao meu currículo.",
+      body: "Para manter as informações profissionais dentro de conversas relevantes, cada solicitação é revisada antes da liberação de um link temporário.",
+      steps: [
+        ["01", "Solicitação", "Conte quem você é e o contexto da oportunidade."],
+        ["02", "Revisão", "Eu reviso a solicitação manualmente e confirmo a aderência."],
+        ["03", "Acesso", "Uma solicitação aprovada recebe um link privado válido por 72 horas."]
+      ],
+      form: {
+        name: "Nome",
+        namePlaceholder: "Seu nome completo",
+        email: "E-mail profissional",
+        emailPlaceholder: "voce@empresa.com",
+        company: "Empresa",
+        companyPlaceholder: "Nome da empresa",
+        jobTitle: "Cargo",
+        jobTitlePlaceholder: "Seu cargo",
+        linkedin: "LinkedIn (opcional)",
+        linkedinPlaceholder: "https://linkedin.com/in/...",
+        purpose: "Contexto da oportunidade",
+        purposePlaceholder: "Conte sobre a vaga, a equipe e por que gostaria de analisar meu currículo.",
+        privacy: "Essas informações são usadas apenas para revisar a solicitação e controlar o acesso temporário.",
+        submit: "Solicitar acesso",
+        sending: "Enviando",
+        success: "Solicitação recebida e aguardando revisão.",
+        track: "Acompanhar solicitação",
+        trackingCode: "Guarde este link privado. Ele é a única forma de consultar a solicitação sem e-mail.",
+        error: "Não foi possível enviar a solicitação. Tente novamente.",
+        rateLimit: "Várias solicitações foram enviadas por esta conexão. Tente novamente amanhã."
+      },
+      status: {
+        eyebrow: "Solicitação de currículo",
+        heading: "Estado da solicitação",
+        tokenLabel: "Código privado de acompanhamento",
+        tokenPlaceholder: "Cole o código de acompanhamento",
+        check: "Consultar estado",
+        loading: "Consultando",
+        pending: "Em análise",
+        pendingBody: "Sua solicitação foi recebida e aguarda revisão manual.",
+        approved: "Aprovada",
+        approvedBody: "Um link privado foi preparado. Confira a resposta enviada ao seu e-mail profissional ou a mensagem compartilhada diretamente pelo Gabriel.",
+        rejected: "Não aprovada",
+        rejectedBody: "A solicitação foi revisada, mas o acesso não foi liberado neste momento.",
+        revoked: "Acesso encerrado",
+        revokedBody: "O acesso temporário concedido a esta solicitação foi revogado.",
+        expired: "Acesso expirado",
+        expiredBody: "O período de 72 horas terminou. Envie uma nova solicitação se o acesso ainda for necessário.",
+        notFound: "Este código de acompanhamento é inválido ou não está mais disponível."
+      },
+      access: {
+        eyebrow: "Documento protegido",
+        heading: "Acesso privado ao currículo",
+        body: "Este link é pessoal, temporário e não deve ser encaminhado. O endereço de download gerado expira após 60 segundos.",
+        download: "Baixar PDF",
+        preparing: "Preparando download",
+        expired: "Este acesso expirou ou foi revogado.",
+        unavailable: "O currículo está temporariamente indisponível. Entre em contato com Gabriel."
       }
     },
     location: {

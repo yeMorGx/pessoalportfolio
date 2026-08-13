@@ -1,22 +1,22 @@
 "use client";
 
-import { Github, Linkedin, Mail } from "lucide-react";
+import { FileText, Github, Linkedin, Mail } from "lucide-react";
 import { ContactForm } from "@/components/sections/ContactForm";
 import { FooterLocation } from "@/components/sections/FooterLocation";
 import { FooterWordmark } from "@/components/sections/FooterWordmark";
 import { PortfolioIcon } from "@/components/ui/PortfolioIcon";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
-import { siteCopy, type Locale } from "@/lib/i18n";
-
-const contactLinks = [
-  { href: "mailto:gabrielmcgoes@gmail.com", label: "Email", icon: Mail },
-  { href: "https://github.com/yeMorGx", label: "GitHub", icon: Github },
-  { href: "https://www.linkedin.com/in/gabrielmcgoes", label: "LinkedIn", icon: Linkedin }
-];
+import { resumePath, siteCopy, type Locale } from "@/lib/i18n";
 
 export function Contact({ locale }: { locale: Locale }) {
   const ref = useScrollReveal<HTMLElement>();
   const copy = siteCopy[locale].contact;
+  const contactLinks = [
+    { href: "mailto:gabrielmcgoes@gmail.com", label: "Email", icon: Mail },
+    { href: "https://github.com/yeMorGx", label: "GitHub", icon: Github },
+    { href: "https://www.linkedin.com/in/gabrielmcgoes", label: "LinkedIn", icon: Linkedin },
+    { href: resumePath(locale), label: siteCopy[locale].resume.linkLabel, icon: FileText }
+  ];
 
   return (
     <section id="contato" ref={ref} className="bg-ceramic px-5 py-16 text-ink sm:px-8 sm:py-24">
@@ -38,7 +38,7 @@ export function Contact({ locale }: { locale: Locale }) {
           </div>
         </div>
 
-        <div data-reveal className="grid border-y border-ink/15 sm:grid-cols-3">
+        <div data-reveal className="grid border-y border-ink/15 sm:grid-cols-4">
           {contactLinks.map(({ href, label, icon: Icon }, index) => (
             <a
               key={label}

@@ -2,21 +2,23 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, FolderKanban, Inbox, LogOut } from "lucide-react";
+import { ArrowLeft, FileKey2, FolderKanban, Inbox, LogOut } from "lucide-react";
 import { signOutAction } from "@/app/admin/actions";
 
 type AdminSidebarProps = {
-  active: "projects" | "messages";
+  active: "projects" | "messages" | "resume";
   projectCount?: number;
   unreadMessageCount?: number;
+  pendingResumeCount?: number;
 };
 
 const navigation = [
   { id: "projects", href: "/admin", label: "Projetos", icon: FolderKanban },
-  { id: "messages", href: "/admin/messages", label: "Mensagens", icon: Inbox }
+  { id: "messages", href: "/admin/messages", label: "Mensagens", icon: Inbox },
+  { id: "resume", href: "/admin/resume", label: "Currículo", icon: FileKey2 }
 ] as const;
 
-export function AdminSidebar({ active, projectCount = 0, unreadMessageCount = 0 }: AdminSidebarProps) {
+export function AdminSidebar({ active, projectCount = 0, unreadMessageCount = 0, pendingResumeCount = 0 }: AdminSidebarProps) {
   return (
     <aside className="flex border-b border-white/10 bg-black/20 lg:sticky lg:top-0 lg:h-screen lg:flex-col lg:border-b-0 lg:border-r">
       <div className="flex min-w-0 flex-1 items-center gap-3 px-4 py-4 lg:flex-none lg:border-b lg:border-white/10 lg:px-5 lg:py-6">
@@ -34,7 +36,7 @@ export function AdminSidebar({ active, projectCount = 0, unreadMessageCount = 0 
         <div className="flex gap-1 lg:mt-3 lg:block lg:space-y-1">
           {navigation.map(({ id, href, label, icon: Icon }) => {
             const isActive = active === id;
-            const count = id === "projects" ? projectCount : unreadMessageCount;
+            const count = id === "projects" ? projectCount : id === "messages" ? unreadMessageCount : pendingResumeCount;
 
             return (
               <Link

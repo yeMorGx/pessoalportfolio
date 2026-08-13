@@ -119,10 +119,12 @@ async function getLogoValidationError(file: File) {
 export function AdminProjects({
   initialProjects,
   unreadMessageCount,
+  pendingResumeCount,
   status
 }: {
   initialProjects: Project[];
   unreadMessageCount?: number;
+  pendingResumeCount?: number;
   status?: "created" | "deleted" | "updated" | "error";
 }) {
   const [projects] = useState(initialProjects);
@@ -504,7 +506,7 @@ export function AdminProjects({
   return (
     <main className="min-h-screen bg-ink text-white">
       <div className="mx-auto grid min-h-screen max-w-[96rem] lg:grid-cols-[15rem_minmax(0,1fr)]">
-        <AdminSidebar active="projects" projectCount={projects.length} unreadMessageCount={unreadMessageCount} />
+        <AdminSidebar active="projects" projectCount={projects.length} unreadMessageCount={unreadMessageCount} pendingResumeCount={pendingResumeCount} />
 
         <div className="min-w-0 px-4 py-6 sm:px-6 lg:px-10 lg:py-9">
           <header className="flex flex-col justify-between gap-5 border-b border-white/10 pb-7 sm:flex-row sm:items-end">

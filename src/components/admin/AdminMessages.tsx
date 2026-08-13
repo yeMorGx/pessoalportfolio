@@ -39,10 +39,12 @@ function StatusAction({ id, status, icon: Icon, label }: { id: string; status: C
 export function AdminMessages({
   initialMessages,
   projectCount,
+  pendingResumeCount,
   status
 }: {
   initialMessages: ContactMessage[];
   projectCount: number;
+  pendingResumeCount: number;
   status?: "updated" | "deleted" | "error";
 }) {
   const [query, setQuery] = useState("");
@@ -65,7 +67,7 @@ export function AdminMessages({
   return (
     <main className="min-h-screen bg-ink text-white">
       <div className="mx-auto grid min-h-screen max-w-[96rem] lg:grid-cols-[15rem_minmax(0,1fr)]">
-        <AdminSidebar active="messages" projectCount={projectCount} unreadMessageCount={newCount} />
+        <AdminSidebar active="messages" projectCount={projectCount} unreadMessageCount={newCount} pendingResumeCount={pendingResumeCount} />
 
         <div className="min-w-0 px-4 py-6 sm:px-6 lg:px-10 lg:py-9">
           <header className="flex flex-col justify-between gap-5 border-b border-white/10 pb-7 sm:flex-row sm:items-end">
