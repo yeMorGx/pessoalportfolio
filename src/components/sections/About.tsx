@@ -4,15 +4,11 @@ import Image from "next/image";
 import { useEffect, useRef } from "react";
 import { PortfolioIcon } from "@/components/ui/PortfolioIcon";
 import { getGsap, prefersReducedMotion } from "@/lib/gsap";
+import { siteCopy, type Locale } from "@/lib/i18n";
 
-const capabilities = [
-  ["Produto", "Transformo necessidades em fluxos claros e interfaces que ajudam a decidir."],
-  ["Engenharia", "Construo frontend, APIs, autenticação e dados como uma solução única."],
-  ["Segurança", "Trago visão de defesa para a arquitetura, a operação e a experiência."]
-];
-
-export function About() {
+export function About({ locale }: { locale: Locale }) {
   const sectionRef = useRef<HTMLElement | null>(null);
+  const copy = siteCopy[locale].about;
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -55,7 +51,7 @@ export function About() {
     <section id="sobre" ref={sectionRef} className="bg-ceramic px-5 py-16 text-ink sm:px-8 sm:py-24">
       <div className="mx-auto max-w-7xl">
         <div data-about-reveal className="flex items-center justify-between border-b border-ink/15 pb-4 font-mono text-[0.65rem] uppercase text-ink/55">
-          <span>Perfil / abordagem</span>
+          <span>{copy.sectionLabel}</span>
           <span>01</span>
         </div>
 
@@ -64,28 +60,28 @@ export function About() {
             <Image
               data-about-photo
               src="/gabriel-morgado.jpg"
-              alt="Retrato de Gabriel Morgado"
+              alt={copy.portraitAlt}
               fill
               sizes="(min-width: 1024px) 42vw, 100vw"
               className="object-cover object-[center_66%] will-change-transform"
             />
             <div className="absolute bottom-0 left-0 flex items-center gap-2 bg-ink px-4 py-3 font-mono text-[0.62rem] uppercase text-ceramic">
               <span className="h-1.5 w-1.5 bg-mint" />
-              Disponível para novos projetos
+              {copy.availability}
             </div>
           </div>
 
           <div className="lg:col-span-7 lg:pl-6">
-            <p data-about-reveal className="font-mono text-[0.68rem] uppercase text-ink/55">Full-stack developer</p>
+            <p data-about-reveal className="font-mono text-[0.68rem] uppercase text-ink/55">{copy.eyebrow}</p>
             <h2 data-about-reveal className="mt-5 max-w-3xl font-display text-3xl font-semibold leading-[1.08] sm:text-4xl lg:text-5xl">
-              A visão do produto não termina quando o código começa.
+              {copy.heading}
             </h2>
             <p data-about-reveal className="mt-6 max-w-2xl text-base leading-7 text-ink/70 sm:text-lg sm:leading-8">
-              Uno direção visual, engenharia full-stack e fundamentos de segurança para construir produtos digitais que sejam fáceis de entender, confiáveis para operar e fortes para apresentar.
+              {copy.body}
             </p>
 
             <div className="mt-9 border-t border-ink/15">
-              {capabilities.map(([title, description], index) => (
+              {copy.capabilities.map(([title, description], index) => (
                 <div data-about-reveal key={title} className="grid gap-2 border-b border-ink/15 py-5 sm:grid-cols-[7rem_1fr] sm:gap-6">
                   <div className="flex items-center gap-3">
                     <span className="font-mono text-[0.58rem] text-coral">{String(index + 1).padStart(2, "0")}</span>
@@ -97,7 +93,7 @@ export function About() {
             </div>
 
             <a data-about-reveal href="#projetos" className="group mt-7 inline-flex items-center gap-2 text-sm font-semibold text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-ink">
-              Conheça o trabalho
+              {copy.work}
               <PortfolioIcon name="down" className="h-3.5 w-3.5 transition-transform group-hover:translate-y-0.5" />
             </a>
           </div>

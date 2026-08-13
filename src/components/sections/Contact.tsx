@@ -5,6 +5,7 @@ import { FooterLocation } from "@/components/sections/FooterLocation";
 import { FooterWordmark } from "@/components/sections/FooterWordmark";
 import { PortfolioIcon } from "@/components/ui/PortfolioIcon";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
+import { siteCopy, type Locale } from "@/lib/i18n";
 
 const contactLinks = [
   { href: "mailto:gabrielmcgoes@gmail.com", label: "Email", icon: Mail },
@@ -12,26 +13,27 @@ const contactLinks = [
   { href: "https://www.linkedin.com/in/gabrielmcgoes", label: "LinkedIn", icon: Linkedin }
 ];
 
-export function Contact() {
+export function Contact({ locale }: { locale: Locale }) {
   const ref = useScrollReveal<HTMLElement>();
+  const copy = siteCopy[locale].contact;
 
   return (
     <section id="contato" ref={ref} className="bg-ceramic px-5 py-16 text-ink sm:px-8 sm:py-24">
       <div className="mx-auto max-w-7xl">
         <div data-reveal className="flex items-center justify-between border-b border-ink/15 pb-4 font-mono text-[0.65rem] uppercase text-ink/55">
-          <span>Contato / disponibilidade</span>
+          <span>{copy.sectionLabel}</span>
           <span>04</span>
         </div>
 
         <div className="grid gap-10 py-9 lg:grid-cols-[1fr_20rem] lg:items-end lg:py-14">
           <div data-reveal>
-            <p className="font-mono text-[0.68rem] uppercase text-coral">Vamos conversar</p>
-            <h2 className="mt-5 max-w-4xl font-display text-3xl font-semibold leading-[1.06] sm:text-4xl lg:text-5xl">Tem um produto para construir ou uma equipe que precisa de mais força?</h2>
-            <p className="mt-6 max-w-2xl text-base leading-7 text-ink/65">Estou aberto a oportunidades full-stack e projetos em que engenharia, experiência e clareza precisam andar juntas.</p>
+            <p className="font-mono text-[0.68rem] uppercase text-coral">{copy.eyebrow}</p>
+            <h2 className="mt-5 max-w-4xl font-display text-3xl font-semibold leading-[1.06] sm:text-4xl lg:text-5xl">{copy.heading}</h2>
+            <p className="mt-6 max-w-2xl text-base leading-7 text-ink/65">{copy.body}</p>
           </div>
 
           <a data-reveal href="mailto:gabrielmcgoes@gmail.com" className="group inline-flex min-h-14 items-center justify-between bg-ink px-5 text-sm font-semibold text-ceramic transition-colors hover:bg-coral focus:outline-none focus-visible:ring-2 focus-visible:ring-ink">
-            Iniciar conversa
+            {copy.cta}
             <PortfolioIcon name="link" className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </a>
         </div>
@@ -51,13 +53,13 @@ export function Contact() {
           ))}
         </div>
 
-        <FooterLocation />
+        <FooterLocation locale={locale} />
 
-        <FooterWordmark />
+        <FooterWordmark locale={locale} />
 
         <footer data-reveal className="mt-5 flex flex-col gap-3 font-mono text-[0.6rem] uppercase text-ink/50 sm:flex-row sm:items-center sm:justify-between">
           <span>Gabriel Morgado / Full-stack developer</span>
-          <a href="https://www.google.com/maps/search/?api=1&query=-23.962,-46.363" target="_blank" rel="noreferrer" className="transition-colors hover:text-coral">Baixada Santista / Brasil</a>
+          <a href="https://www.google.com/maps/search/?api=1&query=-23.962,-46.363" target="_blank" rel="noreferrer" className="transition-colors hover:text-coral">{copy.location}</a>
         </footer>
       </div>
     </section>

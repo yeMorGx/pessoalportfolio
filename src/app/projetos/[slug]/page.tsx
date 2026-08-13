@@ -1,6 +1,4 @@
-import { notFound } from "next/navigation";
-import { ProjectShowcase } from "@/components/project-showcase/ProjectShowcase";
-import { getProjectBySlug } from "@/lib/supabase/projects";
+import { redirect } from "next/navigation";
 
 type ProjectPageProps = {
   params: Promise<{
@@ -12,11 +10,5 @@ export const dynamic = "force-dynamic";
 
 export default async function ProjectPage({ params }: ProjectPageProps) {
   const { slug } = await params;
-  const project = await getProjectBySlug(slug);
-
-  if (!project) {
-    notFound();
-  }
-
-  return <ProjectShowcase project={project} />;
+  redirect(`/pt/projetos/${slug}`);
 }

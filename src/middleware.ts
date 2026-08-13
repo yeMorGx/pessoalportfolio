@@ -9,15 +9,24 @@ type SupabaseCookie = {
 };
 
 export async function middleware(request: NextRequest) {
+  const isAdminRoute = request.nextUrl.pathname.startsWith("/admin");
+  const isPortugueseRoute = request.nextUrl.pathname === "/pt" || request.nextUrl.pathname.startsWith("/pt/") || isAdminRoute;
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-site-language", isPortugueseRoute ? "pt-BR" : "en");
+
+  let response = NextResponse.next({
+    request: { headers: requestHeaders }
+  });
+
+  if (!isAdminRoute) {
+    return response;
+  }
+
   const hasConfig = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
   if (!hasConfig) {
-    return NextResponse.next();
+    return response;
   }
-
-  let response = NextResponse.next({
-    request
-  });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL as string,
@@ -29,7 +38,7 @@ export async function middleware(request: NextRequest) {
         },
         setAll(cookiesToSet: SupabaseCookie[]) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-          response = NextResponse.next({ request });
+          response = NextResponse.next({ request: { headers: requestHeaders } });
           cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
         }
       }
@@ -40,7 +49,6 @@ export async function middleware(request: NextRequest) {
     data: { user }
   } = await supabase.auth.getUser();
 
-  const isAdminRoute = request.nextUrl.pathname.startsWith("/admin");
   const isLoginRoute = request.nextUrl.pathname === "/admin/login";
 
   if (isAdminRoute && !isLoginRoute && !user) {
@@ -66,5 +74,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"]
+  matcher: ["/((?!_next/static|_next/image|favicon.svg|.*\\..*).*)"]
 };

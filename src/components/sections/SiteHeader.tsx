@@ -4,19 +4,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, Menu, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { LanguageSwitch } from "@/components/ui/LanguageSwitch";
 import { getGsap, prefersReducedMotion } from "@/lib/gsap";
+import { homePath, siteCopy, type Locale } from "@/lib/i18n";
 
-const navItems = [
-  { href: "#sobre", label: "Sobre" },
-  { href: "#projetos", label: "Projetos" },
-  { href: "#stack", label: "Stack" },
-  { href: "#contato", label: "Contato" }
-];
-
-export function SiteHeader() {
+export function SiteHeader({ locale }: { locale: Locale }) {
   const headerRef = useRef<HTMLElement | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileHeaderRevealed, setMobileHeaderRevealed] = useState(false);
+  const copy = siteCopy[locale].header;
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 767px)");
@@ -58,15 +54,15 @@ export function SiteHeader() {
           mobileHeaderRevealed ? "mx-auto h-14 w-full px-3" : "ml-auto h-11 w-11 border-white/15 bg-ink/70 px-0"
         }`}
       >
-        <Link href="/" aria-label="Gabriel Morgado - início" className={`h-full shrink-0 items-center pr-0 text-sm font-semibold text-ceramic transition-[opacity,transform] duration-500 focus:outline-none focus-visible:text-mint md:gap-3 md:pr-6 ${mobileHeaderRevealed ? "flex opacity-100" : "hidden -translate-x-2 opacity-0 md:flex md:translate-x-0 md:opacity-100"}`}>
+        <Link href={homePath(locale)} aria-label={copy.homeLabel} className={`h-full shrink-0 items-center pr-0 text-sm font-semibold text-ceramic transition-[opacity,transform] duration-500 focus:outline-none focus-visible:text-mint md:gap-3 md:pr-6 ${mobileHeaderRevealed ? "flex opacity-100" : "hidden -translate-x-2 opacity-0 md:flex md:translate-x-0 md:opacity-100"}`}>
           <span className="flex h-8 w-8 items-center justify-center border border-white/10 bg-white/[0.04]">
             <Image className="brand-mark h-5 w-5" src="/logo.svg" alt="" width={20} height={20} priority />
           </span>
           <span className="hidden md:inline">Gabriel Morgado</span>
         </Link>
 
-        <nav className="hidden h-full flex-1 items-stretch border-x border-white/10 md:flex" aria-label="Navegação principal">
-          {navItems.map((item, index) => (
+        <nav className="hidden h-full flex-1 items-stretch border-x border-white/10 md:flex" aria-label={copy.navigationLabel}>
+          {copy.navItems.map((item, index) => (
             <a key={item.href} href={item.href} className="group flex min-w-0 flex-1 items-center justify-center gap-2 border-r border-white/10 px-3 font-mono text-[0.62rem] uppercase text-steel transition-colors last:border-r-0 hover:bg-white/[0.04] hover:text-ceramic focus:outline-none focus-visible:bg-white/[0.04] focus-visible:text-mint">
               <span className="text-[0.5rem] text-slate-600 transition-colors group-hover:text-mint">0{index + 1}</span>
               {item.label}
@@ -75,14 +71,17 @@ export function SiteHeader() {
         </nav>
 
         <div className={`ml-auto flex h-full items-center transition-[padding] duration-500 md:pl-4 ${mobileHeaderRevealed ? "pl-3" : "pl-0"}`}>
+          <div className="mr-3 hidden md:block">
+            <LanguageSwitch locale={locale} englishHref="/" portugueseHref="/pt" />
+          </div>
           <a href="#contato" className="group hidden h-9 items-center gap-2 bg-ceramic px-4 text-xs font-semibold text-ink transition-colors hover:bg-mint focus:outline-none focus-visible:ring-2 focus-visible:ring-mint md:inline-flex">
-            Vamos conversar
+            {copy.cta}
             <ArrowUpRight size={14} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </a>
           <button
             type="button"
             className="inline-flex h-9 w-9 items-center justify-center border border-white/15 text-ceramic focus:outline-none focus-visible:ring-2 focus-visible:ring-mint md:hidden"
-            aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
+            aria-label={menuOpen ? copy.closeMenu : copy.openMenu}
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((open) => !open)}
           >
@@ -92,13 +91,16 @@ export function SiteHeader() {
       </div>
 
       {menuOpen ? (
-        <nav className="mx-auto max-w-7xl border-x border-b border-white/10 bg-ink/95 px-4 py-3 backdrop-blur-xl md:hidden" aria-label="Navegação móvel">
-          {navItems.map((item, index) => (
+        <nav className="mx-auto max-w-7xl border-x border-b border-white/10 bg-ink/95 px-4 py-3 backdrop-blur-xl md:hidden" aria-label={copy.mobileNavigationLabel}>
+          {copy.navItems.map((item, index) => (
             <a key={item.href} href={item.href} onClick={() => setMenuOpen(false)} className="flex min-h-12 items-center justify-between border-b border-white/10 text-sm text-smoke last:border-0">
               <span className="flex items-center gap-3"><span className="font-mono text-[0.55rem] text-mint">0{index + 1}</span>{item.label}</span>
               <ArrowUpRight size={14} className="text-steel" />
             </a>
           ))}
+          <div className="pt-3">
+            <LanguageSwitch locale={locale} englishHref="/" portugueseHref="/pt" />
+          </div>
         </nav>
       ) : null}
     </header>

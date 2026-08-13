@@ -6,15 +6,17 @@ import { useEffect, useRef, useState } from "react";
 import { PortfolioIcon } from "@/components/ui/PortfolioIcon";
 import { useElementVisibility } from "@/hooks/useElementVisibility";
 import { getGsap, prefersReducedMotion } from "@/lib/gsap";
+import { siteCopy, type Locale } from "@/lib/i18n";
 
 const LogoScene = dynamic(() => import("@/components/three/LogoScene").then((module) => module.LogoScene), { ssr: false });
 
-export function Hero() {
+export function Hero({ locale }: { locale: Locale }) {
   const heroRef = useRef<HTMLElement | null>(null);
   const sceneRef = useRef<HTMLDivElement | null>(null);
   const scrollProgress = useRef(0);
   const [reducedMotion, setReducedMotion] = useState(false);
   const sceneActive = useElementVisibility(heroRef, { initial: true, rootMargin: "120px 0px" });
+  const copy = siteCopy[locale].hero;
 
   useEffect(() => {
     const hero = heroRef.current;
@@ -87,7 +89,7 @@ export function Hero() {
       <div className="relative mx-auto flex min-h-[calc(92svh-8rem)] max-w-7xl flex-col justify-end sm:min-h-[calc(94svh-8.5rem)]">
         <div className="absolute left-0 top-0 hidden items-center gap-3 font-mono text-[0.62rem] uppercase text-steel sm:flex sm:text-[0.68rem]">
           <span className="h-1.5 w-1.5 bg-mint" />
-          Interface / Sistemas / Segurança
+          {copy.eyebrow}
         </div>
 
         <div data-hero-copy className="relative z-10 max-w-[50rem] pb-4 sm:pb-8">
@@ -97,18 +99,18 @@ export function Hero() {
           </h1>
 
           <div className="mt-6 max-w-xl overflow-hidden">
-            <p data-hero-line className="text-base leading-7 text-smoke sm:text-lg sm:leading-8">Desenvolvo produtos digitais entre interface, sistemas e segurança.</p>
+            <p data-hero-line className="text-base leading-7 text-smoke sm:text-lg sm:leading-8">{copy.tagline}</p>
           </div>
 
           <div data-hero-meta className="mt-7 grid grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] gap-3 sm:flex sm:flex-wrap sm:items-center">
             <a href="#projetos" className="group inline-flex h-12 min-w-0 items-center justify-center gap-2 whitespace-nowrap rounded-sm bg-ceramic px-3 text-xs font-semibold text-ink transition-colors hover:bg-mint focus:outline-none focus-visible:ring-2 focus-visible:ring-mint focus-visible:ring-offset-2 focus-visible:ring-offset-ink sm:px-5 sm:text-sm">
-              Ver projetos
+              {copy.projects}
               <PortfolioIcon name="down" className="h-3.5 w-3.5 transition-transform group-hover:translate-y-0.5" />
             </a>
             <a href="mailto:gabrielmcgoes@gmail.com" className="inline-flex h-12 min-w-0 items-center justify-center gap-2 whitespace-nowrap rounded-sm border border-white/18 bg-ink/35 px-3 text-xs text-white backdrop-blur-sm transition-colors hover:border-coral/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-coral sm:px-5 sm:text-sm">
               <Mail size={16} />
-              <span className="min-[360px]:hidden">Contato</span>
-              <span className="hidden min-[360px]:inline">Entrar em contato</span>
+              <span className="min-[360px]:hidden">{copy.contactShort}</span>
+              <span className="hidden min-[360px]:inline">{copy.contact}</span>
             </a>
           </div>
         </div>
@@ -118,7 +120,7 @@ export function Hero() {
             <a href="https://github.com/yeMorGx" target="_blank" rel="noreferrer" aria-label="GitHub" className="transition-colors hover:text-white focus:outline-none focus-visible:text-mint"><Github size={18} /></a>
             <a href="https://www.linkedin.com/in/gabrielmcgoes" target="_blank" rel="noreferrer" aria-label="LinkedIn" className="transition-colors hover:text-white focus:outline-none focus-visible:text-mint"><Linkedin size={18} /></a>
           </div>
-          <p className="font-mono text-[0.58rem] uppercase text-slate-500">Role para explorar</p>
+          <p className="font-mono text-[0.58rem] uppercase text-slate-500">{copy.explore}</p>
         </div>
       </div>
     </section>

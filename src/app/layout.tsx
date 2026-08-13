@@ -1,21 +1,25 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://pessoalportfolio.vercel.app"),
   title: "Gabriel Morgado | Full-stack Developer",
-  description: "Portfólio de Gabriel Morgado: produtos digitais entre interface, sistemas e segurança.",
+  description: "Gabriel Morgado's portfolio: digital products across interfaces, systems and security.",
   icons: {
     icon: [{ url: "/favicon.svg", type: "image/svg+xml" }]
   }
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const language = (await headers()).get("x-site-language") ?? "en";
+
   return (
-    <html lang="pt-BR">
+    <html lang={language}>
       <body className="font-sans antialiased">{children}</body>
     </html>
   );

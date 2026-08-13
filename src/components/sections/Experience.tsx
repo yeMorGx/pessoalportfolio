@@ -2,6 +2,7 @@
 
 import { StackLogo } from "@/components/ui/StackLogo";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
+import { siteCopy, type Locale } from "@/lib/i18n";
 
 type StackGroup = {
   title: string;
@@ -11,29 +12,23 @@ type StackGroup = {
   items: string[];
 };
 
-const stackGroups: StackGroup[] = [
+const stackGroupsBase: Omit<StackGroup, "title" | "description">[] = [
   {
-    title: "Dev / Front",
-    description: "Interfaces, componentes e experiências responsivas.",
     accent: "text-mint",
     items: ["JavaScript", "TypeScript", "Next.js", "React", "HTML5", "CSS"]
   },
   {
-    title: "Dev / Back",
-    description: "Serviços, autenticação, dados e integrações.",
     direction: "reverse",
     accent: "text-coral",
     items: ["Python", "MySQL", "PHP", "Composer", "Laravel", "Rust", "PostgreSQL", "Supabase", "API", "SSO"]
   },
   {
-    title: "Ciber",
-    description: "Monitoramento, resposta e segurança de aplicações.",
     accent: "text-steel",
     items: ["Wazuh", "TheHive", "OWASP Top 10", "RedTeam", "SOC"]
   }
 ];
 
-function StackCarousel({ group, index }: { group: StackGroup; index: number }) {
+function StackCarousel({ group, index, technologiesLabel }: { group: StackGroup; index: number; technologiesLabel: string }) {
   const repeatedItems = [
     ...group.items.map((label) => ({ label, clone: false })),
     ...group.items.map((label) => ({ label, clone: true }))
@@ -47,7 +42,7 @@ function StackCarousel({ group, index }: { group: StackGroup; index: number }) {
           <h3 className={`font-mono text-[0.68rem] uppercase ${group.accent}`}>{group.title}</h3>
         </div>
         <p className="text-xs leading-5 text-steel sm:text-sm">{group.description}</p>
-        <span className="hidden font-mono text-[0.58rem] uppercase text-white/25 md:block">{group.items.length} tecnologias</span>
+        <span className="hidden font-mono text-[0.58rem] uppercase text-white/25 md:block">{group.items.length} {technologiesLabel}</span>
       </div>
 
       <div className="stack-marquee border-y border-white/10 bg-ink/45" data-direction={group.direction ?? "normal"} role="list" aria-label={group.title}>
@@ -64,25 +59,31 @@ function StackCarousel({ group, index }: { group: StackGroup; index: number }) {
   );
 }
 
-export function Experience() {
+export function Experience({ locale }: { locale: Locale }) {
   const ref = useScrollReveal<HTMLElement>();
+  const copy = siteCopy[locale].experience;
+  const stackGroups = stackGroupsBase.map((group, index) => ({
+    ...group,
+    title: copy.groups[index][0],
+    description: copy.groups[index][1]
+  }));
 
   return (
     <section id="stack" ref={ref} className="border-y border-white/10 bg-graphite px-5 py-16 sm:px-8 sm:py-24">
       <div className="mx-auto max-w-7xl">
         <div data-reveal className="flex items-center justify-between border-b border-white/12 pb-4 font-mono text-[0.65rem] uppercase text-steel">
-          <span>Sistema técnico</span>
+          <span>{copy.sectionLabel}</span>
           <span>03</span>
         </div>
 
         <div data-reveal className="grid gap-5 border-b border-white/12 py-8 lg:grid-cols-[1fr_25rem] lg:items-end lg:py-10">
-          <h2 className="max-w-3xl font-display text-3xl font-semibold leading-[1.08] text-ceramic sm:text-4xl lg:text-5xl">Tecnologias conectadas por intenção.</h2>
-          <p className="max-w-md text-sm leading-6 text-steel sm:text-base sm:leading-7">Uma base multidisciplinar para desenhar a experiência, sustentar a operação e proteger o produto.</p>
+          <h2 className="max-w-3xl font-display text-3xl font-semibold leading-[1.08] text-ceramic sm:text-4xl lg:text-5xl">{copy.heading}</h2>
+          <p className="max-w-md text-sm leading-6 text-steel sm:text-base sm:leading-7">{copy.body}</p>
         </div>
 
         <div>
           {stackGroups.map((group, index) => (
-            <StackCarousel key={group.title} group={group} index={index} />
+            <StackCarousel key={group.title} group={group} index={index} technologiesLabel={copy.technologies} />
           ))}
         </div>
       </div>

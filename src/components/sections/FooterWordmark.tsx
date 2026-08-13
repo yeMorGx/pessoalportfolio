@@ -2,11 +2,13 @@
 
 import { useEffect, useRef } from "react";
 import { getGsap, prefersReducedMotion } from "@/lib/gsap";
+import { siteCopy, type Locale } from "@/lib/i18n";
 
 const wordmark = "MORGADO".split("");
 
-export function FooterWordmark() {
+export function FooterWordmark({ locale }: { locale: Locale }) {
   const scopeRef = useRef<HTMLDivElement | null>(null);
+  const copy = siteCopy[locale].wordmark;
 
   useEffect(() => {
     const scope = scopeRef.current;
@@ -63,10 +65,10 @@ export function FooterWordmark() {
   return (
     <div ref={scopeRef} className="mt-14 border-t border-ink/15 pt-4 sm:mt-20 sm:pt-5">
       <div className="flex items-center justify-between gap-4 font-mono text-[0.58rem] uppercase text-ink/45 sm:text-[0.62rem]">
-        <span>Assinatura / Portfólio</span>
+        <span>{copy.signature}</span>
         <span className="flex items-center gap-2 text-right">
           <span className="h-1.5 w-1.5 shrink-0 bg-mint ring-1 ring-ink/15" />
-          <span>Agenda aberta<span className="hidden sm:inline"> / Novos projetos</span></span>
+          <span>{copy.open}<span className="hidden sm:inline"> / {copy.projects}</span></span>
         </span>
       </div>
 

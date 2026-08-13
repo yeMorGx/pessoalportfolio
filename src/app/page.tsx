@@ -1,22 +1,16 @@
-import { About } from "@/components/sections/About";
-import { Contact } from "@/components/sections/Contact";
-import { Experience } from "@/components/sections/Experience";
-import { Hero } from "@/components/sections/Hero";
-import { Projects } from "@/components/sections/Projects";
-import { SiteHeader } from "@/components/sections/SiteHeader";
+import type { Metadata } from "next";
+import { PortfolioHome } from "@/components/portfolio/PortfolioHome";
+import { localizedAlternates, localizeProjects } from "@/lib/i18n";
 import { getPublicProjects } from "@/lib/supabase/projects";
 
-export default async function Home() {
-  const projects = await getPublicProjects();
+export const metadata: Metadata = {
+  title: "Gabriel Morgado | Full-stack Developer",
+  description: "Digital products across interfaces, systems and security, designed and built by Gabriel Morgado.",
+  alternates: localizedAlternates("en", "/", "/pt")
+};
 
-  return (
-    <main className="relative overflow-hidden bg-ink">
-      <SiteHeader />
-      <Hero />
-      <About />
-      <Projects projects={projects} />
-      <Experience />
-      <Contact />
-    </main>
-  );
+export default async function Home() {
+  const projects = localizeProjects(await getPublicProjects(), "en");
+
+  return <PortfolioHome locale="en" projects={projects} />;
 }

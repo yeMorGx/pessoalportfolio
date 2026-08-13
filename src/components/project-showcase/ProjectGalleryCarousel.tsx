@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { PortfolioIcon } from "@/components/ui/PortfolioIcon";
 import { getGsap, prefersReducedMotion } from "@/lib/gsap";
+import { siteCopy, type Locale } from "@/lib/i18n";
 import type { ProjectGalleryImageSize } from "@/lib/projects";
 
 type ProjectGalleryCarouselProps = {
@@ -13,6 +14,7 @@ type ProjectGalleryCarouselProps = {
   descriptions: string[];
   title: string;
   fallbackDescription: string;
+  locale: Locale;
 };
 
 type LoopController = {
@@ -33,8 +35,9 @@ function getImageClass(size: ProjectGalleryImageSize | undefined) {
   return "object-cover";
 }
 
-export function ProjectGalleryCarousel({ images, sizes, descriptions, title, fallbackDescription }: ProjectGalleryCarouselProps) {
+export function ProjectGalleryCarousel({ images, sizes, descriptions, title, fallbackDescription, locale }: ProjectGalleryCarouselProps) {
   const itemCount = images.length;
+  const copy = siteCopy[locale].gallery;
   const canLoop = itemCount > 1;
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
@@ -154,8 +157,8 @@ export function ProjectGalleryCarousel({ images, sizes, descriptions, title, fal
         ref={viewportRef}
         className="relative overflow-hidden py-8 sm:py-10"
         role="region"
-        aria-roledescription="carrossel"
-        aria-label={`Galeria de ${title}`}
+        aria-roledescription={copy.carousel}
+        aria-label={`${copy.galleryOf} ${title}`}
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => {
           setIsHovering(false);
@@ -188,16 +191,16 @@ export function ProjectGalleryCarousel({ images, sizes, descriptions, title, fal
                       className="group relative block aspect-[16/10] w-full overflow-hidden border border-white/15 bg-graphite text-left shadow-2xl shadow-black/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-mint"
                       onClick={() => setSelectedIndex(sourceIndex)}
                       tabIndex={copyIndex === 0 ? 0 : -1}
-                      aria-label={`Abrir detalhes da tela ${sourceIndex + 1}`}
+                      aria-label={`${copy.openScreen} ${sourceIndex + 1}`}
                     >
                       <img
                         src={src}
-                        alt={`${title}, tela ${sourceIndex + 1}`}
+                        alt={`${title}, ${copy.screen.toLowerCase()} ${sourceIndex + 1}`}
                         loading={copyIndex === 0 && sourceIndex === 0 ? "eager" : "lazy"}
                         className={`h-full w-full transition-transform duration-700 group-hover:scale-[1.015] ${getImageClass(size)}`}
                       />
                       <span className="absolute bottom-0 left-0 flex h-9 items-center bg-ink px-3 font-mono text-[0.58rem] uppercase text-steel">
-                        Tela {String(sourceIndex + 1).padStart(2, "0")}
+                        {copy.screen} {String(sourceIndex + 1).padStart(2, "0")}
                       </span>
                     </button>
                   </figure>
@@ -210,10 +213,10 @@ export function ProjectGalleryCarousel({ images, sizes, descriptions, title, fal
 
       <div className="mx-auto flex max-w-7xl items-center justify-between border-y border-white/10 px-5 py-3 sm:px-8">
         <p className="font-mono text-[0.6rem] uppercase text-steel">
-          {canLoop ? "Galeria em movimento" : "Imagem do produto"}
+          {canLoop ? copy.moving : copy.image}
         </p>
         <span className="font-mono text-[0.58rem] uppercase text-white/30">
-          {String(itemCount).padStart(2, "0")} {itemCount === 1 ? "tela" : "telas"}
+          {String(itemCount).padStart(2, "0")} {itemCount === 1 ? copy.singular : copy.plural}
         </span>
       </div>
 
@@ -239,8 +242,8 @@ export function ProjectGalleryCarousel({ images, sizes, descriptions, title, fal
               type="button"
               onClick={() => setSelectedIndex(null)}
               className="absolute right-3 top-3 z-20 inline-flex h-10 w-10 items-center justify-center border border-white/20 bg-ink/85 text-ceramic backdrop-blur transition-colors hover:border-coral hover:text-coral focus:outline-none focus-visible:ring-2 focus-visible:ring-coral"
-              aria-label="Fechar detalhes da imagem"
-              title="Fechar"
+              aria-label={copy.closeDetails}
+              title={copy.close}
             >
               <X size={18} />
             </button>
@@ -248,14 +251,14 @@ export function ProjectGalleryCarousel({ images, sizes, descriptions, title, fal
             <div className="flex min-h-[18rem] items-center justify-center bg-black/45 p-3 sm:p-6 lg:min-h-[36rem]">
               <img
                 src={images[selectedIndex]}
-                alt={`${title}, tela ${selectedIndex + 1}`}
+                alt={`${title}, ${copy.screen.toLowerCase()} ${selectedIndex + 1}`}
                 className={`max-h-[72vh] w-full ${getImageClass(sizes[selectedIndex])}`}
               />
             </div>
 
             <div className="flex flex-col border-t border-white/10 p-5 sm:p-7 lg:border-l lg:border-t-0">
-              <p className="font-mono text-[0.62rem] uppercase text-mint">{title} / Tela {String(selectedIndex + 1).padStart(2, "0")}</p>
-              <h3 id="gallery-dialog-title" className="mt-5 font-display text-2xl font-semibold text-ceramic">Sobre esta tela.</h3>
+              <p className="font-mono text-[0.62rem] uppercase text-mint">{title} / {copy.screen} {String(selectedIndex + 1).padStart(2, "0")}</p>
+              <h3 id="gallery-dialog-title" className="mt-5 font-display text-2xl font-semibold text-ceramic">{copy.about}</h3>
               <p className="mt-5 text-sm leading-7 text-slate-300 sm:text-base">{selectedDescription}</p>
 
               {canLoop ? (
@@ -268,8 +271,8 @@ export function ProjectGalleryCarousel({ images, sizes, descriptions, title, fal
                       type="button"
                       onClick={() => setSelectedIndex(normalizeIndex(selectedIndex - 1, itemCount))}
                       className="inline-flex h-10 w-10 items-center justify-center border border-white/15 text-ceramic transition-colors hover:border-mint hover:text-mint focus:outline-none focus-visible:ring-2 focus-visible:ring-mint"
-                      aria-label="Imagem anterior"
-                      title="Imagem anterior"
+                      aria-label={copy.previous}
+                      title={copy.previous}
                     >
                       <PortfolioIcon name="left" className="h-4 w-4" />
                     </button>
@@ -277,8 +280,8 @@ export function ProjectGalleryCarousel({ images, sizes, descriptions, title, fal
                       type="button"
                       onClick={() => setSelectedIndex(normalizeIndex(selectedIndex + 1, itemCount))}
                       className="inline-flex h-10 w-10 items-center justify-center border border-white/15 text-ceramic transition-colors hover:border-coral hover:text-coral focus:outline-none focus-visible:ring-2 focus-visible:ring-coral"
-                      aria-label="Próxima imagem"
-                      title="Próxima imagem"
+                      aria-label={copy.next}
+                      title={copy.next}
                     >
                       <PortfolioIcon name="right" className="h-4 w-4" />
                     </button>
