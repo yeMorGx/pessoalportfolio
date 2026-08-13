@@ -194,3 +194,30 @@ select {
     display: none;
   }
 }
+
+@media (prefers-reduced-motion: reduce) and (min-width: 1024px) {
+  .projects-archive-stage {
+    height: auto !important;
+    min-height: 100vh;
+    overflow: visible;
+  }
+
+  .projects-archive-rail {
+    width: auto !important;
+    height: auto !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 8rem 2rem 5rem !important;
+    transform: none !important;
+  }
+
+  .projects-archive-item {
+    width: 100% !important;
+    max-width: 80rem;
+    transform: none !important;
+  }
+
+  .projects-archive-controls {
+    display: none !important;
+  }
+}

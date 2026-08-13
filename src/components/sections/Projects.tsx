@@ -1,12 +1,14 @@
 "use client";
 
+import Link from "next/link";
 import { ProjectCard } from "@/components/project-card/ProjectCard";
+import { PortfolioIcon } from "@/components/ui/PortfolioIcon";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import type { Project } from "@/lib/projects";
 
 export function Projects({ projects }: { projects: Project[] }) {
   const ref = useScrollReveal<HTMLElement>();
-  const orderedProjects = [...projects].sort((a, b) => a.order - b.order);
+  const orderedProjects = [...projects].sort((a, b) => a.order - b.order).slice(0, 3);
 
   return (
     <section id="projetos" ref={ref} className="bg-ink px-5 py-16 sm:px-8 sm:py-24">
@@ -25,6 +27,13 @@ export function Projects({ projects }: { projects: Project[] }) {
           {orderedProjects.map((project, index) => (
             <ProjectCard key={project.id} project={project} index={index} />
           ))}
+        </div>
+
+        <div data-reveal className="flex justify-end border-b border-white/12 py-8 sm:py-10">
+          <Link href="/projetos" className="group inline-flex h-12 items-center gap-3 border border-white/16 px-5 text-sm font-semibold text-ceramic transition-colors hover:border-mint/60 hover:text-mint focus:outline-none focus-visible:ring-2 focus-visible:ring-mint">
+            Ver todos os projetos
+            <PortfolioIcon name="right" className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </Link>
         </div>
       </div>
     </section>
