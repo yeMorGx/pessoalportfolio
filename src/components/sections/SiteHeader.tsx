@@ -16,6 +16,24 @@ const navItems = [
 export function SiteHeader() {
   const headerRef = useRef<HTMLElement | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileHeaderRevealed, setMobileHeaderRevealed] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+
+    const updateMobileHeader = () => {
+      setMobileHeaderRevealed(!mediaQuery.matches || window.scrollY > 48);
+    };
+
+    updateMobileHeader();
+    window.addEventListener("scroll", updateMobileHeader, { passive: true });
+    mediaQuery.addEventListener("change", updateMobileHeader);
+
+    return () => {
+      window.removeEventListener("scroll", updateMobileHeader);
+      mediaQuery.removeEventListener("change", updateMobileHeader);
+    };
+  }, []);
 
   useEffect(() => {
     const header = headerRef.current;
@@ -35,12 +53,16 @@ export function SiteHeader() {
 
   return (
     <header ref={headerRef} className="fixed left-0 right-0 top-0 z-40 px-3 pt-3 sm:px-5 sm:pt-4">
-      <div className="mx-auto flex h-14 max-w-7xl items-center border border-white/10 bg-ink/[0.88] px-3 shadow-[0_14px_40px_rgba(0,0,0,0.28)] backdrop-blur-xl sm:px-4">
-        <Link href="/" aria-label="Gabriel Morgado - início" className="flex h-full shrink-0 items-center pr-0 text-sm font-semibold text-ceramic focus:outline-none focus-visible:text-mint sm:gap-3 sm:pr-6">
+      <div
+        className={`flex max-w-7xl items-center border border-white/10 bg-ink/[0.88] shadow-[0_14px_40px_rgba(0,0,0,0.28)] backdrop-blur-xl transition-[width,height,padding,background-color,border-color] duration-500 ease-out md:mx-auto md:h-14 md:w-full md:px-4 ${
+          mobileHeaderRevealed ? "mx-auto h-14 w-full px-3" : "ml-auto h-11 w-11 border-white/15 bg-ink/70 px-0"
+        }`}
+      >
+        <Link href="/" aria-label="Gabriel Morgado - início" className={`h-full shrink-0 items-center pr-0 text-sm font-semibold text-ceramic transition-[opacity,transform] duration-500 focus:outline-none focus-visible:text-mint md:gap-3 md:pr-6 ${mobileHeaderRevealed ? "flex opacity-100" : "hidden -translate-x-2 opacity-0 md:flex md:translate-x-0 md:opacity-100"}`}>
           <span className="flex h-8 w-8 items-center justify-center border border-white/10 bg-white/[0.04]">
             <Image className="brand-mark h-5 w-5" src="/logo.svg" alt="" width={20} height={20} priority />
           </span>
-          <span className="hidden sm:inline">Gabriel Morgado</span>
+          <span className="hidden md:inline">Gabriel Morgado</span>
         </Link>
 
         <nav className="hidden h-full flex-1 items-stretch border-x border-white/10 md:flex" aria-label="Navegação principal">
@@ -52,7 +74,7 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <div className="ml-auto flex h-full items-center pl-3 sm:pl-4">
+        <div className={`ml-auto flex h-full items-center transition-[padding] duration-500 md:pl-4 ${mobileHeaderRevealed ? "pl-3" : "pl-0"}`}>
           <a href="#contato" className="group hidden h-9 items-center gap-2 bg-ceramic px-4 text-xs font-semibold text-ink transition-colors hover:bg-mint focus:outline-none focus-visible:ring-2 focus-visible:ring-mint md:inline-flex">
             Vamos conversar
             <ArrowUpRight size={14} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
