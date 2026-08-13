@@ -6,7 +6,7 @@ import { useMemo, useRef, useState } from "react";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { createSupabaseBrowserClient } from "@/lib/supabase";
 import { getFunctionErrorCode } from "@/lib/supabase/functionErrors";
-import { RESUME_BUCKET, RESUME_FILE_PATH, type ResumeFileState, type ResumeRequest, type ResumeRequestStatus } from "@/lib/resume";
+import { RESUME_BUCKET, type ResumeFileState, type ResumeRequest, type ResumeRequestStatus } from "@/lib/resume";
 
 type RequestFilter = "all" | "pending" | "approved" | "closed";
 type ReviewAction = "approve" | "reject" | "revoke" | "delete" | "note";
@@ -78,9 +78,18 @@ export function AdminResumeRequests({
       return;
     }
 
-    const { error } = await supabase.storage.from(RESUME_BUCKET).upload(RESUME_FILE_PATH, file, {
+    const { data: target, error: targetError } = await supabase.functions.invoke("resume-file-admin", {
+      body: { action: "create-upload" }
+    });
+
+    if (targetError || !target?.path || !target?.token) {
+      setFeedback("Não foi possível preparar o envio seguro do PDF.");
+      setFileBusy(false);
+      return;
+    }
+
+    const { error } = await supabase.storage.from(RESUME_BUCKET).uploadToSignedUrl(target.path, target.token, file, {
       contentType: "application/pdf",
-      upsert: true,
       cacheControl: "0"
     });
     setFeedback(error ? `Não foi possível enviar o PDF: ${error.message}` : "PDF privado atualizado.");
@@ -100,7 +109,7 @@ export function AdminResumeRequests({
       return;
     }
 
-    const { error } = await supabase.storage.from(RESUME_BUCKET).remove([RESUME_FILE_PATH]);
+    const { error } = await supabase.functions.invoke("resume-file-admin", { body: { action: "remove" } });
     setFeedback(error ? "Não foi possível remover o PDF." : "PDF removido.");
     setFileBusy(false);
     router.refresh();

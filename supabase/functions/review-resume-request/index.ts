@@ -1,6 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-const ADMIN_EMAIL = "gabrielmcgoes@gmail.com";
+const CONTACT_EMAIL = "gabrielmcgoes@gmail.com";
 const RESUME_BUCKET = "private-resume";
 
 type ReviewPayload = {
@@ -93,7 +93,7 @@ async function sendDecisionEmail(input: {
     body: JSON.stringify({
       from: Deno.env.get("CONTACT_FROM_EMAIL") || "Gabriel Morgado Portfolio <onboarding@resend.dev>",
       to: [input.email],
-      reply_to: Deno.env.get("CONTACT_TO_EMAIL") || ADMIN_EMAIL,
+      reply_to: Deno.env.get("CONTACT_TO_EMAIL") || CONTACT_EMAIL,
       subject: subjectByAction[input.action],
       text: bodyByAction[input.action]
     })
@@ -114,9 +114,10 @@ Deno.serve(async (request) => {
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const adminEmail = Deno.env.get("ADMIN_EMAIL")?.trim().toLowerCase();
   const authorization = request.headers.get("authorization") || "";
 
-  if (!supabaseUrl || !anonKey || !serviceRoleKey || !authorization) {
+  if (!supabaseUrl || !anonKey || !serviceRoleKey || !adminEmail || !authorization) {
     return json(request, { code: "UNAUTHORIZED" }, 401);
   }
 
@@ -126,7 +127,7 @@ Deno.serve(async (request) => {
   });
   const { data: { user } } = await authClient.auth.getUser();
 
-  if (user?.email?.toLowerCase() !== ADMIN_EMAIL) {
+  if (user?.email?.trim().toLowerCase() !== adminEmail) {
     return json(request, { code: "UNAUTHORIZED" }, 401);
   }
 

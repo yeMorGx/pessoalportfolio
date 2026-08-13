@@ -1,4 +1,5 @@
 import { AdminProjects } from "@/components/admin/AdminProjects";
+import { ensurePortfolioAdminAccess } from "@/lib/supabase/adminAccess";
 import { getUnreadContactMessageCount } from "@/lib/supabase/contactMessages";
 import { getAdminProjects } from "@/lib/supabase/projects";
 import { getPendingResumeRequestCount } from "@/lib/supabase/resumeRequests";
@@ -13,6 +14,7 @@ export default async function AdminPage({
     error?: string;
   }>;
 }) {
+  await ensurePortfolioAdminAccess();
   const [params, projects, unreadMessageCount, pendingResumeCount] = await Promise.all([
     searchParams,
     getAdminProjects(),
