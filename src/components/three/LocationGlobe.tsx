@@ -1,8 +1,10 @@
 "use client";
 
-import { Canvas, useFrame, useLoader } from "@react-three/fiber";
+import { OrbitControls } from "@react-three/drei";
+import { Canvas, useFrame, useLoader, useThree } from "@react-three/fiber";
 import { Suspense, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
+import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 
 type LocationGlobeProps = {
   active?: boolean;
@@ -12,6 +14,8 @@ type LocationGlobeProps = {
 const markerLatitude = -23.962;
 const markerLongitude = -46.363;
 const baseRotationY = -0.72;
+const cameraHome = new THREE.Vector3(0, 0, 4.35);
+const targetHome = new THREE.Vector3(0, 0, 0);
 
 function latLonToVector3(latitude: number, longitude: number, radius: number) {
   const phi = THREE.MathUtils.degToRad(90 - latitude);
@@ -124,6 +128,72 @@ function GlobeFallback() {
   );
 }
 
+function GlobeControls({ active = true }: LocationGlobeProps) {
+  const controlsRef = useRef<OrbitControlsImpl | null>(null);
+  const returnTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const returningRef = useRef(false);
+  const { camera, invalidate } = useThree();
+
+  useEffect(() => {
+    return () => {
+      if (returnTimerRef.current) {
+        clearTimeout(returnTimerRef.current);
+      }
+    };
+  }, []);
+
+  useFrame((_, delta) => {
+    const controls = controlsRef.current;
+
+    if (!active || !controls || !returningRef.current) {
+      return;
+    }
+
+    const damping = 1 - Math.exp(-delta * 4.8);
+    camera.position.lerp(cameraHome, damping);
+    controls.target.lerp(targetHome, damping);
+    controls.update();
+
+    if (camera.position.distanceToSquared(cameraHome) < 0.000004) {
+      camera.position.copy(cameraHome);
+      controls.target.copy(targetHome);
+      controls.update();
+      returningRef.current = false;
+      return;
+    }
+
+    invalidate();
+  });
+
+  return (
+    <OrbitControls
+      ref={controlsRef}
+      enabled={active}
+      enableDamping
+      dampingFactor={0.085}
+      enablePan={false}
+      enableZoom={false}
+      rotateSpeed={0.58}
+      minPolarAngle={0.35}
+      maxPolarAngle={Math.PI - 0.35}
+      onStart={() => {
+        returningRef.current = false;
+
+        if (returnTimerRef.current) {
+          clearTimeout(returnTimerRef.current);
+          returnTimerRef.current = null;
+        }
+      }}
+      onEnd={() => {
+        returnTimerRef.current = setTimeout(() => {
+          returningRef.current = true;
+          invalidate();
+        }, 700);
+      }}
+    />
+  );
+}
+
 export function LocationGlobe({ active = true, reducedMotion = false }: LocationGlobeProps) {
   return (
     <Canvas
@@ -131,6 +201,8 @@ export function LocationGlobe({ active = true, reducedMotion = false }: Location
       dpr={[1, 1.5]}
       frameloop={active && !reducedMotion ? "always" : "demand"}
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
+      className={reducedMotion ? undefined : "cursor-grab active:cursor-grabbing"}
+      style={{ touchAction: reducedMotion ? "auto" : "none" }}
     >
       <ambientLight intensity={0.68} />
       <hemisphereLight args={["#f1f3f0", "#080a0c", 1.05]} />
@@ -139,6 +211,7 @@ export function LocationGlobe({ active = true, reducedMotion = false }: Location
       <Suspense fallback={<GlobeFallback />}>
         <Globe active={active} reducedMotion={reducedMotion} />
       </Suspense>
+      {reducedMotion ? null : <GlobeControls active={active} />}
     </Canvas>
   );
 }

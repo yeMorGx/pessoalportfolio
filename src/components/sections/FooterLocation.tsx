@@ -12,7 +12,7 @@ const LocationGlobe = dynamic(() => import("@/components/three/LocationGlobe").t
 const mapsUrl = "https://www.google.com/maps/search/?api=1&query=-23.962,-46.363";
 
 export function FooterLocation({ locale }: { locale: Locale }) {
-  const locationRef = useRef<HTMLAnchorElement | null>(null);
+  const locationRef = useRef<HTMLDivElement | null>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
   const shouldLoadGlobe = useElementVisibility(locationRef, { once: true, rootMargin: "600px 0px" });
   const globeActive = useElementVisibility(locationRef, { rootMargin: "120px 0px" });
@@ -23,15 +23,17 @@ export function FooterLocation({ locale }: { locale: Locale }) {
   }, []);
 
   return (
-    <a
+    <div
       ref={locationRef}
-      href={mapsUrl}
-      target="_blank"
-      rel="noreferrer"
-      aria-label={copy.ariaLabel}
-      className="group relative mt-14 grid min-h-[19rem] overflow-hidden border-y border-ink/15 text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-coral sm:mt-20 lg:grid-cols-[0.8fr_1.2fr]"
+      className="group relative mt-14 grid min-h-[19rem] overflow-hidden border-y border-ink/15 text-ink sm:mt-20 lg:grid-cols-[0.8fr_1.2fr]"
     >
-      <div className="relative z-10 flex flex-col justify-between py-6 lg:py-8">
+      <a
+        href={mapsUrl}
+        target="_blank"
+        rel="noreferrer"
+        aria-label={copy.ariaLabel}
+        className="relative z-10 flex flex-col justify-between py-6 focus:outline-none focus-visible:ring-2 focus-visible:ring-coral lg:py-8"
+      >
         <div className="flex items-center gap-2 font-mono text-[0.58rem] uppercase text-ink/45">
           <MapPin size={13} className="text-coral" />
           {copy.base}
@@ -47,7 +49,7 @@ export function FooterLocation({ locale }: { locale: Locale }) {
           {copy.map}
           <ArrowUpRight size={14} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
         </span>
-      </div>
+      </a>
 
       <div className="relative min-h-[17rem] lg:min-h-[22rem]" aria-hidden="true">
         <div className="technical-grid absolute inset-0 opacity-35" />
@@ -55,6 +57,6 @@ export function FooterLocation({ locale }: { locale: Locale }) {
           {shouldLoadGlobe ? <LocationGlobe active={globeActive} reducedMotion={reducedMotion} /> : null}
         </div>
       </div>
-    </a>
+    </div>
   );
 }
