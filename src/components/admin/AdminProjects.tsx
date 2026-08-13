@@ -34,6 +34,10 @@ const stackGroups = [
     technologies: ["API", "REST", "GraphQL", "SSO", "Docker", "Kubernetes", "AWS", "Google Cloud", "Azure", "Vercel", "GitHub Actions"]
   },
   {
+    label: "IA e automação",
+    technologies: ["OpenAI", "Codex", "Claude", "Gemini", "n8n", "LangChain", "Hugging Face", "Ollama", "MCP"]
+  },
+  {
     label: "Segurança",
     technologies: ["Wazuh", "TheHive", "OWASP Top 10", "Kali Linux", "RedTeam", "SOC"]
   }

@@ -1,4 +1,7 @@
+"use client";
+
 import { Braces, Crosshair, KeyRound, Radar, type LucideIcon } from "lucide-react";
+import { useState } from "react";
 
 const stackIconSlugs: Record<string, string> = {
   javascript: "javascript",
@@ -60,6 +63,17 @@ const stackIconSlugs: Record<string, string> = {
   "google cloud": "googlecloud",
   vercel: "vercel",
   "github actions": "githubactions",
+  claude: "claude",
+  "claude ai": "claude",
+  gemini: "googlegemini",
+  "google gemini": "googlegemini",
+  n8n: "n8n",
+  langchain: "langchain",
+  "hugging face": "huggingface",
+  huggingface: "huggingface",
+  ollama: "ollama",
+  mcp: "modelcontextprotocol",
+  "model context protocol": "modelcontextprotocol",
   "kali linux": "kalilinux",
   owasp: "owasp",
   "owasp top 10": "owasp"
@@ -69,7 +83,9 @@ const stackIconUrls: Record<string, string> = {
   aws: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/aws.svg",
   azure: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/microsoft-azure.svg",
   wazuh: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/wazuh.svg",
-  thehive: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/thehive.svg"
+  thehive: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/thehive.svg",
+  openai: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/openai.svg",
+  codex: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/codex.svg"
 };
 
 const genericIcons: Record<string, LucideIcon> = {
@@ -86,17 +102,18 @@ function getSlug(label: string) {
 }
 
 export function StackLogo({ label, className = "h-4 w-4" }: { label: string; className?: string }) {
+  const [imageFailed, setImageFailed] = useState(false);
   const normalizedLabel = label.trim().toLowerCase();
   const slug = getSlug(label);
   const iconUrl = stackIconUrls[normalizedLabel];
   const GenericIcon = genericIcons[normalizedLabel];
 
-  if (slug) {
-    return <img src={`https://cdn.simpleicons.org/${slug}/ffffff`} alt="" className={`${className} object-contain`} loading="lazy" />;
+  if (slug && !imageFailed) {
+    return <img src={`https://cdn.simpleicons.org/${slug}/ffffff`} alt="" className={`${className} object-contain`} loading="lazy" onError={() => setImageFailed(true)} />;
   }
 
-  if (iconUrl) {
-    return <img src={iconUrl} alt="" className={`${className} object-contain brightness-0 invert`} loading="lazy" />;
+  if (iconUrl && !imageFailed) {
+    return <img src={iconUrl} alt="" className={`${className} object-contain brightness-0 invert`} loading="lazy" onError={() => setImageFailed(true)} />;
   }
 
   if (GenericIcon) {
