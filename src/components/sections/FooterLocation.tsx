@@ -2,7 +2,8 @@
 
 import dynamic from "next/dynamic";
 import { ArrowUpRight, MapPin } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useElementVisibility } from "@/hooks/useElementVisibility";
 import { prefersReducedMotion } from "@/lib/gsap";
 
 const LocationGlobe = dynamic(() => import("@/components/three/LocationGlobe").then((module) => module.LocationGlobe), { ssr: false });
@@ -10,7 +11,10 @@ const LocationGlobe = dynamic(() => import("@/components/three/LocationGlobe").t
 const mapsUrl = "https://www.google.com/maps/search/?api=1&query=-23.962,-46.363";
 
 export function FooterLocation() {
+  const locationRef = useRef<HTMLAnchorElement | null>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
+  const shouldLoadGlobe = useElementVisibility(locationRef, { once: true, rootMargin: "600px 0px" });
+  const globeActive = useElementVisibility(locationRef, { rootMargin: "120px 0px" });
 
   useEffect(() => {
     setReducedMotion(prefersReducedMotion());
@@ -18,6 +22,7 @@ export function FooterLocation() {
 
   return (
     <a
+      ref={locationRef}
       href={mapsUrl}
       target="_blank"
       rel="noreferrer"
@@ -45,7 +50,7 @@ export function FooterLocation() {
       <div className="relative min-h-[17rem] lg:min-h-[22rem]" aria-hidden="true">
         <div className="technical-grid absolute inset-0 opacity-35" />
         <div className="absolute inset-[-12%] transition-transform duration-700 ease-out group-hover:scale-[1.025]">
-          <LocationGlobe reducedMotion={reducedMotion} />
+          {shouldLoadGlobe ? <LocationGlobe active={globeActive} reducedMotion={reducedMotion} /> : null}
         </div>
       </div>
     </a>

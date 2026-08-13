@@ -5,6 +5,7 @@ import { Suspense, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 
 type LocationGlobeProps = {
+  active?: boolean;
   reducedMotion?: boolean;
 };
 
@@ -23,7 +24,7 @@ function latLonToVector3(latitude: number, longitude: number, radius: number) {
   );
 }
 
-function Globe({ reducedMotion = false }: LocationGlobeProps) {
+function Globe({ active = true, reducedMotion = false }: LocationGlobeProps) {
   const globeRef = useRef<THREE.Group | null>(null);
   const pulseRef = useRef<THREE.Mesh | null>(null);
   const [earthMap, earthNormalMap] = useLoader(THREE.TextureLoader, [
@@ -52,7 +53,7 @@ function Globe({ reducedMotion = false }: LocationGlobeProps) {
   useFrame((state, delta) => {
     const globe = globeRef.current;
 
-    if (!globe) {
+    if (!active || !globe) {
       return;
     }
 
@@ -123,11 +124,12 @@ function GlobeFallback() {
   );
 }
 
-export function LocationGlobe({ reducedMotion = false }: LocationGlobeProps) {
+export function LocationGlobe({ active = true, reducedMotion = false }: LocationGlobeProps) {
   return (
     <Canvas
       camera={{ position: [0, 0, 4.35], fov: 38, near: 0.1, far: 20 }}
       dpr={[1, 1.5]}
+      frameloop={active && !reducedMotion ? "always" : "demand"}
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
     >
       <ambientLight intensity={0.68} />
@@ -135,7 +137,7 @@ export function LocationGlobe({ reducedMotion = false }: LocationGlobeProps) {
       <spotLight position={[-3, 4, 5]} color="#f1f3f0" intensity={9} angle={0.55} penumbra={0.9} />
       <pointLight position={[3, -2, 4]} color="#6ee7b7" intensity={1.4} />
       <Suspense fallback={<GlobeFallback />}>
-        <Globe reducedMotion={reducedMotion} />
+        <Globe active={active} reducedMotion={reducedMotion} />
       </Suspense>
     </Canvas>
   );

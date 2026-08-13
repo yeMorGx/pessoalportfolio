@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: "Gabriel Morgado | Full-stack Developer",
   description: "Portfólio de Gabriel Morgado: produtos digitais entre interface, sistemas e segurança.",
   icons: {
-    icon: "/favicon.ico"
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }]
   }
 };
 

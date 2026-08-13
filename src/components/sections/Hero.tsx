@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { Github, Linkedin, Mail } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { PortfolioIcon } from "@/components/ui/PortfolioIcon";
+import { useElementVisibility } from "@/hooks/useElementVisibility";
 import { getGsap, prefersReducedMotion } from "@/lib/gsap";
 
 const LogoScene = dynamic(() => import("@/components/three/LogoScene").then((module) => module.LogoScene), { ssr: false });
@@ -13,6 +14,7 @@ export function Hero() {
   const sceneRef = useRef<HTMLDivElement | null>(null);
   const scrollProgress = useRef(0);
   const [reducedMotion, setReducedMotion] = useState(false);
+  const sceneActive = useElementVisibility(heroRef, { initial: true, rootMargin: "120px 0px" });
 
   useEffect(() => {
     const hero = heroRef.current;
@@ -75,7 +77,7 @@ export function Hero() {
             </div>
           ) : (
             <div className="h-full w-full lg:pl-[6%] xl:pl-[8%]">
-              <LogoScene scrollProgress={scrollProgress} />
+              <LogoScene active={sceneActive} scrollProgress={scrollProgress} />
             </div>
           )}
         </div>

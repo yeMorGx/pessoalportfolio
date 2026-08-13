@@ -6,6 +6,7 @@ import * as THREE from "three";
 import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader.js";
 
 type LogoSceneProps = {
+  active?: boolean;
   scrollProgress: MutableRefObject<number>;
 };
 
@@ -89,11 +90,12 @@ function LogoObject({ scrollProgress }: LogoSceneProps) {
   );
 }
 
-export function LogoScene({ scrollProgress }: LogoSceneProps) {
+export function LogoScene({ active = true, scrollProgress }: LogoSceneProps) {
   return (
     <Canvas
       camera={{ position: [0, 0, 6.6], fov: 38, near: 0.1, far: 40 }}
       dpr={[1, 1.5]}
+      frameloop={active ? "always" : "demand"}
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
     >
       <ambientLight intensity={0.38} />
