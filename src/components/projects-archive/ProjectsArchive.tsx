@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowUpRight, ChevronLeft, ChevronRight, Mail } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { LanguageSwitch } from "@/components/ui/LanguageSwitch";
+import { ProjectLogo } from "@/components/ui/ProjectLogo";
 import { StackLogo } from "@/components/ui/StackLogo";
 import { getGsap, prefersReducedMotion } from "@/lib/gsap";
 import { homePath, projectPath, siteCopy, type Locale } from "@/lib/i18n";
@@ -202,7 +203,10 @@ export function ProjectsArchive({ projects, locale }: ProjectsArchiveProps) {
                         <span>{project.product_role ?? projectCopy.defaultRole}</span>
                         <span className={project.featured ? "text-mint" : ""}>{project.featured ? projectCopy.featured : projectCopy.caseLabel}</span>
                       </div>
-                      <h2 className="mt-5 font-display text-3xl font-semibold leading-tight text-ceramic sm:text-4xl">{project.title}</h2>
+                      <div className="mt-5 flex items-center gap-3">
+                        <ProjectLogo title={project.title} url={project.logo_image_url} />
+                        <h2 className="font-display text-3xl font-semibold leading-tight text-ceramic sm:text-4xl">{project.title}</h2>
+                      </div>
                       <p className="mt-4 text-sm leading-6 text-smoke/75">{project.description}</p>
                       <div className="mt-6 flex flex-wrap gap-x-4 gap-y-3">
                         {visibleTech.map((tech) => (

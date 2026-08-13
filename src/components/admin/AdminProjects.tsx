@@ -5,12 +5,15 @@ import Link from "next/link";
 import { ArrowLeft, Check, ChevronLeft, ChevronRight, Edit3, Eye, FileText, FolderKanban, ImageIcon, Link2, LogOut, Plus, Search, Star, Trash2, Upload, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createProjectUploadTargetAction, deleteProjectAction, discardProjectUploadsAction, saveProjectAction, signOutAction, toggleFeaturedAction } from "@/app/admin/actions";
+import { ProjectLogo } from "@/components/ui/ProjectLogo";
 import { StackLogo } from "@/components/ui/StackLogo";
 import type { Project } from "@/lib/projects";
 import { createSupabaseBrowserClient } from "@/lib/supabase";
 
 const PROJECT_ASSET_BUCKET = "project-covers";
 const MAX_PROJECT_IMAGE_BYTES = 20 * 1024 * 1024;
+const MAX_PROJECT_LOGO_BYTES = 2 * 1024 * 1024;
+const PROJECT_LOGO_TYPES = new Set(["image/png", "image/webp"]);
 
 const stackGroups = [
   {
@@ -89,6 +92,30 @@ function getImageValidationError(file: File) {
   return null;
 }
 
+async function getLogoValidationError(file: File) {
+  if (!PROJECT_LOGO_TYPES.has(file.type)) {
+    return `${file.name} deve estar em PNG ou WebP.`;
+  }
+
+  if (file.size > MAX_PROJECT_LOGO_BYTES) {
+    return `${file.name} ultrapassa o limite de 2 MB.`;
+  }
+
+  try {
+    const bitmap = await createImageBitmap(file);
+    const { width, height } = bitmap;
+    bitmap.close();
+
+    if (width !== height || width < 128 || width > 2048) {
+      return "O logo deve ser quadrado, entre 128 x 128 e 2048 x 2048 px.";
+    }
+  } catch {
+    return `${file.name} não pôde ser lido como imagem.`;
+  }
+
+  return null;
+}
+
 export function AdminProjects({
   initialProjects,
   status
@@ -100,6 +127,8 @@ export function AdminProjects({
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [stackValue, setStackValue] = useState("");
+  const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null);
+  const [logoRemoved, setLogoRemoved] = useState(false);
   const [coverPreviewUrl, setCoverPreviewUrl] = useState<string | null>(null);
   const [galleryPreviewUrls, setGalleryPreviewUrls] = useState<string[]>([]);
   const [currentStep, setCurrentStep] = useState(0);
@@ -126,6 +155,7 @@ export function AdminProjects({
     });
   }, [projectFilter, projectQuery, projects]);
   const previewCoverUrl = coverPreviewUrl ?? selectedProject?.cover_image_url ?? "/project-forge.svg";
+  const previewLogoUrl = logoPreviewUrl ?? (logoRemoved ? null : selectedProject?.logo_image_url ?? null);
   const previewGalleryUrls = galleryPreviewUrls.length ? galleryPreviewUrls : selectedProject?.gallery_image_urls ?? [];
 
   useEffect(() => {
@@ -152,6 +182,14 @@ export function AdminProjects({
 
   useEffect(() => {
     return () => {
+      if (logoPreviewUrl) {
+        URL.revokeObjectURL(logoPreviewUrl);
+      }
+    };
+  }, [logoPreviewUrl]);
+
+  useEffect(() => {
+    return () => {
       if (coverPreviewUrl) {
         URL.revokeObjectURL(coverPreviewUrl);
       }
@@ -167,6 +205,8 @@ export function AdminProjects({
   function openCreateForm() {
     setSelectedProject(null);
     setStackValue("");
+    setLogoPreviewUrl(null);
+    setLogoRemoved(false);
     setCoverPreviewUrl(null);
     setGalleryPreviewUrls([]);
     setCurrentStep(0);
@@ -180,6 +220,8 @@ export function AdminProjects({
   function openEditForm(project: Project) {
     setSelectedProject(project);
     setStackValue(project.tech_stack.join(", "));
+    setLogoPreviewUrl(null);
+    setLogoRemoved(false);
     setCoverPreviewUrl(null);
     setGalleryPreviewUrls([]);
     setCurrentStep(0);
@@ -197,6 +239,8 @@ export function AdminProjects({
 
     setIsModalOpen(false);
     setSelectedProject(null);
+    setLogoPreviewUrl(null);
+    setLogoRemoved(false);
     setCoverPreviewUrl(null);
     setGalleryPreviewUrls([]);
     setCurrentStep(0);
@@ -279,6 +323,29 @@ export function AdminProjects({
     setStackValue(nextStacks.join(", "));
   }
 
+  async function handleLogoPreview(event: React.ChangeEvent<HTMLInputElement>) {
+    const input = event.target;
+    const file = input.files?.[0];
+    const validationError = file ? await getLogoValidationError(file) : null;
+
+    if (validationError) {
+      input.value = "";
+      setLogoPreviewUrl(null);
+      setSaveError(validationError);
+      return;
+    }
+
+    setSaveError(null);
+    setLogoRemoved(false);
+    setLogoPreviewUrl(file ? URL.createObjectURL(file) : null);
+  }
+
+  function removeLogo() {
+    setLogoPreviewUrl(null);
+    setLogoRemoved(true);
+    setSaveError(null);
+  }
+
   function handleCoverPreview(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     const validationError = file ? getImageValidationError(file) : null;
@@ -324,15 +391,18 @@ export function AdminProjects({
     }
 
     const formData = new FormData(form);
+    const logo = formData.get("logo");
+    const logoFile = logo instanceof File && logo.size > 0 ? logo : null;
     const cover = formData.get("cover");
     const coverFile = cover instanceof File && cover.size > 0 ? cover : null;
     const galleryFiles = formData.getAll("gallery_images")
       .filter((file): file is File => file instanceof File && file.size > 0);
-    const files = [coverFile, ...galleryFiles].filter((file): file is File => Boolean(file));
+    const files = [logoFile, coverFile, ...galleryFiles].filter((file): file is File => Boolean(file));
     const validationError = files.map(getImageValidationError).find(Boolean);
+    const logoValidationError = logoFile ? await getLogoValidationError(logoFile) : null;
 
-    if (validationError) {
-      setSaveError(validationError);
+    if (logoValidationError || validationError) {
+      setSaveError(logoValidationError ?? validationError ?? "Arquivo inválido.");
       return;
     }
 
@@ -349,6 +419,7 @@ export function AdminProjects({
     setSaveError(null);
 
     try {
+      formData.delete("logo");
       formData.delete("cover");
       formData.delete("gallery_images");
 
@@ -358,7 +429,7 @@ export function AdminProjects({
         setSaveProgress("Salvando projeto...");
       }
 
-      const uploadImage = async (file: File, kind: "cover" | "gallery") => {
+      const uploadImage = async (file: File, kind: "cover" | "gallery" | "logo") => {
         const target = await createProjectUploadTargetAction({
           fileName: file.name,
           contentType: file.type,
@@ -386,6 +457,10 @@ export function AdminProjects({
 
         return supabase.storage.from(PROJECT_ASSET_BUCKET).getPublicUrl(target.path).data.publicUrl;
       };
+
+      if (logoFile) {
+        formData.set("logo_image_url", await uploadImage(logoFile, "logo"));
+      }
 
       if (coverFile) {
         formData.set("cover_image_url", await uploadImage(coverFile, "cover"));
@@ -529,6 +604,7 @@ export function AdminProjects({
                   <div className="flex min-w-0 items-center gap-4">
                     <div className="relative h-16 w-24 shrink-0 overflow-hidden border border-white/10 bg-white/5">
                       <Image src={project.cover_image_url || "/project-forge.svg"} alt={`Capa de ${project.title}`} fill sizes="96px" className="object-cover" />
+                      <ProjectLogo title={project.title} url={project.logo_image_url} className="absolute bottom-1 right-1 z-10 h-7 w-7 bg-ink/90" />
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
@@ -635,6 +711,8 @@ export function AdminProjects({
               className="flex min-h-0 flex-1 flex-col overflow-hidden"
             >
               <input name="id" type="hidden" value={selectedProject?.id ?? ""} readOnly />
+              <input name="current_logo_image_url" type="hidden" value={selectedProject?.logo_image_url ?? ""} readOnly />
+              <input name="remove_logo" type="hidden" value={logoRemoved ? "true" : "false"} readOnly />
               <input name="current_cover_image_url" type="hidden" value={selectedProject?.cover_image_url ?? ""} readOnly />
               <input name="gallery_image_urls" type="hidden" value={getGalleryFormValue(selectedProject)} readOnly />
 
@@ -760,7 +838,28 @@ export function AdminProjects({
                 <span className="font-mono text-[0.62rem] text-steel">03</span>
                 <div>
                   <p className="text-sm font-medium text-white">Mostre o produto em uso</p>
-                  <p className="mt-1 text-xs leading-5 text-slate-500">A capa apresenta o projeto. A galeria explica as telas em detalhes.</p>
+                  <p className="mt-1 text-xs leading-5 text-slate-500">O logo identifica a marca, a capa apresenta o projeto e a galeria explica as telas.</p>
+                </div>
+              </div>
+
+              <div className="grid gap-4 border-b border-white/10 pb-6 sm:grid-cols-[minmax(0,1fr)_9rem] sm:items-center">
+                <div className="space-y-3">
+                  <p className="text-xs uppercase text-slate-500">Logo do projeto</p>
+                  <label className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-sm border border-dashed border-white/18 px-4 py-5 text-sm text-slate-300 transition hover:border-mint/50 hover:text-white sm:max-w-sm">
+                    <Upload size={16} />
+                    {previewLogoUrl ? "Trocar logo" : "Enviar logo"}
+                    <input name="logo" className="sr-only" type="file" accept="image/png,image/webp" onChange={handleLogoPreview} />
+                  </label>
+                  <p className="text-[0.68rem] leading-5 text-slate-600">PNG ou WebP quadrado, de 128 a 2048 px, com até 2 MB. Fundo transparente recomendado.</p>
+                </div>
+
+                <div className="flex items-center gap-3 sm:flex-col">
+                  <span className="flex h-24 w-24 items-center justify-center overflow-hidden border border-white/12 bg-black/25">
+                    {previewLogoUrl ? <img src={previewLogoUrl} alt="Prévia do logo" className="h-full w-full object-contain p-3" /> : <ImageIcon size={24} className="text-slate-700" />}
+                  </span>
+                  {previewLogoUrl ? (
+                    <button type="button" onClick={removeLogo} className="text-xs text-slate-500 transition hover:text-coral">Remover logo</button>
+                  ) : <span className="text-center text-[0.65rem] text-slate-600">Fallback automático</span>}
                 </div>
               </div>
 
@@ -874,7 +973,10 @@ export function AdminProjects({
                           <span className="font-mono text-[0.58rem] uppercase text-steel">{draftPreview.role}</span>
                           {draftPreview.featured ? <span className="font-mono text-[0.58rem] uppercase text-mint">Destaque</span> : null}
                         </div>
-                        <h3 className="mt-4 font-display text-2xl font-semibold text-white">{draftPreview.title}</h3>
+                        <div className="mt-4 flex items-center gap-3">
+                          <ProjectLogo title={draftPreview.title} url={previewLogoUrl} className="h-10 w-10" />
+                          <h3 className="font-display text-2xl font-semibold text-white">{draftPreview.title}</h3>
+                        </div>
                         <p className="mt-3 text-sm leading-6 text-slate-400">{draftPreview.description}</p>
                         <div className="mt-5 flex flex-wrap gap-2">
                           {draftPreview.stacks.length ? draftPreview.stacks.slice(0, 8).map((tech) => (

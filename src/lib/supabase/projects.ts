@@ -19,6 +19,7 @@ function normalizeProject(project: RawProject): Project {
     title: project.title,
     slug: project.slug,
     description: project.description,
+    logo_image_url: project.logo_image_url || null,
     cover_image_url: project.cover_image_url || "/project-forge.svg",
     cover_display: coverDisplay,
     product_overview: project.product_overview || null,

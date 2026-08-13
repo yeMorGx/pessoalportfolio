@@ -3,6 +3,7 @@ export type Project = {
   title: string;
   slug: string;
   description: string;
+  logo_image_url: string | null;
   cover_image_url: string;
   cover_display: "thumbnail" | "fullscreen";
   product_overview: string | null;
@@ -28,6 +29,7 @@ export const fallbackProjects: Project[] = [
     title: "Atlas CRM",
     slug: "atlas-crm",
     description: "Painel operacional para equipes comerciais acompanharem pipeline, receita e tarefas críticas em tempo real.",
+    logo_image_url: null,
     cover_image_url: "/project-atlas.svg",
     cover_display: "thumbnail",
     product_overview: "Um CRM operacional pensado para diminuir ruído entre leads, atividades e decisões de venda. A experiência concentra indicadores, próximos passos e contexto do cliente em uma interface rápida de escanear.",
@@ -49,6 +51,7 @@ export const fallbackProjects: Project[] = [
     title: "Pulse Analytics",
     slug: "pulse-analytics",
     description: "Dashboard de produto com métricas acionáveis, segmentação por coorte e visualizações focadas em decisão.",
+    logo_image_url: null,
     cover_image_url: "/project-pulse.svg",
     cover_display: "thumbnail",
     product_overview: "Uma camada analítica para transformar eventos de produto em leitura objetiva. O foco é revelar padrões de uso, retenção e oportunidades sem enterrar o usuário em gráficos soltos.",
@@ -70,6 +73,7 @@ export const fallbackProjects: Project[] = [
     title: "Forge Admin",
     slug: "forge-admin",
     description: "Área administrativa enxuta para gerenciar conteúdo, uploads e estados de publicação sem tocar no código.",
+    logo_image_url: null,
     cover_image_url: "/project-forge.svg",
     cover_display: "thumbnail",
     product_overview: "Um painel privado para controlar conteúdo de projetos com autenticação, uploads e estados de destaque. A proposta é dar autonomia sem transformar o site em um CMS genérico.",

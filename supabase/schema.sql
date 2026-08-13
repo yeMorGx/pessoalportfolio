@@ -5,6 +5,7 @@ create table if not exists public.projects (
   title text not null,
   slug text not null unique,
   description text not null,
+  logo_image_url text,
   cover_image_url text not null,
   cover_display text not null default 'thumbnail' check (cover_display in ('thumbnail', 'fullscreen')),
   product_overview text,

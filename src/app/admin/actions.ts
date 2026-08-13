@@ -7,6 +7,8 @@ import { createSupabaseServerClient, hasSupabaseConfig } from "@/lib/supabase/se
 
 const PROJECT_ASSET_BUCKET = "project-covers";
 const MAX_PROJECT_IMAGE_BYTES = 20 * 1024 * 1024;
+const MAX_PROJECT_LOGO_BYTES = 2 * 1024 * 1024;
+const PROJECT_LOGO_TYPES = new Set(["image/png", "image/webp"]);
 
 export type ProjectUploadTargetResult =
   | { ok: true; path: string; token: string }
@@ -168,7 +170,7 @@ export async function createProjectUploadTargetAction(input: {
   fileName: string;
   contentType: string;
   size: number;
-  kind: "cover" | "gallery";
+  kind: "cover" | "gallery" | "logo";
 }): Promise<ProjectUploadTargetResult> {
   if (!hasSupabaseConfig()) {
     return { ok: false, message: "Supabase não está configurado neste ambiente." };
@@ -180,7 +182,17 @@ export async function createProjectUploadTargetAction(input: {
     return { ok: false, message: "O arquivo selecionado não é uma imagem válida." };
   }
 
-  if (!Number.isFinite(input.size) || input.size <= 0 || input.size > MAX_PROJECT_IMAGE_BYTES) {
+  if (input.kind === "logo" && !PROJECT_LOGO_TYPES.has(input.contentType)) {
+    return { ok: false, message: "O logo deve estar em PNG ou WebP." };
+  }
+
+  const maxBytes = input.kind === "logo" ? MAX_PROJECT_LOGO_BYTES : MAX_PROJECT_IMAGE_BYTES;
+
+  if (!Number.isFinite(input.size) || input.size <= 0 || input.size > maxBytes) {
+    if (input.kind === "logo") {
+      return { ok: false, message: "O logo deve ter no máximo 2 MB." };
+    }
+
     return { ok: false, message: "Cada imagem deve ter no máximo 20 MB." };
   }
 
@@ -202,7 +214,7 @@ export async function discardProjectUploadsAction(paths: string[]) {
     return;
   }
 
-  const safePaths = paths.filter((path) => /^uploads\/(cover|gallery)\/[a-f0-9-]+\.[a-z0-9]{2,5}$/i.test(path));
+  const safePaths = paths.filter((path) => /^uploads\/(cover|gallery|logo)\/[a-f0-9-]+\.[a-z0-9]{2,5}$/i.test(path));
 
   if (!safePaths.length) {
     return;
@@ -236,6 +248,10 @@ export async function saveProjectAction(formData: FormData): Promise<SaveProject
   try {
     const title = getRequiredString(formData, "title");
     const id = getOptionalString(formData, "id");
+    const currentLogoUrl = getOptionalString(formData, "current_logo_image_url");
+    const logoImageUrl = formData.get("remove_logo") === "true"
+      ? null
+      : getOptionalString(formData, "logo_image_url") ?? currentLogoUrl;
     const currentCoverUrl = getOptionalString(formData, "current_cover_image_url");
     const coverImageUrl = getOptionalString(formData, "cover_image_url") ?? currentCoverUrl ?? "/project-forge.svg";
     const gallery = parseGallery(getOptionalString(formData, "gallery_image_urls"));
@@ -247,6 +263,7 @@ export async function saveProjectAction(formData: FormData): Promise<SaveProject
       title,
       slug: getOptionalString(formData, "slug") ?? slugify(title),
       description: getRequiredString(formData, "description"),
+      logo_image_url: logoImageUrl,
       cover_image_url: coverImageUrl,
       cover_display: parseCoverDisplay(getOptionalString(formData, "cover_display")),
       product_overview: getOptionalString(formData, "product_overview"),
@@ -275,6 +292,9 @@ export async function saveProjectAction(formData: FormData): Promise<SaveProject
     }
 
     revalidatePath("/");
+    revalidatePath("/pt");
+    revalidatePath("/projects");
+    revalidatePath("/pt/projetos");
     revalidatePath("/admin");
     return { ok: true };
   } catch (error) {

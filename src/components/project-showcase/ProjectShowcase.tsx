@@ -7,6 +7,7 @@ import { useEffect, useRef } from "react";
 import { ProjectGalleryCarousel } from "@/components/project-showcase/ProjectGalleryCarousel";
 import { LanguageSwitch } from "@/components/ui/LanguageSwitch";
 import { PortfolioIcon } from "@/components/ui/PortfolioIcon";
+import { ProjectLogo } from "@/components/ui/ProjectLogo";
 import { StackLogo } from "@/components/ui/StackLogo";
 import { getGsap, prefersReducedMotion } from "@/lib/gsap";
 import { homePath, projectPath, projectsPath, siteCopy, type Locale } from "@/lib/i18n";
@@ -128,7 +129,10 @@ export function ProjectShowcase({ project, locale }: { project: Project; locale:
           <div className="mt-10 grid gap-9 lg:grid-cols-[0.72fr_1.28fr] lg:items-center">
             <div className="relative z-10">
               <p data-project-intro className="font-mono text-[0.68rem] uppercase text-mint">{project.product_role ?? copy.defaultRole}</p>
-              <h1 data-project-intro className="mt-4 max-w-xl font-display text-4xl font-semibold leading-tight text-ceramic sm:text-5xl">{project.title}</h1>
+              <div data-project-intro className="mt-4 flex items-center gap-4">
+                <ProjectLogo title={project.title} url={project.logo_image_url} className="h-12 w-12 sm:h-14 sm:w-14" />
+                <h1 className="max-w-xl font-display text-4xl font-semibold leading-tight text-ceramic sm:text-5xl">{project.title}</h1>
+              </div>
               <p data-project-intro className="mt-5 max-w-xl text-sm leading-7 text-slate-300 sm:text-base">{project.description}</p>
 
               <div data-project-intro className="mt-7 flex flex-wrap gap-3">

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
 import { PortfolioIcon } from "@/components/ui/PortfolioIcon";
+import { ProjectLogo } from "@/components/ui/ProjectLogo";
 import { StackLogo } from "@/components/ui/StackLogo";
 import { useTilt } from "@/hooks/useTilt";
 import { projectPath, siteCopy, type Locale } from "@/lib/i18n";
@@ -46,7 +47,10 @@ export function ProjectCard({ project, index, locale }: ProjectCardProps) {
             {project.featured ? <span className="text-mint">{copy.featured}</span> : <span>{copy.caseLabel}</span>}
           </div>
 
-          <h3 className="mt-5 font-display text-2xl font-semibold leading-tight text-ceramic sm:text-3xl">{project.title}</h3>
+          <div className="mt-5 flex items-center gap-3">
+            <ProjectLogo title={project.title} url={project.logo_image_url} />
+            <h3 className="font-display text-2xl font-semibold leading-tight text-ceramic sm:text-3xl">{project.title}</h3>
+          </div>
           <p className="mt-4 max-w-xl text-sm leading-6 text-smoke/80 sm:text-[0.95rem] sm:leading-7">{project.description}</p>
 
           <div className="mt-6 flex flex-wrap gap-x-4 gap-y-3">
