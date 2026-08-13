@@ -3,13 +3,20 @@
 import { useEffect, useState } from "react";
 
 function getInitials(title: string) {
-  return title
+  const words = title
     .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => word[0])
-    .join("")
-    .toUpperCase();
+    .map((word) => word.replace(/[^a-z0-9]/gi, ""))
+    .filter(Boolean);
+
+  if (title.trim().startsWith("+") && words[0]) {
+    return `+${words[0][0]}`.toUpperCase();
+  }
+
+  if (words.length === 1) {
+    return words[0].slice(0, 2).toUpperCase();
+  }
+
+  return words.slice(0, 2).map((word) => word[0]).join("").toUpperCase();
 }
 
 export function ProjectLogo({ title, url, className = "h-10 w-10" }: { title: string; url: string | null; className?: string }) {
