@@ -13,8 +13,14 @@ export function ResumeAccessPage() {
   const [errorCode, setErrorCode] = useState("");
 
   useEffect(() => {
-    const language = window.location.hash.slice(1).split(".", 1)[0];
-    if (language === "en" || language === "pt") setLocale(language);
+    const updateLocale = () => {
+      const language = window.location.hash.slice(1).split(".", 1)[0];
+      if (language === "en" || language === "pt") setLocale(language);
+    };
+
+    updateLocale();
+    window.addEventListener("hashchange", updateLocale);
+    return () => window.removeEventListener("hashchange", updateLocale);
   }, []);
   const copy = locale === "pt" ? {
     back: "Voltar ao portfólio",
