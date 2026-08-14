@@ -26,8 +26,8 @@ Leia junto com `AGENTS.md` antes de alterar o codigo.
 
 - Atualizado em: 2026-08-14.
 - Branch: `main`.
-- HEAD publicado: `8ec7d79` (`fix: authorize resume uploads by admin account`).
-- Ultimo commit funcional: `8ec7d79` (`fix: authorize resume uploads by admin account`).
+- HEAD publicado: `770da1f` (`feat: refine portfolio entry experience`).
+- Ultimo commit funcional: `770da1f` (`feat: refine portfolio entry experience`).
 - Producao: `https://pessoalportfolio.vercel.app`.
 - Deploy: Vercel conectado a `main`.
 - Dados: Supabase Postgres, Auth e Storage.
@@ -75,9 +75,14 @@ Ideias futuras registradas no Linear:
 - Validacoes locais: `npm run lint`, `npm run typecheck` e `npm run build`
   aprovados; runtime local respondeu 200 em `/` e `/pt` e confirmou loader,
   interacao e trilho de IA nas duas linguas.
-- Estado: **local / nao publicado**; sem commit, push ou deploy nesta etapa.
-- Retomada: revisar visualmente a home em desktop/mobile, confirmar os favicons
-  dos projetos reais e publicar somente depois do QA final do usuario.
+- Estado: **publicado** no commit `770da1f`; `tsconfig.tsbuildinfo` continua
+  modificado localmente e fora do commit.
+- Deploy de producao: `https://pessoalportfolio-bh2js4o2z-yemorgxs-projects.vercel.app`
+  ficou `Ready` em 50 segundos; o alias `https://pessoalportfolio.vercel.app`
+  respondeu `200` em 2026-08-14.
+- Linear: `GAB-15` concluida com commit, push e deploy confirmados.
+- Retomada: fazer QA visual de desktop/mobile quando houver uma nova rodada de
+  refinamentos ou publicar outras tarefas do projeto.
 - Esta versao condensada do `CHANGELOG.md` permanece modificada localmente e
   nao foi incluida nos commits funcionais.
 - `tsconfig.tsbuildinfo` continua modificado localmente e fora dos commits.
