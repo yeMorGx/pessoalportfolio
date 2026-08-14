@@ -55,9 +55,7 @@ export const siteCopy = {
       projects: "View projects",
       contactShort: "Contact",
       contact: "Get in touch",
-      explore: "Scroll to explore",
-      interactionLabel: "3D / interactive",
-      interactionHint: "Move over the mark or drag to inspect it."
+      explore: "Scroll to explore"
     },
     about: {
       sectionLabel: "Profile / approach",
@@ -273,9 +271,7 @@ export const siteCopy = {
       projects: "Ver projetos",
       contactShort: "Contato",
       contact: "Entrar em contato",
-      explore: "Role para explorar",
-      interactionLabel: "3D / interativa",
-      interactionHint: "Passe sobre a marca ou arraste para inspecionar."
+      explore: "Role para explorar"
     },
     about: {
       sectionLabel: "Perfil / abordagem",

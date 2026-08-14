@@ -1,9 +1,11 @@
 "use client";
 
-import { Canvas, useFrame, useLoader, type ThreeEvent } from "@react-three/fiber";
+import { OrbitControls } from "@react-three/drei";
+import { Canvas, useFrame, useLoader } from "@react-three/fiber";
 import { Suspense, useEffect, useMemo, useRef, type MutableRefObject } from "react";
 import * as THREE from "three";
 import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader.js";
+import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 
 type LogoSceneProps = {
   active?: boolean;
@@ -13,15 +15,6 @@ type LogoSceneProps = {
 function LogoObject({ scrollProgress }: LogoSceneProps) {
   const logo = useLoader(SVGLoader, "/logo.svg");
   const objectRef = useRef<THREE.Group | null>(null);
-  const interactionRef = useRef({
-    dragging: false,
-    hovered: false,
-    lastX: 0,
-    lastY: 0,
-    rotationX: 0,
-    rotationY: 0,
-    spinVelocity: 0
-  });
 
   const geometries = useMemo(() => {
     return logo.paths.flatMap((path) =>
@@ -74,63 +67,19 @@ function LogoObject({ scrollProgress }: LogoSceneProps) {
     const damping = 1 - Math.exp(-delta * 4.5);
     const pointerX = isMobile ? 0 : state.pointer.x;
     const pointerY = isMobile ? 0 : state.pointer.y;
-    const interaction = interactionRef.current;
     const targetX = isMobile ? 0.16 : 1.25;
     const targetY = isMobile ? 1.05 : 0.15;
     const baseScale = isMobile ? 0.38 : 0.72;
 
-    interaction.spinVelocity *= Math.exp(-delta * 2.6);
-    interaction.rotationY += interaction.spinVelocity * delta;
-    if (!interaction.dragging) {
-      interaction.rotationX = THREE.MathUtils.lerp(interaction.rotationX, 0, 1 - Math.exp(-delta * 2.8));
-      interaction.rotationY = THREE.MathUtils.lerp(interaction.rotationY, 0, 1 - Math.exp(-delta * 1.8));
-    }
-
     object.position.x = THREE.MathUtils.lerp(object.position.x, targetX + pointerX * 0.12, damping);
     object.position.y = THREE.MathUtils.lerp(object.position.y, targetY + pointerY * 0.08 - progress * 0.35, damping);
-    object.rotation.x = THREE.MathUtils.lerp(object.rotation.x, -0.12 - pointerY * 0.12 + progress * 0.28 + interaction.rotationX, damping);
-    object.rotation.y = THREE.MathUtils.lerp(object.rotation.y, 0.32 + pointerX * 0.22 + progress * 0.5 + interaction.rotationY, damping);
+    object.rotation.x = THREE.MathUtils.lerp(object.rotation.x, -0.12 - pointerY * 0.12 + progress * 0.28, damping);
+    object.rotation.y = THREE.MathUtils.lerp(object.rotation.y, 0.32 + pointerX * 0.22 + progress * 0.5, damping);
     object.rotation.z = THREE.MathUtils.lerp(object.rotation.z, -0.06 + progress * 0.12, damping);
 
-    const hoverScale = interaction.hovered && !isMobile ? 1.045 : 1;
-    const scale = baseScale * (0.7 + easedSettle * 0.3) * (1 - progress * 0.12) * hoverScale;
+    const scale = baseScale * (0.7 + easedSettle * 0.3) * (1 - progress * 0.12);
     object.scale.setScalar(scale);
   });
-
-  const handlePointerDown = (event: ThreeEvent<PointerEvent>) => {
-    event.stopPropagation();
-    const interaction = interactionRef.current;
-    interaction.dragging = true;
-    interaction.lastX = event.nativeEvent.clientX;
-    interaction.lastY = event.nativeEvent.clientY;
-  };
-
-  const handlePointerMove = (event: ThreeEvent<PointerEvent>) => {
-    const interaction = interactionRef.current;
-
-    if (!interaction.dragging) {
-      return;
-    }
-
-    event.stopPropagation();
-    const deltaX = event.nativeEvent.clientX - interaction.lastX;
-    const deltaY = event.nativeEvent.clientY - interaction.lastY;
-    interaction.lastX = event.nativeEvent.clientX;
-    interaction.lastY = event.nativeEvent.clientY;
-    interaction.rotationY += deltaX * 0.012;
-    interaction.rotationX += deltaY * 0.008;
-    interaction.spinVelocity = deltaX * 0.012;
-  };
-
-  const handlePointerUp = (event: ThreeEvent<PointerEvent>) => {
-    event.stopPropagation();
-    interactionRef.current.dragging = false;
-  };
-
-  const handleClick = (event: ThreeEvent<MouseEvent>) => {
-    event.stopPropagation();
-    interactionRef.current.spinVelocity += 7.5;
-  };
 
   return (
     <group ref={objectRef} scale={0.7}>
@@ -142,17 +91,41 @@ function LogoObject({ scrollProgress }: LogoSceneProps) {
             material={material}
             castShadow
             receiveShadow
-            onClick={handleClick}
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={handlePointerUp}
-            onPointerCancel={handlePointerUp}
-            onPointerOver={() => { interactionRef.current.hovered = true; }}
-            onPointerOut={() => { interactionRef.current.hovered = false; }}
           />
         ))}
       </group>
     </group>
+  );
+}
+
+function LogoControls({ active }: { active: boolean }) {
+  const controlsRef = useRef<OrbitControlsImpl | null>(null);
+
+  useEffect(() => {
+    const controls = controlsRef.current;
+
+    if (!controls) {
+      return undefined;
+    }
+
+    controls.target.set(1.25, 0.15, 0);
+    controls.update();
+
+    return undefined;
+  }, []);
+
+  return (
+    <OrbitControls
+      ref={controlsRef}
+      enabled={active}
+      enableDamping
+      dampingFactor={0.085}
+      enablePan={false}
+      enableZoom={false}
+      rotateSpeed={0.72}
+      minPolarAngle={0.35}
+      maxPolarAngle={Math.PI - 0.35}
+    />
   );
 }
 
@@ -163,6 +136,8 @@ export function LogoScene({ active = true, scrollProgress }: LogoSceneProps) {
       dpr={[1, 1.5]}
       frameloop={active ? "always" : "demand"}
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
+      className="cursor-grab active:cursor-grabbing"
+      style={{ touchAction: "none" }}
     >
       <ambientLight intensity={0.38} />
       <hemisphereLight args={["#F1F3F0", "#080A0C", 0.72]} />
@@ -173,6 +148,7 @@ export function LogoScene({ active = true, scrollProgress }: LogoSceneProps) {
       <Suspense fallback={null}>
         <LogoObject scrollProgress={scrollProgress} />
       </Suspense>
+      <LogoControls active={active} />
     </Canvas>
   );
 }

@@ -63,6 +63,20 @@ Ideias futuras registradas no Linear:
 
 ## Trabalho local / nao publicado
 
+- 2026-08-14: nova rodada de refinamento do hero: a tela de carregamento foi
+  removida, assim como o texto de apoio `3D / interativa` e a instrução para
+  passar o mouse sobre a marca. `LogoScene` agora usa `OrbitControls` para
+  permitir rotação por arraste, com damping, zoom/pan desativados e cursor de
+  interação; o fallback estático para `prefers-reduced-motion` foi preservado.
+  `PortfolioHome`, `Hero`, `LogoScene`, `i18n` e os componentes antigos
+  `PageLoader`/`AnimatedLogo` foram ajustados ou removidos.
+- Linear: tarefa `GAB-16` criada no projeto `Portfolio Pessoal` e mantida em
+  **In Progress** durante a validação e publicação desta rodada.
+- Validações locais: `npm run lint`, `npm run typecheck`, `npm run build` e
+  `git diff --check` aprovados. Estado: **local / nao publicado** até concluir
+  commit, push e deploy; o runtime local respondeu `200` em `/` e confirmou a
+  ausência do loader e do texto removido; `tsconfig.tsbuildinfo` permanece
+  modificado localmente e fora do commit.
 - 2026-08-14: a home ganhou uma tela de carregamento com a marca SVG animada,
   interacao de arraste e clique na logo 3D do hero, favicon automatico a partir
   do `project_url`/`repo_url` quando nao existe logo enviada e um quarto trilho
