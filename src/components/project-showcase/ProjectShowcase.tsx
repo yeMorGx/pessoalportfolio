@@ -130,7 +130,7 @@ export function ProjectShowcase({ project, locale }: { project: Project; locale:
             <div className="relative z-10">
               <p data-project-intro className="font-mono text-[0.68rem] uppercase text-mint">{project.product_role ?? copy.defaultRole}</p>
               <div data-project-intro className="mt-4 flex items-center gap-4">
-                <ProjectLogo title={project.title} url={project.logo_image_url} className="h-12 w-12 sm:h-14 sm:w-14" />
+                <ProjectLogo title={project.title} url={project.logo_image_url} sourceUrl={project.project_url ?? project.repo_url} className="h-12 w-12 sm:h-14 sm:w-14" />
                 <h1 className="max-w-xl font-display text-4xl font-semibold leading-tight text-ceramic sm:text-5xl">{project.title}</h1>
               </div>
               <p data-project-intro className="mt-5 max-w-xl text-sm leading-7 text-slate-300 sm:text-base">{project.description}</p>

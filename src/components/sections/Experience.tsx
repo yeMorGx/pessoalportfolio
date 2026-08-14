@@ -25,6 +25,11 @@ const stackGroupsBase: Omit<StackGroup, "title" | "description">[] = [
   {
     accent: "text-steel",
     items: ["Wazuh", "TheHive", "OWASP Top 10", "RedTeam", "SOC"]
+  },
+  {
+    direction: "reverse",
+    accent: "text-mint",
+    items: ["OpenAI", "Codex", "Claude", "Gemini", "n8n", "LangChain", "Hugging Face", "Ollama", "MCP"]
   }
 ];
 

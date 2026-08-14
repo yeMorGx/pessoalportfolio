@@ -204,7 +204,7 @@ export function ProjectsArchive({ projects, locale }: ProjectsArchiveProps) {
                         <span className={project.featured ? "text-mint" : ""}>{project.featured ? projectCopy.featured : projectCopy.caseLabel}</span>
                       </div>
                       <div className="mt-5 flex items-center gap-3">
-                        <ProjectLogo title={project.title} url={project.logo_image_url} />
+                        <ProjectLogo title={project.title} url={project.logo_image_url} sourceUrl={project.project_url ?? project.repo_url} />
                         <h2 className="font-display text-3xl font-semibold leading-tight text-ceramic sm:text-4xl">{project.title}</h2>
                       </div>
                       <p className="mt-4 text-sm leading-6 text-smoke/75">{project.description}</p>

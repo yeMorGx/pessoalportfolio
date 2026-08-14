@@ -576,7 +576,7 @@ export function AdminProjects({
                   <div className="flex min-w-0 items-center gap-4">
                     <div className="relative h-16 w-24 shrink-0 overflow-hidden border border-white/10 bg-white/5">
                       <Image src={project.cover_image_url || "/project-forge.svg"} alt={`Capa de ${project.title}`} fill sizes="96px" className="object-cover" />
-                      <ProjectLogo title={project.title} url={project.logo_image_url} className="absolute bottom-1 right-1 z-10 h-7 w-7 bg-ink/90" />
+                      <ProjectLogo title={project.title} url={project.logo_image_url} sourceUrl={project.project_url ?? project.repo_url} className="absolute bottom-1 right-1 z-10 h-7 w-7 bg-ink/90" />
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
@@ -946,7 +946,7 @@ export function AdminProjects({
                           {draftPreview.featured ? <span className="font-mono text-[0.58rem] uppercase text-mint">Destaque</span> : null}
                         </div>
                         <div className="mt-4 flex items-center gap-3">
-                          <ProjectLogo title={draftPreview.title} url={previewLogoUrl} className="h-10 w-10" />
+                          <ProjectLogo title={draftPreview.title} url={previewLogoUrl} sourceUrl={draftPreview.projectUrl || draftPreview.repoUrl} className="h-10 w-10" />
                           <h3 className="font-display text-2xl font-semibold text-white">{draftPreview.title}</h3>
                         </div>
                         <p className="mt-3 text-sm leading-6 text-slate-400">{draftPreview.description}</p>

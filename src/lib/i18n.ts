@@ -55,7 +55,9 @@ export const siteCopy = {
       projects: "View projects",
       contactShort: "Contact",
       contact: "Get in touch",
-      explore: "Scroll to explore"
+      explore: "Scroll to explore",
+      interactionLabel: "3D / interactive",
+      interactionHint: "Move over the mark or drag to inspect it."
     },
     about: {
       sectionLabel: "Profile / approach",
@@ -90,7 +92,8 @@ export const siteCopy = {
       groups: [
         ["Dev / Front", "Interfaces, components and responsive experiences."],
         ["Dev / Back", "Services, authentication, data and integrations."],
-        ["Cyber", "Application monitoring, response and security."]
+        ["Cyber", "Application monitoring, response and security."],
+        ["AI / Automation", "Models, agents and workflows that turn ideas into useful systems."]
       ]
     },
     contact: {
@@ -270,7 +273,9 @@ export const siteCopy = {
       projects: "Ver projetos",
       contactShort: "Contato",
       contact: "Entrar em contato",
-      explore: "Role para explorar"
+      explore: "Role para explorar",
+      interactionLabel: "3D / interativa",
+      interactionHint: "Passe sobre a marca ou arraste para inspecionar."
     },
     about: {
       sectionLabel: "Perfil / abordagem",
@@ -305,7 +310,8 @@ export const siteCopy = {
       groups: [
         ["Dev / Front", "Interfaces, componentes e experiências responsivas."],
         ["Dev / Back", "Serviços, autenticação, dados e integrações."],
-        ["Ciber", "Monitoramento, resposta e segurança de aplicações."]
+        ["Ciber", "Monitoramento, resposta e segurança de aplicações."],
+        ["IA / Automação", "Modelos, agentes e fluxos que transformam ideias em sistemas úteis."]
       ]
     },
     contact: {

@@ -1,6 +1,6 @@
 "use client";
 
-import { Canvas, useFrame, useLoader } from "@react-three/fiber";
+import { Canvas, useFrame, useLoader, type ThreeEvent } from "@react-three/fiber";
 import { Suspense, useEffect, useMemo, useRef, type MutableRefObject } from "react";
 import * as THREE from "three";
 import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader.js";
@@ -13,6 +13,15 @@ type LogoSceneProps = {
 function LogoObject({ scrollProgress }: LogoSceneProps) {
   const logo = useLoader(SVGLoader, "/logo.svg");
   const objectRef = useRef<THREE.Group | null>(null);
+  const interactionRef = useRef({
+    dragging: false,
+    hovered: false,
+    lastX: 0,
+    lastY: 0,
+    rotationX: 0,
+    rotationY: 0,
+    spinVelocity: 0
+  });
 
   const geometries = useMemo(() => {
     return logo.paths.flatMap((path) =>
@@ -65,25 +74,82 @@ function LogoObject({ scrollProgress }: LogoSceneProps) {
     const damping = 1 - Math.exp(-delta * 4.5);
     const pointerX = isMobile ? 0 : state.pointer.x;
     const pointerY = isMobile ? 0 : state.pointer.y;
+    const interaction = interactionRef.current;
     const targetX = isMobile ? 0.16 : 1.25;
     const targetY = isMobile ? 1.05 : 0.15;
     const baseScale = isMobile ? 0.38 : 0.72;
 
+    interaction.spinVelocity *= Math.exp(-delta * 2.6);
+    interaction.rotationY += interaction.spinVelocity * delta;
+    if (!interaction.dragging) {
+      interaction.rotationX = THREE.MathUtils.lerp(interaction.rotationX, 0, 1 - Math.exp(-delta * 2.8));
+      interaction.rotationY = THREE.MathUtils.lerp(interaction.rotationY, 0, 1 - Math.exp(-delta * 1.8));
+    }
+
     object.position.x = THREE.MathUtils.lerp(object.position.x, targetX + pointerX * 0.12, damping);
     object.position.y = THREE.MathUtils.lerp(object.position.y, targetY + pointerY * 0.08 - progress * 0.35, damping);
-    object.rotation.x = THREE.MathUtils.lerp(object.rotation.x, -0.12 - pointerY * 0.12 + progress * 0.28, damping);
-    object.rotation.y = THREE.MathUtils.lerp(object.rotation.y, 0.32 + pointerX * 0.22 + progress * 0.5, damping);
+    object.rotation.x = THREE.MathUtils.lerp(object.rotation.x, -0.12 - pointerY * 0.12 + progress * 0.28 + interaction.rotationX, damping);
+    object.rotation.y = THREE.MathUtils.lerp(object.rotation.y, 0.32 + pointerX * 0.22 + progress * 0.5 + interaction.rotationY, damping);
     object.rotation.z = THREE.MathUtils.lerp(object.rotation.z, -0.06 + progress * 0.12, damping);
 
-    const scale = baseScale * (0.7 + easedSettle * 0.3) * (1 - progress * 0.12);
+    const hoverScale = interaction.hovered && !isMobile ? 1.045 : 1;
+    const scale = baseScale * (0.7 + easedSettle * 0.3) * (1 - progress * 0.12) * hoverScale;
     object.scale.setScalar(scale);
   });
+
+  const handlePointerDown = (event: ThreeEvent<PointerEvent>) => {
+    event.stopPropagation();
+    const interaction = interactionRef.current;
+    interaction.dragging = true;
+    interaction.lastX = event.nativeEvent.clientX;
+    interaction.lastY = event.nativeEvent.clientY;
+  };
+
+  const handlePointerMove = (event: ThreeEvent<PointerEvent>) => {
+    const interaction = interactionRef.current;
+
+    if (!interaction.dragging) {
+      return;
+    }
+
+    event.stopPropagation();
+    const deltaX = event.nativeEvent.clientX - interaction.lastX;
+    const deltaY = event.nativeEvent.clientY - interaction.lastY;
+    interaction.lastX = event.nativeEvent.clientX;
+    interaction.lastY = event.nativeEvent.clientY;
+    interaction.rotationY += deltaX * 0.012;
+    interaction.rotationX += deltaY * 0.008;
+    interaction.spinVelocity = deltaX * 0.012;
+  };
+
+  const handlePointerUp = (event: ThreeEvent<PointerEvent>) => {
+    event.stopPropagation();
+    interactionRef.current.dragging = false;
+  };
+
+  const handleClick = (event: ThreeEvent<MouseEvent>) => {
+    event.stopPropagation();
+    interactionRef.current.spinVelocity += 7.5;
+  };
 
   return (
     <group ref={objectRef} scale={0.7}>
       <group scale={[0.0115, -0.0115, 0.0115]}>
         {geometries.map((geometry, geometryIndex) => (
-          <mesh key={geometryIndex} geometry={geometry} material={material} castShadow receiveShadow />
+          <mesh
+            key={geometryIndex}
+            geometry={geometry}
+            material={material}
+            castShadow
+            receiveShadow
+            onClick={handleClick}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerUp}
+            onPointerOver={() => { interactionRef.current.hovered = true; }}
+            onPointerOut={() => { interactionRef.current.hovered = false; }}
+          />
         ))}
       </group>
     </group>

@@ -86,6 +86,11 @@ export function Hero({ locale }: { locale: Locale }) {
         <div className="scene-reticle absolute right-[8%] top-[12%] hidden h-[70%] w-[52%] lg:block" />
       </div>
 
+      <div data-hero-meta className="pointer-events-none absolute right-5 top-[29%] z-10 hidden max-w-40 text-right lg:block">
+        <span className="font-mono text-[0.58rem] uppercase tracking-[0.16em] text-mint">{copy.interactionLabel}</span>
+        <p className="mt-2 text-[0.68rem] leading-5 text-steel">{copy.interactionHint}</p>
+      </div>
+
       <div className="relative mx-auto flex min-h-[calc(92svh-8rem)] max-w-7xl flex-col justify-end sm:min-h-[calc(94svh-8.5rem)]">
         <div className="absolute left-0 top-0 hidden items-center gap-3 font-mono text-[0.62rem] uppercase text-steel sm:flex sm:text-[0.68rem]">
           <span className="h-1.5 w-1.5 bg-mint" />

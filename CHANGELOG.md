@@ -1,372 +1,274 @@
 # CHANGELOG - Continuidade do projeto
 
-Este arquivo e a fonte de contexto para continuar o portfolio em outro chat,
-outra IA ou outro dispositivo. Leia junto com `AGENTS.md` antes de alterar o
-codigo.
+Contexto tecnico para retomar o portfolio em outro chat, IA ou dispositivo.
+Leia junto com `AGENTS.md` antes de alterar o codigo.
 
 ## Como retomar
 
-1. Ler `AGENTS.md` e este arquivo por completo.
-2. Executar `git status --short` antes de editar qualquer arquivo.
-3. Preservar mudancas locais que nao pertencem a tarefa atual.
-4. Consultar primeiro **Trabalho em andamento** e **Decisoes pendentes**.
-5. Atualizar este arquivo sempre que o codigo, banco, configuracao, assets ou
-   comportamento forem alterados.
+1. Ler `AGENTS.md` e este arquivo.
+2. Executar `git status --short` e preservar mudancas locais do usuario.
+3. Consultar o projeto **Portfolio Pessoal** no Linear para tarefas, ideias,
+   prioridades, revisoes, correcoes e cancelamentos.
+4. Atualizar o Linear e este arquivo em toda alteracao relevante.
+
+## Papel do Linear e deste arquivo
+
+- Linear: fonte operacional do trabalho, com Kanban, prioridades, dependencias
+  e detalhes das tarefas.
+- `CHANGELOG.md`: fonte tecnica versionada, com estado publicado, decisoes,
+  banco, verificacoes e ponto de retomada.
+- Projeto Linear: `Portfolio Pessoal`.
+- Documento Linear: `Continuidade do projeto`.
+- Uma tarefa so passa para concluida depois de implementacao e verificacao.
+- Commit, push e deploy so sao registrados depois de confirmados.
 
 ## Estado atual
 
-- Data do registro: 2026-08-12.
+- Atualizado em: 2026-08-14.
 - Branch: `main`.
-- Ultimo commit funcional publicado: `a7b6617`
-  (`fix: refine mobile hero layout`).
-- Documento de continuidade publicado inicialmente no commit `2e8a69f`.
-- Deploy: Vercel conectado a `main`; o refinamento mobile `a7b6617` foi
-  enviado e verificado em producao em 2026-08-12.
-- Producao: `https://pessoalportfolio.vercel.app`, respondendo `200` e servindo
-  o novo header e a localizacao da Baixada Santista.
-- Banco e autenticacao: Supabase Postgres, Auth e Storage.
+- HEAD publicado: `8ec7d79` (`fix: authorize resume uploads by admin account`).
+- Ultimo commit funcional: `8ec7d79` (`fix: authorize resume uploads by admin account`).
+- Producao: `https://pessoalportfolio.vercel.app`.
+- Deploy: Vercel conectado a `main`.
+- Dados: Supabase Postgres, Auth e Storage.
 - Contato provisorio: `gabrielmcgoes@gmail.com`.
-- Contato futuro: `contact@gabrielmorgado.dev` quando o dominio for comprado.
-- Redes: GitHub `https://github.com/yeMorGx` e LinkedIn
-  `https://www.linkedin.com/in/gabrielmcgoes`.
-- O arquivo gerado `tsconfig.tsbuildinfo` esta modificado localmente e nao deve
-  ser incluido em commit sem necessidade.
+- Contato futuro: `contact@gabrielmorgado.dev`.
+- GitHub: `https://github.com/yeMorGx`.
+- LinkedIn: `https://www.linkedin.com/in/gabrielmcgoes`.
+- `tsconfig.tsbuildinfo` esta modificado localmente e nao deve ser incluido sem
+  necessidade.
 
-## Correcao publicada - upload de projetos
+## Trabalho planejado
 
-Estado: **publicada** no commit `cf5ca18`.
+O acompanhamento detalhado esta no Kanban do Linear. Ordem final definida pelo
+usuario:
 
-- Em 2026-08-12, a confirmacao da etapa final do editor de projetos falhou em
-  producao com o digest `946842490@E394`.
-- O log de runtime da Vercel confirmou `Body exceeded 1 MB limit`, status
-  `413`, no `POST /admin`. A causa era o envio da capa e de todas as imagens da
-  galeria dentro do corpo de uma unica Server Action.
-- `src/app/admin/actions.ts` agora gera URLs assinadas e temporarias para cada
-  imagem depois de validar a sessao do administrador. A Server Action final
-  recebe somente URLs e dados textuais pequenos.
-- `src/components/admin/AdminProjects.tsx` envia cada arquivo diretamente do
-  navegador ao Supabase Storage, mostra progresso, bloqueia envios duplicados
-  e mantem o modal aberto quando ocorre uma falha.
-- O ciclo das URLs de previa da capa e da galeria foi separado. Isso corrige a
-  capa quebrada que aparecia na revisao ao selecionar a galeria depois dela.
-- Erros esperados do banco agora aparecem dentro da revisao. Slug duplicado e
-  banco sem as migracoes necessarias recebem mensagens especificas, sem cair
-  na pagina generica de erro do Next.js.
-- Arquivos enviados durante uma tentativa que falhar sao removidos do Storage
-  para evitar midia orfa.
-- Capa e imagens da galeria aceitam ate 20 MB por arquivo. O limite da Server
-  Action deixa de depender do tamanho total da galeria.
-- `src/app/admin/page.tsx` diferencia a confirmacao de projeto criado da de
-  projeto atualizado.
-- Verificacoes locais concluidas: `npm run typecheck`, `npm run lint` e
-  `npm run build` aprovados.
-- QA visual concluido em rota temporaria local, removida depois do teste: capa
-  e duas imagens de galeria permaneceram validas na revisao, todas com
-  dimensoes naturais carregadas. Nenhum projeto de teste foi criado e nenhum
-  arquivo foi enviado ao Supabase durante essa verificacao.
-- Depois da remocao da rota temporaria e do cache de tipos correspondente,
-  `npm run lint`, `npm run typecheck`, `npm run build` e `git diff --check`
-  foram aprovados. O build final contem somente as oito rotas esperadas.
-- O commit `cf5ca18` foi enviado para `main`. O deploy de producao
-  `pessoalportfolio-d39kh5xf5-yemorgxs-projects.vercel.app` ficou `Ready` em
-  44 segundos. A URL publica respondeu `200`, `/admin` manteve o redirecionamento
-  `307` para `/admin/login` e nao havia erros registrados no novo deploy.
+1. Ativar a notificacao por e-mail do formulario com a chave do Resend
+   (`GAB-6`); persistencia e painel ja estao publicados.
+2. Enviar o PDF final pelo painel e ativar os avisos do fluxo de curriculo
+   (`GAB-7`); solicitacao, aprovacao e acesso ja estao publicados.
+3. QA final e publicacao definitiva (`GAB-5`).
 
-## Ajuste publicado - espacamento da logo 3D
+Dependencias ainda necessarias:
 
-Estado: **publicado** no commit `f2a8813`.
+- Criar/configurar `RESEND_API_KEY`; o Supabase do formulario ja esta ativo.
+- Comprar e verificar `gabrielmorgado.dev` para o remetente definitivo.
+- Fornecer o curriculo final em PDF.
 
-- `src/components/sections/Hero.tsx`: o palco da logo 3D foi deslocado
-  levemente para a direita somente a partir do desktop, aumentando o respiro
-  entre o objeto e os textos do hero sem alterar escala, camera ou mobile.
-- Deslocamento visual: aproximadamente 3% no desktop e 4% em telas largas.
-- QA visual aprovado no desktop: a logo ganhou um intervalo maior em relacao
-  ao fim do texto, permaneceu centralizada dentro da reticula e nao sofreu
-  recorte.
-- QA em viewport mobile de 390 x 844 aprovado: o deslocamento nao e aplicado,
-  os dois canvases 3D carregaram e nao houve overflow horizontal.
-- `npm run lint`, `npm run typecheck`, `npm run build` e `git diff --check`
-  aprovados; o build final manteve as oito rotas esperadas.
-- O commit `f2a8813` foi enviado para `main`. O deploy de producao
-  `pessoalportfolio-afzra3654-yemorgxs-projects.vercel.app` ficou `Ready` em
-  40 segundos, a URL publica respondeu `200` e nao registrou erros de runtime.
+Ideias futuras registradas no Linear:
 
-## Ajuste publicado - hero e header mobile
+- `GAB-11` (media): icone ou logo por projeto.
+- `GAB-12` (media): stacks e ferramentas de IA.
+- `GAB-13` (baixa): globo interativo com retorno a Santos.
 
-Estado: **publicado** no commit `a7b6617`.
+## Trabalho local / nao publicado
 
-- `src/components/sections/SiteHeader.tsx`: removido o texto `GM` do header
-  mobile. O link da marca mantem um nome acessivel e mostra apenas a logo no
-  celular; o nome completo continua visivel a partir de `sm`.
-- `src/components/three/LogoScene.tsx`: a logo 3D mobile foi reduzida e
-  deslocada para baixo para aparecer inteira depois do header, sem alterar o
-  enquadramento desktop.
-- `src/components/sections/Hero.tsx`: a primeira tela mobile ficou um pouco
-  mais curta e os dois CTAs passaram a usar colunas estaveis, com tipografia e
-  padding adaptados para telas estreitas.
-- Abaixo de 360 px, o segundo CTA usa o rotulo curto `Contato`; em larguras
-  maiores continua `Entrar em contato`. Os dois rotulos nao quebram linha.
-- QA em 390 x 844 aprovado: logo inteira abaixo do header, CTAs alinhados em
-  uma linha, dois canvases carregados, sem `GM`, sem overflow e sem erros no
-  navegador.
-- QA adicional em 320 x 740 aprovado: `Ver projetos` e `Contato` permanecem
-  em uma linha e dentro dos botoes, sem overflow horizontal.
-- Desktop revisado depois das mudancas: nome completo preservado no header,
-  enquadramento 3D anterior mantido e sem overflow.
-- `npm run lint`, `npm run typecheck`, `npm run build` e `git diff --check`
-  aprovados; o build final manteve as oito rotas esperadas.
-- O commit `a7b6617` foi enviado para `main`. O deploy de producao
-  `pessoalportfolio-kehqo6692-yemorgxs-projects.vercel.app` ficou `Ready` em
-  41 segundos, a URL publica respondeu `200` e nao registrou erros de runtime.
+- 2026-08-14: a home ganhou uma tela de carregamento com a marca SVG animada,
+  interacao de arraste e clique na logo 3D do hero, favicon automatico a partir
+  do `project_url`/`repo_url` quando nao existe logo enviada e um quarto trilho
+  publico para IA e automacao com OpenAI, Codex, Claude, Gemini, n8n, LangChain,
+  Hugging Face, Ollama e MCP. As mudancas cobrem `PageLoader`, `AnimatedLogo`,
+  `LogoScene`, `ProjectLogo`, `ProjectCard`, acervo, case, admin, `Experience`,
+  `PortfolioHome`, `Hero` e textos bilingues em `i18n`.
+- Linear: tarefa `GAB-15` criada no projeto `Portfolio Pessoal` e marcada como
+  **In Progress** para acompanhar esta entrega.
+- Validacoes locais: `npm run lint`, `npm run typecheck` e `npm run build`
+  aprovados; runtime local respondeu 200 em `/` e `/pt` e confirmou loader,
+  interacao e trilho de IA nas duas linguas.
+- Estado: **local / nao publicado**; sem commit, push ou deploy nesta etapa.
+- Retomada: revisar visualmente a home em desktop/mobile, confirmar os favicons
+  dos projetos reais e publicar somente depois do QA final do usuario.
+- Esta versao condensada do `CHANGELOG.md` permanece modificada localmente e
+  nao foi incluida nos commits funcionais.
+- `tsconfig.tsbuildinfo` continua modificado localmente e fora dos commits.
 
-## Lote publicado em 2026-08-12
+## Entregas publicadas
 
-As mudancas abaixo foram publicadas no commit funcional `a14d95c` depois das
-verificacoes descritas nesta secao.
+### `1569254` + `2383e80` + `b3d9c01` + `8ec7d79` - Acesso protegido ao curriculo (`GAB-7`)
 
-### Continuidade entre IAs e dispositivos
+- `/resume` e `/pt/curriculo` recebem nome, e-mail profissional, empresa,
+  cargo, LinkedIn opcional e contexto da oportunidade, com validacao no
+  servidor, honeypot, tempo minimo e limite de tres solicitacoes por dia.
+- O visitante recebe um token privado de acompanhamento; o painel
+  `/admin/resume` permite revisar, anotar, aprovar, recusar, renovar, revogar e
+  excluir solicitacoes, alem de enviar ou substituir o PDF final.
+- O PDF usa o bucket privado `private-resume`; aprovacoes geram token aleatorio
+  armazenado apenas como hash, link de 72 horas e URL assinada de 60 segundos.
+  O segredo fica no fragmento do navegador e nao entra nos logs da Vercel.
+- O Gmail atual abre uma resposta pronta com o link quando o Resend nao esta
+  configurado. Com chave e remetente verificado, os avisos automaticos ja estao
+  implementados.
+- O login administrativo e o Gmail de contato agora sao responsabilidades
+  separadas: `ADMIN_EMAIL` autoriza a conta real do painel, enquanto o Gmail
+  continua como destino das mensagens. O registro dinamico `portfolio_admins`
+  substitui as politicas RLS que dependiam de um e-mail fixo.
+- O envio e a remocao do PDF passam pela Edge Function `resume-file-admin`, que
+  valida a sessao administrativa e entrega uma URL assinada ao navegador. Isso
+  corrige o erro `new row violates row-level security policy` sem tornar o
+  bucket publico.
+- Migracoes `20260813170000`, `20260813173000` e `20260813180000` aplicadas;
+  Edge Functions `submit-resume-request`, `resume-access`,
+  `review-resume-request` e `resume-file-admin` publicadas.
+- Typecheck, lint e build aprovados. QA remoto confirmou tres solicitacoes,
+  bloqueio da quarta, acompanhamento, barreiras antispam, revisao publica
+  negada e RPC interno oculto; todos os registros artificiais foram removidos.
+- QA desktop/mobile passou sem overflow ou erros. O deploy da correcao
+  `pessoalportfolio-a1yzeo4e0-yemorgxs-projects.vercel.app` ficou pronto em 45 s;
+  PT/EN, acesso privado e protecao do painel foram confirmados no alias publico.
 
-- Arquivos: `CHANGELOG.md` e `AGENTS.md`.
-- Este documento foi criado como fonte de passagem de contexto.
-- O `AGENTS.md` agora obriga futuras IAs a ler e atualizar o changelog em
-  qualquer alteracao do projeto.
-- Esta documentacao e os itens tecnicos seguintes estao publicados no
-  repositorio.
+### `ebd01de` - Formulario e caixa de contato protegidos (`GAB-6`)
 
-### Logo 3D metalico
+- O contato bilingue agora envia mensagens para uma Edge Function do Supabase,
+  com validacao no servidor, honeypot, tempo minimo e limite de tres envios por
+  IP a cada 15 minutos.
+- As mensagens ficam persistidas com RLS restrita a
+  `gabrielmcgoes@gmail.com`; `/admin/messages` permite buscar, ler, responder,
+  arquivar e excluir, com contador integrado ao painel de projetos.
+- O aviso pelo Resend esta preparado para usar o Gmail atual e
+  `onboarding@resend.dev`; sem `RESEND_API_KEY`, o envio continua funcionando e
+  a mensagem fica marcada como `not_configured` no painel.
+- Migracoes `20260813152500`, `20260813154500`, `20260813160000` e
+  `20260813162000` aplicadas; a Edge Function `submit-contact` foi publicada.
+- Typecheck, lint e build aprovados. QA remoto confirmou tres envios aceitos,
+  quarto envio bloqueado, validacoes antispam e RPC publico indisponivel; os
+  registros artificiais foram removidos.
+- Deploy `pessoalportfolio-finb6jdst-yemorgxs-projects.vercel.app` ficou pronto
+  em 42 s. O alias publico foi validado em PT/EN sem erros, e a caixa
+  administrativa redireciona visitantes nao autenticados para o login.
 
-- Arquivo: `src/components/three/LogoScene.tsx`.
-- As tres camadas extrudadas que se atravessavam durante o scroll foram
-  substituidas por uma unica peca 3D.
-- Material metalico claro com reflexo mint e luz coral sutil.
-- O movimento por ponteiro e scroll foi preservado.
-- Validado visualmente no inicio do hero e durante o scroll; canvas visivel e
-  sem intersecoes entre camadas.
+### `e04ec13` - Globo interativo (`GAB-13`)
 
-### Header publico
+- O globo da localizacao aceita arraste por mouse/toque, usa inercia curta e
+  retorna automaticamente para a orientacao inicial da Baixada Santista.
+- O CTA do Maps foi separado da area 3D para evitar abertura durante o gesto;
+  movimento reduzido preserva a versao estatica sem montar controles.
+- Lint, typecheck, build e QA desktop/mobile aprovados. Deploy
+  `pessoalportfolio-ji3v0in3w-yemorgxs-projects.vercel.app` ficou pronto em 51 s
+  e o alias publico foi validado sem overflow ou erros visuais.
 
-- Arquivo: `src/components/sections/SiteHeader.tsx`.
-- Removidos todos os links publicos para `/admin`.
-- A rota `/admin` continua existente e protegida pelo middleware; subdominio
-  pode ser avaliado no futuro, mas nao e necessario para seguranca.
-- Novo header modular com navegacao numerada e CTA de contato no desktop.
-- Menu mobile foi simplificado e nao expoe o painel administrativo.
-- Header validado visualmente em desktop.
+### `c538c37` + `dddadac` - Logos dos projetos (`GAB-11`)
 
-### Estabilidade do editor de projetos
+- O modelo e o editor aceitam logo opcional por projeto, com upload direto ao
+  Storage, preview, remocao e uso em cards, acervo e pagina do case.
+- PNG/WebP quadrado entre 128 e 2048 px, ate 2 MB; sem arquivo, um monograma do
+  titulo preserva a identidade visual. O fallback de `+Ctrl` foi refinado para
+  `+C` no commit complementar.
+- A migracao `20260813141000_add_project_logo.sql` foi aplicada ao Supabase.
+  Lint, typecheck, build e QA de producao desktop/mobile foram aprovados com os
+  quatro projetos reais, sem overflow ou erros de navegador.
+- Deploy final `pessoalportfolio-8u5mq8m36-yemorgxs-projects.vercel.app` ficou
+  pronto em 44 s e assumiu o alias publico.
 
-- Arquivo: `src/components/admin/AdminProjects.tsx`.
-- O modal nao fecha mais ao clicar no fundo escuro.
-- Na etapa de revisao, o modal permaneceu aberto apos avancar, esperar seis
-  segundos e clicar fora.
-- Saidas permitidas: botoes explicitos, tecla Escape ou salvamento.
+### `c6ba7c5` - Catalogo de IA e automacao (`GAB-12`)
 
-### Redesign da pagina administrativa
+- O editor ganhou a categoria `IA e automacao` com OpenAI, Codex, Claude,
+  Gemini, n8n, LangChain, Hugging Face, Ollama e MCP.
+- `StackLogo` resolve as marcas via Simple Icons ou Dashboard Icons e usa o
+  monograma textual quando uma imagem externa falha.
+- Logos responderam nas CDNs configuradas; lint, typecheck e build aprovados.
+- Deploy `pessoalportfolio-6l3kq33s9-yemorgxs-projects.vercel.app` ficou pronto
+  em 42 s. Alias publico e protecao do painel foram validados; a categoria nao
+  foi aberta visualmente em producao por exigir login do usuario.
 
-- Arquivo: `src/components/admin/AdminProjects.tsx`.
-- Nova estrutura de console editorial com identidade e navegacao lateral.
-- Indicadores de projetos publicados, destaques e imagens de galeria.
-- Busca por titulo, slug ou tecnologia.
-- Filtro entre todos os projetos e destaques.
-- Lista mostra ordem, capa, rota, stacks, quantidade de telas, status e acoes.
-- Validada visualmente em desktop e mobile; busca testada com sucesso.
+### `2c8aae7` - Portfolio bilingue (`GAB-10`)
 
-### Divisores da secao de contato
+- `/` e `/projects` usam ingles; `/pt` e `/pt/projetos` preservam portugues.
+  Home, acervo, cases, galeria, navegacao e metadados foram internacionalizados
+  sem alterar Supabase ou admin.
+- O seletor EN/PT preserva a pagina equivalente e atualiza o idioma do
+  documento. URLs antigas em `/projetos` redirecionam para a versao em
+  portugues; canonical, `hreflang` e `x-default` sao definidos por rota.
+- Lint, typecheck e build aprovados. QA de producao desktop/mobile confirmou os
+  quatro projetos reais, trilho horizontal, troca de idioma, redirects, zero
+  overflow e nenhum erro de navegador.
+- Deploy `pessoalportfolio-g2ocpgltq-yemorgxs-projects.vercel.app` ficou pronto
+  em 47 s e o alias publico foi validado.
 
-- Arquivos: `src/components/sections/Contact.tsx` e
-  `src/components/sections/FooterWordmark.tsx`.
-- A lista de Email, GitHub e LinkedIn agora usa uma unica moldura horizontal;
-  os itens internos possuem apenas um divisor, evitando emendas ou linhas
-  interrompidas no iOS.
-- Removida a borda inferior duplicada do wordmark. A linha animada com o
-  marcador coral passou a ser o unico fechamento visual do bloco `MORGADO`.
-- O fundo do novo header foi corrigido para manter o contraste sobre a secao
-  clara de contato, inclusive no Safari/iOS.
-- A altura de linha do wordmark foi normalizada para impedir recortes nas
-  letras arredondadas junto a regua inferior.
-- QA em viewport de iPhone confirmou linhas alinhadas e ausencia de overflow
-  horizontal.
-- `npm run lint`, `npm run typecheck` e `git diff --check` aprovados depois do
-  ajuste. `npm run build` tambem aprovado e a alteracao esta publicada.
+### `fe8ea8b` - Acervo horizontal de projetos (`GAB-9`)
 
-### Localizacao 3D e recorte do footer
+- A home mostra tres projetos e um acesso para o acervo completo.
+- `/projetos` usa trilho horizontal pinado no desktop, com quatro projetos
+  reais, progresso, setas e navegacao pelas teclas direcionais.
+- Mobile e movimento reduzido usam leitura vertical sem controles flutuantes.
+- Rota com 4,91 kB e 162 kB de First Load JS; lint, tipos e build aprovados.
+- Deploy `pessoalportfolio-f1drlm2xt-yemorgxs-projects.vercel.app` ficou pronto
+  em 43 s; alias publico e QA desktop/mobile aprovados sem erros ou overflow.
 
-- Arquivos: `src/components/three/LocationGlobe.tsx`,
-  `src/components/sections/FooterLocation.tsx`, `Contact.tsx` e
-  `FooterWordmark.tsx`.
-- Nova faixa clicavel de localizacao com globo 3D metalico, continentes em
-  pontos, grade geografica e marcador na Baixada Santista.
-- O bloco identifica Santos / Sao Vicente e abre o Google Maps nas
-  coordenadas aproximadas `-23.962, -46.363`.
-- O wordmark `MORGADO` agora termina recortado e desaparece por mascara suave
-  na base, seguindo a referencia sem copiar sua composicao.
-- O globo reage de forma sutil ao ponteiro e permanece estatico quando o
-  usuario prefere movimento reduzido. Sua geometria tambem e descartada ao
-  sair da pagina para evitar acumulo de memoria.
-- QA visual aprovado em desktop e viewport de iPhone. O globo, o marcador, o
-  recorte do wordmark e o link do Google Maps renderizaram sem sobreposicao ou
-  overflow horizontal.
-- Ajuste posterior solicitado pelo usuario: a superficie abstrata preta e os
-  continentes aproximados foram substituidos por texturas terrestres reais de
-  cor e relevo, armazenadas localmente em `public/earth-atmos-2048.jpg` e
-  `public/earth-normal-2048.jpg`.
-- A grade tecnica foi suavizada, a iluminacao foi recalibrada e a orientacao
-  inicial agora coloca a Baixada Santista na face visivel do globo. O marcador
-  coral e a interacao por ponteiro foram preservados.
-- QA visual confirmou continentes e relevo reconheciveis, com a America do Sul
-  e o marcador coral visiveis no enquadramento. O ultimo ajuste clareou a
-  textura, reduziu o reflexo verde e manteve a direcao escura do componente.
-- `npm run lint`, `npm run typecheck`, `git diff --check` e `npm run build`
-  aprovados depois da troca da superficie. Alteracao publicada.
+### `93680f0` - Performance inicial (`GAB-8`)
 
-### Catalogo ampliado de tecnologias
+- O globo 3D e suas texturas de 829,5 kB agora carregam apenas ao se aproximar
+  da secao de localizacao; o topo monta somente o canvas do hero.
+- Os canvases pausam a renderizacao continua fora da area visivel.
+- O favicon servido caiu de 361,4 kB para 0,6 kB.
+- Build final: home com 168 kB de First Load JS e oito rotas.
+- Lighthouse mobile em producao: Performance 80, Acessibilidade 89, Boas
+  praticas 100, SEO 100, FCP 1,1 s, LCP 2,1 s, TBT 730 ms e CLS 0.
+- Deploy `pessoalportfolio-lnomne7ux-yemorgxs-projects.vercel.app` pronto em
+  43 s; alias publico respondeu 200 e o QA mobile nao encontrou erros.
 
-- Arquivos: `src/components/admin/AdminProjects.tsx` e
-  `src/components/ui/StackLogo.tsx`.
-- O primeiro estagio do editor de projetos agora organiza as sugestoes em
-  Frontend, Backend, Mobile, Dados, Plataforma e APIs e Seguranca.
-- Foram adicionadas opcoes como Tailwind CSS, Vue.js, Angular, Svelte, Node.js,
-  Java, Spring Boot, C#, .NET, Go, Ruby, Perl, Flutter, MongoDB, Redis, Docker,
-  Kubernetes e provedores de nuvem, entre outras.
-- O campo livre continua disponivel para qualquer tecnologia fora do catalogo.
-- As novas opcoes usam logos via CDN quando ha um icone correspondente e
-  mantem o fallback textual para tecnologias personalizadas. AWS e Azure usam
-  o catalogo Dashboard Icons porque nao estao disponiveis nos identificadores
-  atuais do Simple Icons.
-- Selecao multipla validada com Tailwind CSS e Go; o campo foi atualizado para
-  `Tailwind CSS, Go` e ambos os botoes mantiveram o estado selecionado.
-- Layout aprovado em desktop e viewport mobile de 390 x 844, sem overflow
-  horizontal. A rota temporaria `src/app/qa-stacks/page.tsx` foi removida apos
-  o teste. O cache correspondente em `.next/types/app/qa-stacks` tambem foi
-  removido.
-- `npm run lint`, `npm run typecheck` e `npm run build` aprovados apos a
-  remocao da rota de QA. Alteracao publicada.
+### `d0f6f95` - Header mobile progressivo (`GAB-14`)
 
-### Verificacoes ja executadas nessas mudancas
+- No topo mobile, o header mostra somente o menu; depois de 48 px de scroll,
+  revela a barra completa e a pequena logo.
+- O retorno ao topo recompata a barra e o desktop permanece inalterado.
+- QA aprovado em 390 x 844, 700 x 844 e 1440 x 900, sem overflow.
 
-- `npm run typecheck`: aprovado na rodada final de 2026-08-12.
-- `npm run lint`: aprovado; a compilacao de producao tambem repetiu a
-  verificacao de lint e tipos com sucesso.
-- `npm run build`: aprovado na rodada final de 2026-08-12, com as oito paginas
-  geradas e sem erro de compilacao.
-- `git diff --check`: aprovado, sem erros de espaco em branco.
-- QA visual do 3D, header, modal e admin realizado no navegador local.
-- QA final do rodape realizado em viewport mobile de 390 x 844: dois canvases
-  3D carregados, nenhum erro ou aviso no navegador e link de localizacao
-  apontando para `https://www.google.com/maps/search/?api=1&query=-23.962,-46.363`.
-- Uma rota temporaria `src/app/qa-admin/page.tsx` foi criada para testes e ja
-  foi removida. O cache correspondente em `.next/types/app/qa-admin` tambem
-  foi removido.
-- Uma nova rodada completa devera ser executada depois que as decisoes de
-  contato e curriculo forem implementadas.
+### `a7b6617` - Hero e header mobile
 
-### QA consolidado do lote - 2026-08-12
+- Removeu `GM` do header mobile e preservou o nome completo no desktop.
+- Reenquadrou a logo 3D e estabilizou os CTAs em 390 x 844 e 320 x 740.
+- Publicado e verificado na Vercel; sem overflow ou erros de navegador.
 
-- Pagina publica validada em desktop: dois canvases 3D renderizados, logo
-  metalico sem camadas se atravessando, globo de localizacao visivel, nenhuma
-  imagem quebrada, nenhum link publico para `/admin` e ausencia de overflow
-  horizontal.
-- Pagina publica validada em viewport mobile de 390 x 844: hero 3D enquadrado,
-  dois canvases carregados, nenhuma imagem quebrada e menu movel abrindo e
-  fechando com Sobre, Projetos, Stack e Contato.
-- Pagina de projeto validada em desktop e mobile sem overflow ou imagens
-  quebradas. O modal da galeria abriu com imagem, titulo, descricao e controle
-  de fechamento corretos.
-- Os projetos atuais do Supabase possuem uma tela de galeria cada. Por isso, o
-  loop automatico com multiplas imagens nao foi reexecutado neste QA
-  consolidado; o comportamento havia sido validado no trabalho anterior do
-  carrossel e seu codigo nao foi alterado neste lote.
-- A rota `/admin` redirecionou corretamente para `/admin/login`. Os campos de
-  e-mail e senha continuam obrigatorios e o acesso Google aponta para
-  `/auth/google`. Nenhum erro ou aviso apareceu no navegador.
-- O painel autenticado e o editor guiado ja haviam sido validados por rota
-  temporaria de QA, removida depois do teste. Nesta rodada nao foi realizada
-  autenticacao real nem alteracao de dados no Supabase.
-- `npm run lint`, `npm run typecheck` e `npm run build` ja estavam aprovados
-  depois da ultima mudanca de codigo. Depois deles, somente este planejamento e
-  os resultados de QA foram adicionados ao changelog.
-- O usuario aprovou o lancamento. O commit `a14d95c` foi enviado para `main` e
-  a pagina publica da Vercel confirmou a nova versao com resposta `200`.
+### `f2a8813` - Espacamento da logo 3D
 
-## Decisoes pendentes do usuario
+- Deslocou o palco 3D para a direita somente no desktop.
+- QA desktop e mobile aprovado sem recorte ou alteracao de enquadramento mobile.
 
-Ordem definida pelo usuario em 2026-08-12: o formulario de contato e o fluxo
-de curriculo para recrutadores serao as duas ultimas funcionalidades. Como o
-site ainda esta em teste, essas decisoes nao bloqueiam o fechamento e a
-publicacao do conjunto visual e administrativo que ja esta pronto.
+### `cf5ca18` - Upload de projetos
 
-Quando essas duas etapas finais forem retomadas, ainda sera necessario:
+- Corrigiu o erro `413 Body exceeded 1 MB limit` da etapa final do admin.
+- O navegador envia arquivos diretamente ao Supabase por URLs assinadas; a
+  Server Action recebe apenas dados textuais e URLs.
+- Mantem o modal aberto em falhas, mostra progresso e remove midia orfa.
+- Capa e galeria aceitam ate 20 MB por arquivo.
+- Lint, typecheck, build e QA de previews aprovados; deploy sem erros.
 
-1. Autorizar e configurar **Resend + Supabase** para o formulario de contato.
-2. Confirmar os dados exigidos na solicitacao de curriculo e a aprovacao
-   manual no admin.
-3. Enviar o curriculo em PDF para testar o download protegido final.
+### `a14d95c` - Experiencia publica e admin refinados
 
-Recomendacao atual:
+- Logo 3D consolidada em uma peca metalica, sem camadas se atravessando.
+- Header publico reorganizado e sem link para `/admin`.
+- Admin redesenhado com busca, filtros, indicadores e editor mais estavel.
+- Modal do editor deixa de fechar ao clicar no fundo durante a revisao.
+- Catalogo de stacks ampliado e agrupado, com logos via CDN e fallback.
+- Divisores de contato corrigidos para desktop e iOS.
+- Globo 3D com texturas reais, relevo, marcador da Baixada Santista e Maps.
+- Footer `MORGADO` com recorte e fade na base.
+- QA publico, admin, projetos e mobile aprovado antes do push.
 
-- Usar Resend para e-mail transacional e Supabase para armazenar mensagens,
-  solicitacoes, status de aprovacao e tokens de download.
-- Enquanto `gabrielmorgado.dev` nao estiver comprado e verificado, o Resend
-  fica limitado ao fluxo de testes. Depois, usar
-  `contact@gabrielmorgado.dev` como remetente.
-- A "comprovacao" do recrutador deve ser coleta de sinais e revisao manual,
-  nao uma promessa automatica de validar juridicamente uma empresa.
+### `c3ba232` - Footer de assinatura
 
-## Proximos passos planejados
+- Adicionou wordmark grande `MORGADO`, entrada GSAP e marcador ligado ao scroll.
+- Incluiu responsividade e suporte a `prefers-reduced-motion`.
 
-1. Como penultima funcionalidade, implementar o formulario de contato com
-   envio, feedback e protecao contra abuso.
-2. Como ultima funcionalidade, implementar solicitacao, aprovacao e download
-   protegido do curriculo para recrutadores.
-3. Executar QA final dos fluxos de contato e curriculo antes da publicacao
-   definitiva dessas funcionalidades.
+### `7272a10` - Editor guiado de projetos
 
-## Funcionalidades publicadas importantes
+- Dividiu criacao e edicao em Essencial, Produto, Midia e Revisao.
+- Adicionou validacao, preview final e preservacao de valores entre etapas.
 
-### Commit `a14d95c` - experiencia publica e admin refinados
+### `69227ba` - Galeria de projetos
 
-- Logo 3D consolidado em uma unica peca metalica.
-- Header publico reorganizado sem expor o acesso ao admin.
-- Painel administrativo redesenhado e editor de projetos estabilizado.
-- Catalogo ampliado de tecnologias com grupos e logos.
-- Divisores da secao de contato corrigidos para desktop e iOS.
-- Localizacao 3D da Baixada Santista com texturas terrestres reais, marcador
-  coral e link para o Google Maps.
-- Footer `MORGADO` recortado com fade na base.
-- Lint, typecheck, build e QA visual desktop/mobile aprovados antes do push.
+- Carrossel continuo com pausa no hover, foco elevado e blur nas vizinhas.
+- Clique abre modal com imagem, titulo e descricao da tela.
 
-### Commit `c3ba232` - footer de assinatura
+### `36f59c4` - Redesign e paginas de projeto
 
-- Footer existente preservado.
-- Wordmark grande `MORGADO`, com `G` coral.
-- Entrada com GSAP e marcador ligado ao scroll.
-- Layout responsivo e suporte a `prefers-reduced-motion`.
-
-### Commit `7272a10` - editor guiado de projetos
-
-- Modal de criacao e edicao dividido em quatro etapas: Essencial, Produto,
-  Midia e Revisao.
-- Validacao nativa antes de avancar.
-- Preview final com card, links, stacks, status e galeria.
-- Valores preservados ao voltar entre etapas.
-
-### Commit `69227ba` - carrossel da galeria
-
-- Carrossel continuo com pausa no hover.
-- Imagem em foco sobe e as vizinhas recebem blur.
-- Clique abre modal explicativo da tela.
-- Descricoes da galeria armazenadas no projeto.
-
-### Commit `36f59c4` - redesign e pagina de projeto
-
-- Redesign completo do portfolio com GSAP e Three.js.
-- Paginas individuais de projeto com produto, stack, imagens, videos e
-  informacoes detalhadas.
-- Foto real de Gabriel em `public/gabriel-morgado.jpg`.
+- Redesign do portfolio com GSAP e Three.js.
+- Paginas individuais com produto, stacks, imagens, videos e detalhes.
+- Foto real em `public/gabriel-morgado.jpg`.
 
 ## Banco de dados
 
-Migracoes presentes em `supabase/migrations`:
+Migracoes em `supabase/migrations`:
 
 - `20260810135700_init_projects.sql`
 - `20260810135800_seed_projects.sql`
@@ -374,10 +276,17 @@ Migracoes presentes em `supabase/migrations`:
 - `20260810150000_add_project_showcase_fields.sql`
 - `20260810151500_add_gallery_image_sizes.sql`
 - `20260811224500_add_gallery_image_descriptions.sql`
+- `20260813141000_add_project_logo.sql`
+- `20260813152500_create_contact_messages.sql`
+- `20260813154500_contact_admin_access.sql`
+- `20260813160000_contact_rate_limit.sql`
+- `20260813162000_contact_notification_status.sql`
+- `20260813170000_create_resume_requests.sql`
+- `20260813173000_resume_access.sql`
+- `20260813180000_dynamic_admin_access.sql`
 
-A migracao de descricoes da galeria foi aplicada ao projeto Supabase durante o
-trabalho anterior. Qualquer nova tabela deve ser criada por migracao e refletida
-em `supabase/schema.sql` quando aplicavel.
+A migracao das descricoes da galeria ja foi aplicada. Novas tabelas ou campos
+devem usar migracao e atualizar `supabase/schema.sql` quando aplicavel.
 
 ## Ambiente e publicacao
 
@@ -388,25 +297,27 @@ Variaveis documentadas em `.env.example`:
 - `NEXT_PUBLIC_SITE_URL`
 - `ADMIN_EMAIL`
 
-Nao registrar os valores reais neste arquivo. Futuramente, o envio de e-mail
-deve adicionar ao exemplo apenas os nomes das variaveis necessarias, como
-`RESEND_API_KEY` e enderecos de remetente/destino.
+Nao registrar segredos neste arquivo. O envio de e-mail devera documentar apenas
+os nomes de novas variaveis, como `RESEND_API_KEY` e enderecos de envio.
 
-Fluxo de publicacao usado no projeto:
+Fluxo de publicacao:
 
 1. `npm run lint`
 2. `npm run typecheck`
 3. `npm run build`
-4. Revisao de `git diff` e `git status`
+4. Revisar `git diff` e `git status`
 5. Commit descritivo
-6. Push para `main`, acionando o deploy da Vercel
+6. Push para `main`
+7. Confirmar deploy e producao antes de atualizar o status no Linear
 
 ## Regra para novas entradas
 
-Ao alterar o projeto, atualizar no minimo:
+Manter este arquivo curto e sem repetir detalhes que ja estejam no Linear ou no
+historico Git. Em cada ciclo, registrar somente:
 
-- **Estado atual**, se branch, commit ou deploy mudarem.
-- **Trabalho em andamento**, enquanto algo estiver local.
-- **Funcionalidades publicadas**, depois do push.
-- **Decisoes pendentes** e **Proximos passos**, quando o plano mudar.
-- Verificacoes executadas e qualquer risco ou bloqueio ainda existente.
+- estado local ou publicado;
+- arquivos ou areas afetadas;
+- comportamento alterado e decisoes importantes;
+- verificacoes executadas;
+- commit/deploy, quando realmente concluidos;
+- proximo ponto concreto de retomada.
