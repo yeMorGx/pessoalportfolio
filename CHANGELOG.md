@@ -26,8 +26,8 @@ Leia junto com `AGENTS.md` antes de alterar o codigo.
 
 - Atualizado em: 2026-08-14.
 - Branch: `main`.
-- HEAD publicado: `770da1f` (`feat: refine portfolio entry experience`).
-- Ultimo commit funcional: `770da1f` (`feat: refine portfolio entry experience`).
+- HEAD funcional publicado: `ca360ea` (`fix: simplify hero logo interaction`).
+- Ultimo commit funcional: `ca360ea` (`fix: simplify hero logo interaction`).
 - Producao: `https://pessoalportfolio.vercel.app`.
 - Deploy: Vercel conectado a `main`.
 - Dados: Supabase Postgres, Auth e Storage.
@@ -70,12 +70,14 @@ Ideias futuras registradas no Linear:
   interação; o fallback estático para `prefers-reduced-motion` foi preservado.
   `PortfolioHome`, `Hero`, `LogoScene`, `i18n` e os componentes antigos
   `PageLoader`/`AnimatedLogo` foram ajustados ou removidos.
-- Linear: tarefa `GAB-16` criada no projeto `Portfolio Pessoal` e mantida em
-  **In Progress** durante a validação e publicação desta rodada.
-- Validações locais: `npm run lint`, `npm run typecheck`, `npm run build` e
-  `git diff --check` aprovados. Estado: **local / nao publicado** até concluir
-  commit, push e deploy; o runtime local respondeu `200` em `/` e confirmou a
-  ausência do loader e do texto removido; `tsconfig.tsbuildinfo` permanece
+- Linear: tarefa `GAB-16` concluída após implementação, validação, commit, push
+  e deploy confirmados.
+- Validações locais: `npm run lint`, `npm run typecheck`, `npm run build`,
+  `git diff --check` e smoke test aprovados. O runtime local respondeu `200` em
+  `/` e o alias público respondeu `200`, sem o loader ou os textos removidos.
+- Estado: **publicado** no commit `ca360ea`; o deploy
+  `https://pessoalportfolio-i4a23upm0-yemorgxs-projects.vercel.app` ficou
+  `Ready` em produção em 2026-08-14. `tsconfig.tsbuildinfo` permanece
   modificado localmente e fora do commit.
 - 2026-08-14: a home ganhou uma tela de carregamento com a marca SVG animada,
   interacao de arraste e clique na logo 3D do hero, favicon automatico a partir
@@ -84,8 +86,8 @@ Ideias futuras registradas no Linear:
   Hugging Face, Ollama e MCP. As mudancas cobrem `PageLoader`, `AnimatedLogo`,
   `LogoScene`, `ProjectLogo`, `ProjectCard`, acervo, case, admin, `Experience`,
   `PortfolioHome`, `Hero` e textos bilingues em `i18n`.
-- Linear: tarefa `GAB-15` criada no projeto `Portfolio Pessoal` e marcada como
-  **In Progress** para acompanhar esta entrega.
+- Linear: tarefa `GAB-15` criada no projeto `Portfolio Pessoal` e concluída após
+  acompanhar esta entrega.
 - Validacoes locais: `npm run lint`, `npm run typecheck` e `npm run build`
   aprovados; runtime local respondeu 200 em `/` e `/pt` e confirmou loader,
   interacao e trilho de IA nas duas linguas.
@@ -97,8 +99,7 @@ Ideias futuras registradas no Linear:
 - Linear: `GAB-15` concluida com commit, push e deploy confirmados.
 - Retomada: fazer QA visual de desktop/mobile quando houver uma nova rodada de
   refinamentos ou publicar outras tarefas do projeto.
-- Esta versao condensada do `CHANGELOG.md` permanece modificada localmente e
-  nao foi incluida nos commits funcionais.
+- O `CHANGELOG.md` permanece como ponto de continuidade versionado do projeto.
 - `tsconfig.tsbuildinfo` continua modificado localmente e fora dos commits.
 
 ## Entregas publicadas
