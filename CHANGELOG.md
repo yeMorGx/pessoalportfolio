@@ -24,11 +24,11 @@ Leia junto com `AGENTS.md` antes de alterar o codigo.
 
 ## Estado atual
 
-- Atualizado em: 2026-08-14.
+- Atualizado em: 2026-10-26.
 - Branch: `main`.
-- HEAD funcional publicado: `ca360ea` (`fix: simplify hero logo interaction`).
-- Ultimo commit funcional: `ca360ea` (`fix: simplify hero logo interaction`).
-- Producao: `https://pessoalportfolio.vercel.app`.
+- HEAD funcional publicado: `1f4457e` (`feat: manage profile photo and refine hero placement`).
+- Ultimo commit funcional: `1f4457e` (`feat: manage profile photo and refine hero placement`).
+- Producao: `https://gabrielmorgado.com` (alias anterior: `https://pessoalportfolio.vercel.app`).
 - Deploy: Vercel conectado a `main`.
 - Dados: Supabase Postgres, Auth e Storage.
 - Contato provisorio: `gabrielmcgoes@gmail.com`.
@@ -62,6 +62,16 @@ Ideias futuras registradas no Linear:
 - `GAB-13` (baixa): globo interativo com retorno a Santos.
 
 ## Trabalho local / nao publicado
+
+- 2026-10-26: **publicado** o código da foto do perfil e enquadramento do hero
+  no commit `1f4457e`, com push para `main` autorizado pelo usuário. A Vercel
+  reportou `success` no check do commit; deployment
+  `https://vercel.com/yemorgxs-projects/pessoalportfolio/D6YbDrpvmi8h8M9zkAkn8MytWSmh`.
+  O novo editor fica em `/admin/profile`. A migração já está aplicada no projeto
+  Supabase Gabriel. A entrada abaixo registra o estado anterior à publicação.
+  Verificação HTTP/visual de produção não executada: o domínio não está na
+  lista de destinos liberados deste ambiente. Resta validar um upload com a
+  sessão real de administrador. Linear continua exigindo reautenticação.
 
 - 2026-10-26: **codigo local / nao publicado**: novo item “Foto do perfil” no
   admin (`/admin/profile`), com prévia, JPG/PNG/WebP até 5 MB, upload direto por
