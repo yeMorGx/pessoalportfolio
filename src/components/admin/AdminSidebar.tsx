@@ -2,11 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, FileKey2, FolderKanban, Inbox, LogOut } from "lucide-react";
+import { ArrowLeft, FileKey2, FolderKanban, Inbox, LogOut, UserRound } from "lucide-react";
 import { signOutAction } from "@/app/admin/actions";
 
 type AdminSidebarProps = {
-  active: "projects" | "messages" | "resume";
+  active: "projects" | "messages" | "resume" | "profile";
   projectCount?: number;
   unreadMessageCount?: number;
   pendingResumeCount?: number;
@@ -15,12 +15,13 @@ type AdminSidebarProps = {
 const navigation = [
   { id: "projects", href: "/admin", label: "Projetos", icon: FolderKanban },
   { id: "messages", href: "/admin/messages", label: "Mensagens", icon: Inbox },
-  { id: "resume", href: "/admin/resume", label: "Currículo", icon: FileKey2 }
+  { id: "resume", href: "/admin/resume", label: "Currículo", icon: FileKey2 },
+  { id: "profile", href: "/admin/profile", label: "Foto do perfil", icon: UserRound }
 ] as const;
 
 export function AdminSidebar({ active, projectCount = 0, unreadMessageCount = 0, pendingResumeCount = 0 }: AdminSidebarProps) {
   return (
-    <aside className="flex border-b border-white/10 bg-black/20 lg:sticky lg:top-0 lg:h-screen lg:flex-col lg:border-b-0 lg:border-r">
+    <aside className="flex flex-wrap border-b border-white/10 bg-black/20 lg:sticky lg:top-0 lg:h-screen lg:flex-nowrap lg:flex-col lg:border-b-0 lg:border-r">
       <div className="flex min-w-0 flex-1 items-center gap-3 px-4 py-4 lg:flex-none lg:border-b lg:border-white/10 lg:px-5 lg:py-6">
         <span className="flex h-9 w-9 shrink-0 items-center justify-center border border-white/10 bg-white/[0.04]">
           <Image src="/logo.svg" alt="" width={20} height={20} />
@@ -31,18 +32,19 @@ export function AdminSidebar({ active, projectCount = 0, unreadMessageCount = 0,
         </span>
       </div>
 
-      <nav className="flex items-center gap-1 border-l border-white/10 px-2 lg:block lg:flex-1 lg:border-l-0 lg:px-3 lg:py-5" aria-label="Navegação do painel">
+      <nav className="order-last flex w-full items-center gap-1 border-t border-white/10 px-2 py-2 lg:order-none lg:block lg:w-auto lg:flex-1 lg:border-t-0 lg:px-3 lg:py-5" aria-label="Navegação do painel">
         <p className="hidden px-3 font-mono text-[0.55rem] uppercase text-slate-600 lg:block">Conteúdo</p>
         <div className="flex gap-1 lg:mt-3 lg:block lg:space-y-1">
           {navigation.map(({ id, href, label, icon: Icon }) => {
             const isActive = active === id;
-            const count = id === "projects" ? projectCount : id === "messages" ? unreadMessageCount : pendingResumeCount;
+            const count = id === "projects" ? projectCount : id === "messages" ? unreadMessageCount : id === "resume" ? pendingResumeCount : 0;
 
             return (
               <Link
                 key={id}
                 href={href}
                 title={label}
+                aria-label={label}
                 aria-current={isActive ? "page" : undefined}
                 className={`flex h-11 items-center gap-3 border-l-2 px-3 text-sm transition-colors ${isActive ? "border-mint bg-white/[0.04] text-white" : "border-transparent text-slate-400 hover:bg-white/[0.03] hover:text-white"}`}
               >

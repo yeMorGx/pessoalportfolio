@@ -4,9 +4,10 @@ import Image from "next/image";
 import { useEffect, useRef } from "react";
 import { PortfolioIcon } from "@/components/ui/PortfolioIcon";
 import { getGsap, prefersReducedMotion } from "@/lib/gsap";
+import { DEFAULT_PROFILE_PHOTO } from "@/lib/profile";
 import { siteCopy, type Locale } from "@/lib/i18n";
 
-export function About({ locale }: { locale: Locale }) {
+export function About({ locale, photoUrl = DEFAULT_PROFILE_PHOTO }: { locale: Locale; photoUrl?: string }) {
   const sectionRef = useRef<HTMLElement | null>(null);
   const copy = siteCopy[locale].about;
 
@@ -59,7 +60,7 @@ export function About({ locale }: { locale: Locale }) {
           <div data-about-reveal className="relative aspect-[4/5] overflow-hidden bg-graphite sm:aspect-[5/6] lg:col-span-5 lg:aspect-auto lg:min-h-[40rem]">
             <Image
               data-about-photo
-              src="/gabriel-morgado.jpg"
+              src={photoUrl}
               alt={copy.portraitAlt}
               fill
               sizes="(min-width: 1024px) 42vw, 100vw"

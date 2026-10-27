@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { PortfolioHome } from "@/components/portfolio/PortfolioHome";
 import { localizedAlternates, localizeProjects } from "@/lib/i18n";
+import { getProfilePhoto } from "@/lib/supabase/profile";
 import { getPublicProjects } from "@/lib/supabase/projects";
 
 export const metadata: Metadata = {
@@ -10,7 +11,8 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const projects = localizeProjects(await getPublicProjects(), "en");
+  const [rows, photo] = await Promise.all([getPublicProjects(), getProfilePhoto()]);
+  const projects = localizeProjects(rows, "en");
 
-  return <PortfolioHome locale="en" projects={projects} />;
+  return <PortfolioHome locale="en" projects={projects} photoUrl={photo.url} />;
 }

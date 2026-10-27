@@ -63,6 +63,31 @@ Ideias futuras registradas no Linear:
 
 ## Trabalho local / nao publicado
 
+- 2026-10-26: **codigo local / nao publicado**: novo item “Foto do perfil” no
+  admin (`/admin/profile`), com prévia, JPG/PNG/WebP até 5 MB, upload direto por
+  URL assinada, confirmação de salvamento e restauração da foto original.
+  As homes PT/EN consultam a foto persistida; sem configuração, preservam o
+  asset original. A navegação mobile do admin ganhou uma linha própria.
+- Hero: canvas deslocado 15% à direita a partir de desktop, logo 3D ligeiramente
+  menor e coluna de texto limitada para evitar sobreposição. Arraste e fallback
+  de movimento reduzido preservados; deslocamento não se aplica no mobile.
+- Banco **aplicado no projeto Gabriel** (`qjlpghlrbznouwesfsbx`): migração
+  `20261027015840_profile_photo`, tabela singleton `site_settings` e bucket
+  público `profile-photos`, com limite de tamanho/MIME e escrita restrita ao
+  registro de administradores. Reutiliza `private.is_portfolio_admin()` em
+  produção ou o helper público em bancos locais antigos. `schema.sql` atualizado.
+- Verificações: typecheck, lint e build aprovados; `/` e `/pt` responderam 200,
+  `/admin/profile` redirecionou para login sem sessão; RLS ativo, anônimo sem
+  privilégio de escrita e usuário comum alterando zero registros em transação
+  revertida. Upload autenticado e inspeção visual desktop/mobile pendentes por
+  ausência de sessão de admin/ferramenta de navegador nesta execução.
+- Sem commit, push ou deploy do frontend. Próximo passo: publicar o código e
+  validar a troca de foto com login de administrador no site. Linear não
+  atualizado: conexão exige reautenticação. O Supabase tem duas migrações de
+  autorização de 2026-10-25 ausentes neste checkout; não usar db:push/reset no
+  projeto remoto antes de reconciliar esse histórico e a referência antiga em
+  package.json.
+
 - 2026-08-14: nova rodada de refinamento do hero: a tela de carregamento foi
   removida, assim como o texto de apoio `3D / interativa` e a instrução para
   passar o mouse sobre a marca. `LogoScene` agora usa `OrbitControls` para

@@ -7,12 +7,12 @@ import { SiteHeader } from "@/components/sections/SiteHeader";
 import type { Locale } from "@/lib/i18n";
 import type { Project } from "@/lib/projects";
 
-export function PortfolioHome({ locale, projects }: { locale: Locale; projects: Project[] }) {
+export function PortfolioHome({ locale, projects, photoUrl }: { locale: Locale; projects: Project[]; photoUrl?: string }) {
   return (
     <main lang={locale === "pt" ? "pt-BR" : "en"} className="relative overflow-hidden bg-ink">
       <SiteHeader locale={locale} />
       <Hero locale={locale} />
-      <About locale={locale} />
+      <About locale={locale} photoUrl={photoUrl} />
       <Projects locale={locale} projects={projects} />
       <Experience locale={locale} />
       <Contact locale={locale} />

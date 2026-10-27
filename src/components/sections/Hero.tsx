@@ -74,11 +74,11 @@ export function Hero({ locale }: { locale: Locale }) {
         <div className="technical-grid absolute right-0 top-0 h-[72%] w-full opacity-65 lg:h-full lg:w-[68%]" />
         <div className="absolute inset-0">
           {reducedMotion ? (
-            <div className="flex h-full items-start justify-center pt-32 sm:pt-36 lg:items-center lg:justify-end lg:pr-[16%] lg:pt-0">
+            <div className="flex h-full items-start justify-center pt-32 sm:pt-36 lg:items-center lg:justify-end lg:pr-[12%] lg:pt-0">
               <img src="/logo.svg" alt="" className="h-40 w-40 opacity-90 sm:h-56 sm:w-56" />
             </div>
           ) : (
-            <div className="h-full w-full lg:pl-[6%] xl:pl-[8%]">
+            <div className="h-full w-full lg:translate-x-[15%] lg:pl-[6%] xl:pl-[8%]">
               <LogoScene active={sceneActive} scrollProgress={scrollProgress} />
             </div>
           )}
@@ -92,7 +92,7 @@ export function Hero({ locale }: { locale: Locale }) {
           {copy.eyebrow}
         </div>
 
-        <div data-hero-copy className="relative z-10 max-w-[50rem] pb-4 sm:pb-8">
+        <div data-hero-copy className="relative z-10 max-w-[50rem] pb-4 sm:pb-8 lg:max-w-[45%]">
           <h1 className="font-display text-5xl font-semibold leading-[0.94] text-ceramic sm:text-6xl lg:text-7xl">
             <span className="block overflow-hidden"><span data-hero-line className="block">Gabriel</span></span>
             <span className="block overflow-hidden"><span data-hero-line className="block text-steel">Morgado</span></span>
